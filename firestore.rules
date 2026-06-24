@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /leads/{leadId} {
+      allow read: if request.auth != null;
+      // TEMP CIRCUIT-BREAKER (2026-06-04): updates/claims/dispositions still sync,
+      // but creation of NEW lead docs is blocked to stop a duplicate-lead bug.
+      allow update, delete: if request.auth != null;
+      allow create: if false;
+    }
+  }
+}

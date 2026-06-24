@@ -36,8 +36,8 @@ test('csvRowToLead maps fields and arrays', () => {
   assert.equal(lead.businessName, 'Emdoneni Lodge');
   assert.equal(lead.country, 'South Africa');
   assert.equal(lead.region, 'KwaZulu-Natal');
-  assert.deepEqual(lead.emails, ['info@emdonenilodge.com']);
-  assert.deepEqual(lead.phones, ['+27 35 562 7000']);
+  assert.deepEqual(lead.emails, [{ address: 'info@emdonenilodge.com' }]);
+  assert.deepEqual(lead.phones, [{ number: '+27 35 562 7000' }]);
   assert.equal(lead.segment, 'small_lodge');
   assert.equal(lead.funnelLeak, 'Single inbox');
   assert.equal(lead.outreachAngle, 'Hi — enquiries wait');

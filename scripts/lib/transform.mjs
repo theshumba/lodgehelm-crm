@@ -23,8 +23,8 @@ function slugId(name) {
 function hashStr(s) { let h = 0; for (let i = 0; i < (s || '').length; i++) { h = (h * 31 + s.charCodeAt(i)) | 0; } return h; }
 
 export function csvRowToLead(row) {
-  const emails = (row.Email || '').trim() ? [row.Email.trim()] : [];
-  const phones = (row.Phone || '').trim() ? [row.Phone.trim()] : [];
+  const emails = (row.Email || '').trim() ? [{ address: row.Email.trim() }] : [];
+  const phones = (row.Phone || '').trim() ? [{ number: row.Phone.trim() }] : [];
   return {
     id: slugId(row.Name),
     businessName: (row.Name || '').trim(),

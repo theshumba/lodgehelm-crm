@@ -1,0 +1,7 @@
+{
+  "name": "lodgehelm-crm-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test", "import": "node scripts/import-leads.mjs" },
+  "dependencies": { "firebase-admin": "^12.0.0", "csv-parse": "^5.5.0" }
+}

@@ -50,3 +50,11 @@ test('csvRowToLead handles missing email (no empty-string entries)', () => {
   assert.deepEqual(lead.emails, []);
   assert.equal(lead.whatsapp, '+27 11 000 0000');
 });
+
+test('deriveSegment: Mobile type -> operator family', () => {
+  assert.equal(deriveSegment({ ...lodgeRow, Type: 'Mobile', Name: 'Wilderness Dawning' }), 'small_operator');
+});
+
+test('deriveSegment: lodge with group keyword in size -> large_collection', () => {
+  assert.equal(deriveSegment({ ...lodgeRow, Type: 'Lodge', 'Established/Size': 'group of 12 camps' }), 'large_collection');
+});

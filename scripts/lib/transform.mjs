@@ -1,5 +1,7 @@
 // Pure CSV-row → LodgeHelm lead transform. No I/O. Mirrors normalizeLead's shape.
 const BIG_MARKERS = [/collection/i, /\bgroup\b/i, /portfolio/i, /category\s*[abc]\b/i, /\b(100|hundreds|multi-?propert)/i];
+const LODGE_MARKERS = /lodge|camp|reserve|sanctuary|retreat/;
+const OPERATOR_MARKERS = /operator|dmc|tour|travel|\bmobile\b|expeditions?|adventures?/;
 
 export function deriveSegment(row) {
   const type = (row.Type || '').toLowerCase();
@@ -9,7 +11,7 @@ export function deriveSegment(row) {
   const hasSite = !!(row.Website || '').trim();
   if (!hasEmail && !hasSite) return 'phone_only';
   const isBig = BIG_MARKERS.some((re) => re.test(size) || re.test(name) || re.test(type));
-  const isOperator = /operator|dmc|tour|travel|safaris?\b(?!.*lodge)/.test(type) || /tour|dmc/i.test(type);
+  const isOperator = !LODGE_MARKERS.test(type) && OPERATOR_MARKERS.test(type);
   if (isOperator) return isBig ? 'large_operator' : 'small_operator';
   return isBig ? 'large_collection' : 'small_lodge';
 }

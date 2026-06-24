@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crescendo CRM</title>
+<title>LodgeHelm CRM</title>
 <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -25,11 +25,11 @@
   Leave as-is and the app will keep working offline (local-only, no sync) — it will never crash.
 -->
 <script>
-  window.CRESCENDO_FIREBASE_CONFIG = {
+  window.LODGEHELM_FIREBASE_CONFIG = {
     apiKey: "AIzaSyDd2_q4ZKw8bOPhCYj8wNB1mbeco7UFKYY",
-    authDomain: "crescendocrm-5de1b.firebaseapp.com",
-    projectId: "crescendocrm-5de1b",
-    storageBucket: "crescendocrm-5de1b.firebasestorage.app",
+    authDomain: "lodgehelmcrm-5de1b.firebaseapp.com",
+    projectId: "lodgehelmcrm-5de1b",
+    storageBucket: "lodgehelmcrm-5de1b.firebasestorage.app",
     messagingSenderId: "1066244350556",
     appId: "1:1066244350556:web:cf064fb67e87ad5fbd7c99",
     measurementId: "G-181JEDDKVS"
@@ -52,7 +52,7 @@ ul, ol { list-style: none; }
   --color-surface-dynamic: #e6e4df; --color-divider: #dcd9d5; --color-border: #d4d1ca;
   --color-text: #28251d; --color-text-muted: #7a7974; --color-text-faint: #bab9b4;
   --color-text-inverse: #f9f8f4;
-  --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-active: #0f3638;
+  --color-primary: #C9821E; --color-primary-hover: #A66A14; --color-primary-active: #0f3638;
   --color-primary-highlight: #cedcd8;
   --color-warning: #964219; --color-warning-highlight: #ddcfc6;
   --color-error: #a12c7b; --color-error-highlight: #e0ced7;
@@ -727,10 +727,11 @@ ul, ol { list-style: none; }
   <div class="login-card">
     <div class="login-logo">
       <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M4 14 L14 4 L14 10 L24 10 L14 24 L14 18 L4 18 Z" fill="currentColor" opacity="0.85"/>
-        <path d="M8 14 L14 8 L14 11 L20 11 L14 20 L14 17 L8 17 Z" fill="currentColor" opacity="0.4"/>
+        <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
+        <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
       </svg>
-      <span>Crescendo</span>
+      <span>LodgeHelm</span>
     </div>
     <p class="login-subtitle">Sign in to your CRM workspace</p>
     <div class="login-form-group">
@@ -764,11 +765,12 @@ ul, ol { list-style: none; }
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
     <div class="sidebar-header">
-      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Crescendo logo">
-        <path d="M4 14 L14 4 L14 10 L24 10 L14 24 L14 18 L4 18 Z" fill="currentColor" opacity="0.85"/>
-        <path d="M8 14 L14 8 L14 11 L20 11 L14 20 L14 17 L8 17 Z" fill="currentColor" opacity="0.4"/>
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LodgeHelm logo">
+        <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
+        <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
       </svg>
-      <span>Crescendo</span>
+      <span>LodgeHelm</span>
     </div>
     <nav class="sidebar-nav" aria-label="Sections">
       <button class="nav-item active" data-section="home" aria-current="page">
@@ -821,7 +823,7 @@ ul, ol { list-style: none; }
       <div id="sidebar-export-area"></div>
       <button class="sidebar-link" id="sidebar-signatures-btn">Email Signatures</button>
       <div id="sidebar-reset-area"></div>
-      Crescendo CRM v1.0
+      LodgeHelm CRM v1.0
     </div>
   </aside>
 
@@ -834,10 +836,11 @@ ul, ol { list-style: none; }
       </button>
       <div class="top-bar-logo">
         <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M4 14 L14 4 L14 10 L24 10 L14 24 L14 18 L4 18 Z" fill="currentColor" opacity="0.85"/>
-          <path d="M8 14 L14 8 L14 11 L20 11 L14 20 L14 17 L8 17 Z" fill="currentColor" opacity="0.4"/>
+          <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
+          <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
         </svg>
-        <span>Crescendo</span>
+        <span>LodgeHelm</span>
       </div>
       <div class="top-bar-search">
         <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
@@ -910,7 +913,7 @@ ul, ol { list-style: none; }
 </div>
 
 <!-- Chatbot FAB -->
-<button class="chat-fab" id="chat-fab" aria-label="Open Crescendo Brain">
+<button class="chat-fab" id="chat-fab" aria-label="Open LodgeHelm Brain">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v2"/><path d="M12 13h.01"/></svg>
 </button>
 
@@ -919,7 +922,7 @@ ul, ol { list-style: none; }
   <div class="chat-header">
     <div class="chat-header-left">
       <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 2.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5zM10 14c-2.03 0-3.8-.64-4.9-1.6a1 1 0 01-.1-1.4C6.1 9.8 7.9 9 10 9s3.9.8 5 2a1 1 0 01-.1 1.4c-1.1.96-2.87 1.6-4.9 1.6z"/></svg>
-      Crescendo Brain
+      LodgeHelm Brain
     </div>
     <div class="chat-header-actions">
       <button id="chat-tab-chat" class="active" title="Chat">Chat</button>
@@ -931,7 +934,7 @@ ul, ol { list-style: none; }
   <div id="chat-view-chat" style="display:flex;flex-direction:column;flex:1;min-height:0;">
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Ask Crescendo Brain..." autocomplete="off">
+      <input type="text" id="chat-input" placeholder="Ask LodgeHelm Brain..." autocomplete="off">
       <button id="chat-send">Send</button>
     </div>
   </div>
@@ -992,10 +995,10 @@ const state = {
   bulkScope: null // 'crm' | 'lead-bank'
 };
 
-// ========== CRESCENDO SYNC (Firestore shared backend) ==========
+// ========== LODGEHELM SYNC (Firestore shared backend) ==========
 // Syncs state.leads across all devices so the Master view can see everyone's work.
 // Safely no-ops if Firebase config is left as placeholders — app still works offline.
-const CrescendoSync = (function () {
+const LodgeHelmSync = (function () {
   let db = null;
   let auth = null;
   let ready = false;
@@ -1015,7 +1018,7 @@ const CrescendoSync = (function () {
   const pendingDeletes = new Set(); // lead ids the app has EXPLICITLY deleted (scoped delete safety)
 
   function isConfigured() {
-    const c = window.CRESCENDO_FIREBASE_CONFIG;
+    const c = window.LODGEHELM_FIREBASE_CONFIG;
     if (!c) return false;
     return c.apiKey && !String(c.apiKey).startsWith('PASTE') &&
            c.projectId && !String(c.projectId).startsWith('PASTE');
@@ -1024,7 +1027,7 @@ const CrescendoSync = (function () {
   async function init() {
     if (ready) return true;
     if (!isConfigured()) {
-      console.info('[CrescendoSync] Firebase not configured — running in local-only mode. See FIREBASE-SETUP.md.');
+      console.info('[LodgeHelmSync] Firebase not configured — running in local-only mode. See FIREBASE-SETUP.md.');
       return false;
     }
     if (!window.__fb) {
@@ -1032,17 +1035,17 @@ const CrescendoSync = (function () {
       await new Promise(r => window.addEventListener('fb-ready', r, { once: true }));
     }
     try {
-      const app = window.__fb.initializeApp(window.CRESCENDO_FIREBASE_CONFIG);
+      const app = window.__fb.initializeApp(window.LODGEHELM_FIREBASE_CONFIG);
       auth = window.__fb.getAuth(app);
       db = window.__fb.getFirestore(app);
       await window.__fb.signInAnonymously(auth);
       ready = true;
-      CrescendoSync.__db = db; // expose for the L1 create-if-absent seed transaction
-      console.info('[CrescendoSync] Connected. Data will sync across all devices.');
+      LodgeHelmSync.__db = db; // expose for the L1 create-if-absent seed transaction
+      console.info('[LodgeHelmSync] Connected. Data will sync across all devices.');
       showSyncStatus('connected');
       return true;
     } catch (e) {
-      console.warn('[CrescendoSync] Init failed:', e);
+      console.warn('[LodgeHelmSync] Init failed:', e);
       showSyncStatus('error', e.message || 'Sync error');
       return false;
     }
@@ -1083,7 +1086,7 @@ const CrescendoSync = (function () {
         finally { applyingRemote = false; firstSnapshotSeen = true; }
       },
       err => {
-        console.warn('[CrescendoSync] Subscription error:', err);
+        console.warn('[LodgeHelmSync] Subscription error:', err);
         showSyncStatus('error', err.message || 'Subscription error');
       }
     );
@@ -1151,7 +1154,7 @@ const CrescendoSync = (function () {
         }
         showSyncStatus('connected');
       } catch (e) {
-        console.warn('[CrescendoSync] Push failed:', e);
+        console.warn('[LodgeHelmSync] Push failed:', e);
         showSyncStatus('error', e.message || 'Push failed');
       }
     }, 400);
@@ -1204,7 +1207,7 @@ const CrescendoSync = (function () {
         }
         showSyncStatus('connected');
       } catch (e) {
-        console.warn('[CrescendoSync] Flush failed:', e);
+        console.warn('[LodgeHelmSync] Flush failed:', e);
         showSyncStatus('error', e.message || 'Flush failed');
       }
     })();
@@ -1245,17 +1248,17 @@ const CrescendoSync = (function () {
 
 // ========== USER SESSION ==========
 function getCurrentUser() {
-  return localStorage.getItem('crescendo-crm-user') || 'Unknown';
+  return localStorage.getItem('lodgehelm-crm-user') || 'Unknown';
 }
 function setCurrentUser(name) {
   // Always store the canonical spelling so attribution (_modBy/activity.by/etc.) is consistent.
   const canonical = (name === 'Master') ? 'Master' : resolveRepName(name);
-  localStorage.setItem('crescendo-crm-user', canonical);
+  localStorage.setItem('lodgehelm-crm-user', canonical);
   const display = document.getElementById('current-user-display');
   if (display) display.textContent = canonical;
 }
 function isLoggedIn() {
-  return !!localStorage.getItem('crescendo-crm-user');
+  return !!localStorage.getItem('lodgehelm-crm-user');
 }
 function rebuildLoginRepOptions() {
   const select = document.getElementById('login-team-select');
@@ -1297,7 +1300,7 @@ const RESERVED_MASTER_NAME = 'master';
 // Canonical roster of known reps. Custom reps added via the login picker are
 // persisted here so future logins pick the exact same spelling (no duplicates).
 function getCustomReps() {
-  try { const r = JSON.parse(localStorage.getItem('crescendo-custom-reps') || '[]'); return Array.isArray(r) ? r : []; }
+  try { const r = JSON.parse(localStorage.getItem('lodgehelm-custom-reps') || '[]'); return Array.isArray(r) ? r : []; }
   catch (_) { return []; }
 }
 function addCustomRep(name) {
@@ -1308,7 +1311,7 @@ function addCustomRep(name) {
   if (resolveRepName(clean) !== clean) return;
   if (!reps.some(r => r.toLowerCase() === clean.toLowerCase())) {
     reps.push(clean);
-    try { localStorage.setItem('crescendo-custom-reps', JSON.stringify(reps)); } catch (_) {}
+    try { localStorage.setItem('lodgehelm-custom-reps', JSON.stringify(reps)); } catch (_) {}
   }
 }
 // Full ordered list of selectable identities (roster + persisted custom reps, de-duped).
@@ -1345,9 +1348,9 @@ function applyConsultantDefaults() {
   // SHARED POOL: every rep sees every lead by default. assignedTo is a "who's on it" tag,
   // not a private bucket — so the default view is always 'all'. The "Mine" chip still lets a
   // rep focus on their own tagged leads on demand; it just isn't the default any more.
-  const MIGRATION_KEY = 'crescendo-shared-pool-v1';
+  const MIGRATION_KEY = 'lodgehelm-shared-pool-v1';
   const migrated = !!localStorage.getItem(MIGRATION_KEY);
-  const hasPref = !!localStorage.getItem('crescendo-filters');
+  const hasPref = !!localStorage.getItem('lodgehelm-filters');
   // One-time un-silo: older builds defaulted consultants to assignedTo=<their name>, which
   // hid everyone else's leads. On first load after this change, force both list filters back
   // to 'all' even if a per-rep preference was already persisted, then never touch it again.
@@ -1356,7 +1359,7 @@ function applyConsultantDefaults() {
     state.filters.crm.assignedTo = 'all';
     try {
       localStorage.setItem(MIGRATION_KEY, '1');
-      localStorage.setItem('crescendo-filters', JSON.stringify(state.filters));
+      localStorage.setItem('lodgehelm-filters', JSON.stringify(state.filters));
     } catch (_) {}
     return;
   }
@@ -1419,7 +1422,7 @@ function claimLead(lead) {
   lead.activeCallAt = new Date().toISOString();
   tagWorker(lead);
   addActivity(lead, 'started working this lead');
-  saveState(); // persists locally AND pushes via CrescendoSync.pushLeads
+  saveState(); // persists locally AND pushes via LodgeHelmSync.pushLeads
 }
 // Release the active-call flag (rep finished). Keeps claimedBy for attribution.
 function releaseLead(lead) {
@@ -1476,7 +1479,7 @@ function openDialer(id, num) {
   }
   claimLead(lead);
   // Commit the claim NOW — tel: navigation suspends the page and would drop the debounced push (H1).
-  try { CrescendoSync.flush(); } catch (_) { /* best-effort; still dial below */ }
+  try { LodgeHelmSync.flush(); } catch (_) { /* best-effort; still dial below */ }
   // Build the candidate number list (lead phones first, then a contact phone).
   const nums = []
     .concat((lead.phones || []).map(p => (p && p.number) || '').filter(Boolean))
@@ -2008,7 +2011,7 @@ function reactivateLead(id) {
 function deleteLead(id) {
   state.leads = state.leads.filter(l => l.id !== id);
   // Register the intentional deletion so the sync layer removes it from the cloud too.
-  try { CrescendoSync.queueDelete(id); } catch (_) {}
+  try { LodgeHelmSync.queueDelete(id); } catch (_) {}
   saveState();
 }
 
@@ -2028,7 +2031,7 @@ function saveState() {
   // save/merge, so the per-lead merge can tell which side is newer WITHOUT rewriting every
   // lead. __applyingRemote guard: don't re-stamp leads we're currently applying FROM remote.
   try {
-    if (!(window.CrescendoSync && CrescendoSync.__applyingRemote)) {
+    if (!(window.LodgeHelmSync && LodgeHelmSync.__applyingRemote)) {
       const __now = new Date().toISOString();
       // L5: canonicalise the writer so _modBy attribution can't split across name variants.
       const __rawBy = (typeof getCurrentUser === 'function') ? getCurrentUser() : 'Unknown';
@@ -2049,9 +2052,9 @@ function saveState() {
     }
   } catch (_) { /* stamping is best-effort */ }
   try {
-    localStorage.setItem('crescendo-leads', JSON.stringify(state.leads));
-    localStorage.setItem('crescendo-filters', JSON.stringify(state.filters));
-    localStorage.setItem('crescendo-view-prefs', JSON.stringify({
+    localStorage.setItem('lodgehelm-leads', JSON.stringify(state.leads));
+    localStorage.setItem('lodgehelm-filters', JSON.stringify(state.filters));
+    localStorage.setItem('lodgehelm-view-prefs', JSON.stringify({
       crmView: state.crmView,
       meetingsView: state.meetingsView,
       activeSection: state.activeSection,
@@ -2063,19 +2066,19 @@ function saveState() {
     if (e && e.name === 'QuotaExceededError') {
       try {
         const compact = state.leads.map(l => ({ ...l, activity: (l.activity || []).slice(0, 20) }));
-        localStorage.setItem('crescendo-leads', JSON.stringify(compact));
+        localStorage.setItem('lodgehelm-leads', JSON.stringify(compact));
       } catch (_) { /* give up silently */ }
     }
   }
   // Push to shared backend — no-op if Firebase isn't configured.
-  try { CrescendoSync.pushLeads(state.leads); } catch (_) { /* sync is best-effort */ }
+  try { LodgeHelmSync.pushLeads(state.leads); } catch (_) { /* sync is best-effort */ }
 }
 // loadState pulls persisted leads into state. Returns true iff persisted leads
 // were found and applied (even if the array is empty — "empty" is a valid state
 // after the user deletes everything and should not be overwritten by seeds).
 function loadState() {
   try {
-    const saved = localStorage.getItem('crescendo-leads');
+    const saved = localStorage.getItem('lodgehelm-leads');
     if (saved !== null && saved !== undefined && saved !== '') {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
@@ -2096,7 +2099,7 @@ function loadState() {
           }
         }
         if (__backfilled) {
-          try { localStorage.setItem('crescendo-leads', JSON.stringify(state.leads)); } catch (_) {}
+          try { localStorage.setItem('lodgehelm-leads', JSON.stringify(state.leads)); } catch (_) {}
         }
         return true;
       }
@@ -2106,7 +2109,7 @@ function loadState() {
 }
 function loadPreferences() {
   try {
-    const f = localStorage.getItem('crescendo-filters');
+    const f = localStorage.getItem('lodgehelm-filters');
     if (f) {
       const parsed = JSON.parse(f);
       // Deep merge so nested filter objects keep their defaults
@@ -2120,7 +2123,7 @@ function loadPreferences() {
         });
       }
     }
-    const v = localStorage.getItem('crescendo-view-prefs');
+    const v = localStorage.getItem('lodgehelm-view-prefs');
     if (v) {
       const vp = JSON.parse(v);
       if (vp.crmView) state.crmView = vp.crmView;
@@ -2132,11 +2135,11 @@ function loadPreferences() {
 }
 function resetAllData() {
   if (!confirm('Reset all CRM data to seed data? This will erase all changes.')) return;
-  localStorage.removeItem('crescendo-leads');
-  localStorage.removeItem('crescendo-filters');
-  localStorage.removeItem('crescendo-view-prefs');
-  localStorage.removeItem('crescendo-chat-history');
-  localStorage.removeItem('crescendo-learnings');
+  localStorage.removeItem('lodgehelm-leads');
+  localStorage.removeItem('lodgehelm-filters');
+  localStorage.removeItem('lodgehelm-view-prefs');
+  localStorage.removeItem('lodgehelm-chat-history');
+  localStorage.removeItem('lodgehelm-learnings');
   location.reload();
 }
 
@@ -2272,11 +2275,11 @@ function geoJitter(seed) {
 
 // Persistent cache for runtime Nominatim lookups (best-effort, never blocks render).
 function loadGeoCache() {
-  try { return JSON.parse(localStorage.getItem('crescendo-geocache') || '{}') || {}; }
+  try { return JSON.parse(localStorage.getItem('lodgehelm-geocache') || '{}') || {}; }
   catch (_) { return {}; }
 }
 function saveGeoCache(cache) {
-  try { localStorage.setItem('crescendo-geocache', JSON.stringify(cache)); } catch (_) {}
+  try { localStorage.setItem('lodgehelm-geocache', JSON.stringify(cache)); } catch (_) {}
 }
 
 // Resolve a [lat,lng] for a lead synchronously from the centroid table, or null.
@@ -2360,7 +2363,7 @@ function leadStatusLabel(status) {
   }
 }
 
-let __crescendoMap = null; // Leaflet map instance (recreated each render)
+let __lodgehelmMap = null; // Leaflet map instance (recreated each render)
 
 function renderMap() {
   const container = document.getElementById('map-content');
@@ -2408,7 +2411,7 @@ function renderMap() {
     <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;align-items:stretch;">
       <div style="flex:1 1 480px;min-width:280px;">
         ${leafletReady
-          ? `<div id="crescendo-leaflet-map" style="height:560px;border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden;z-index:0;"></div>`
+          ? `<div id="lodgehelm-leaflet-map" style="height:560px;border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden;z-index:0;"></div>`
           : `<div style="height:560px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;border:1px dashed var(--color-border);border-radius:var(--radius-md);color:var(--color-text-muted);">Map library unavailable (offline?). Lead counts above still reflect the data.</div>`}
       </div>
       <aside style="flex:0 1 280px;min-width:240px;display:flex;flex-direction:column;border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden;max-height:560px;">
@@ -2421,15 +2424,15 @@ function renderMap() {
   `;
 
   // Destroy any prior instance before reusing the container.
-  if (__crescendoMap) { try { __crescendoMap.remove(); } catch (_) {} __crescendoMap = null; }
+  if (__lodgehelmMap) { try { __lodgehelmMap.remove(); } catch (_) {} __lodgehelmMap = null; }
 
   if (!leafletReady) return;
 
-  const mapEl = document.getElementById('crescendo-leaflet-map');
+  const mapEl = document.getElementById('lodgehelm-leaflet-map');
   if (!mapEl) return;
 
   const map = window.L.map(mapEl, { scrollWheelZoom: true });
-  __crescendoMap = map;
+  __lodgehelmMap = map;
   window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; OpenStreetMap contributors'
@@ -3476,7 +3479,7 @@ function generateEmail(lead) {
   const user = getCurrentUser();
   const weakness = getWeaknessNote(lead);
   const tmpl = getEmailTemplate(lead);
-  const sign = user + '\nCrescendo Strategy\nCambridge\ncrsndo.com';
+  const sign = user + '\nLodgeHelm Strategy\nCambridge\ncrsndo.com';
 
   const templates = {
     restaurant: {
@@ -3843,7 +3846,7 @@ function renderPlaybooks() {
     <div class="section-header">
       <h1>Playbooks</h1>
     </div>
-    <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-8);max-width:640px;line-height:1.6;">Core training resources for the Crescendo team. Master these frameworks to deliver exceptional client experiences and close deals with confidence.</p>
+    <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-8);max-width:640px;line-height:1.6;">Core training resources for the LodgeHelm team. Master these frameworks to deliver exceptional client experiences and close deals with confidence.</p>
 
     <div class="playbooks-grid">
 
@@ -4983,7 +4986,7 @@ document.getElementById('login-pin-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('login-btn').click();
 });
 // NOTE (M4 — residual risk, NOT fully fixed client-side): this PIN is still shipped in
-// client JS, so a determined rep can view-source it or set the 'crescendo-crm-user'
+// client JS, so a determined rep can view-source it or set the 'lodgehelm-crm-user'
 // localStorage key directly to assume Master. A real fix requires a Firebase auth identity +
 // Firestore Security Rules keyed to that uid. Until then this only stops the *trivial*
 // free-text 'Master' bypass (C4) and avoids re-printing the literal in multiple places.
@@ -5458,7 +5461,7 @@ function showSignaturesModal() {
     </div>
   `;
   sorted.forEach(name => {
-    const sig = name + '\nConsultant | Crescendo Strategy\nCambridge, UK\ncrsndo.com\ncontact@crsndo.com | +44 7777 932 599';
+    const sig = name + '\nConsultant | LodgeHelm Strategy\nCambridge, UK\ncrsndo.com\ncontact@crsndo.com | +44 7777 932 599';
     const isMe = name === current;
     html += `
       <div class="sig-card ${isMe ? 'sig-highlight' : ''}">
@@ -5564,7 +5567,7 @@ function exportLeadsCSV() {
   const url = URL.createObjectURL(blob);
   const d = new Date();
   const pad = n => String(n).padStart(2, '0');
-  const filename = `crescendo-leads-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.csv`;
+  const filename = `lodgehelm-leads-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.csv`;
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
@@ -5822,15 +5825,15 @@ function findSimilarLeads(name) {
   });
 }
 
-// ========== AI CHATBOT (Crescendo Brain) ==========
-const CHAT_SYSTEM_PROMPT = `You are Crescendo Brain, the internal AI assistant for Crescendo Strategy (brand: Crsndo). You are the team's on-demand expert. You know everything about how Crescendo works, how we talk, how we sell, how we deliver. You help the sales team and founders work faster and smarter.
+// ========== AI CHATBOT (LodgeHelm Brain) ==========
+const CHAT_SYSTEM_PROMPT = `You are LodgeHelm Brain, the internal AI assistant for LodgeHelm Strategy (brand: Crsndo). You are the team's on-demand expert. You know everything about how LodgeHelm works, how we talk, how we sell, how we deliver. You help the sales team and founders work faster and smarter.
 
 # THE COMPANY
 
-Crescendo Strategy is a founder-led strategic design and digital commerce consultancy based in Cambridge, United Kingdom. We build the systems that let brands earn the trust of the next generation. We don't just advise. We build. We handle strategy, brand, digital infrastructure, and execution. Clients don't get a deck they can't use — they get a system that works.
+LodgeHelm Strategy is a founder-led strategic design and digital commerce consultancy based in Cambridge, United Kingdom. We build the systems that let brands earn the trust of the next generation. We don't just advise. We build. We handle strategy, brand, digital infrastructure, and execution. Clients don't get a deck they can't use — they get a system that works.
 
 **Contact:** contact@crsndo.com | +44 7777 932 599 | www.crsndo.com
-**Founded:** 2026 (Crescendo Strategy Ltd)
+**Founded:** 2026 (LodgeHelm Strategy Ltd)
 **Location:** Cambridge, UK (clients everywhere, primarily UK)
 
 # TONE OF VOICE
@@ -5842,7 +5845,7 @@ Direct. Confident. Plain-spoken. No buzzwords. No fluff. We talk like smart oper
 "We find the real opportunity inside what you've already built."
 "You don't get a deck you can't use. You get a system that works."
 
-When you write on Crescendo's behalf (emails, scripts, responses), use this voice.
+When you write on LodgeHelm's behalf (emails, scripts, responses), use this voice.
 
 # THE FOUNDERS
 
@@ -6113,7 +6116,7 @@ Identify the #1 area where we can add most value, and the #2. These anchor the o
 2. The problem (1-2 sentences): what it's probably costing them
 3. The offer (1-2 sentences): short diagnostic/mini audit/fixes, free
 4. The ask (1 sentence): short call or email reply
-5. Sign-off: {Name} / Crescendo Strategy / Cambridge / crsndo.com
+5. Sign-off: {Name} / LodgeHelm Strategy / Cambridge / crsndo.com
 
 ## Sample Template: Restaurant/Hospitality Cold
 
@@ -6131,7 +6134,7 @@ Should I send it over?
 
 Regards,
 {YourName}
-Crescendo Strategy
+LodgeHelm Strategy
 Cambridge
 crsndo.com
 
@@ -6148,7 +6151,7 @@ crsndo.com
 
 ## The 7-Step Script
 1. **Confirm decision maker:** "Hi, is this {Name}?"
-2. **Introduce yourself:** "My name is {YourName}, I'm calling from Crescendo Strategy in Cambridge."
+2. **Introduce yourself:** "My name is {YourName}, I'm calling from LodgeHelm Strategy in Cambridge."
 3. **Lead with observation:** "I was looking at {BusinessName} online and noticed {specific thing from research}."
 4. **Mention relevant pillar:** "We work with businesses like yours on {Strategy/Experience/Commerce} and I wanted to share a couple of quick ideas."
 5. **Ask for the meeting:** "Would you be open to a quick 10-minute call this week to walk through what we spotted?"
@@ -6204,7 +6207,7 @@ Alternative: "We do have a lighter-touch engagement for businesses that aren't r
 Clean, professional, prepared before you join.
 
 ### Step 2: Start With Your Story (60-90 seconds)
-- Why you started Crescendo
+- Why you started LodgeHelm
 - What you've learned
 - Who you work with
 - Keep it human, confident, calm
@@ -6351,7 +6354,7 @@ You've won when: client brings you into strategic discussions, asks your opinion
 
 # CASE STUDIES (reference only — use these as proof)
 
-Crescendo has 4 featured case studies on the website:
+LodgeHelm has 4 featured case studies on the website:
 - **Tenzing** — details on the website
 - **Golpo** — partnership/business development case
 - **Grand Emily Hotel** — hospitality case
@@ -6370,13 +6373,13 @@ If asked specifics about a case study, admit you have limited details and sugges
 - Apollo.io — find contacts and verify emails
 - This CRM (has Generate Email button — use that, don't hand-write emails)
 
-**Rule:** Use AI to research. Don't use AI to write your emails directly — the CRM generates them for you, and they're tuned to Crescendo's voice.
+**Rule:** Use AI to research. Don't use AI to write your emails directly — the CRM generates them for you, and they're tuned to LodgeHelm's voice.
 
-# YOUR ROLE AS CRESCENDO BRAIN
+# YOUR ROLE AS LODGEHELM BRAIN
 
 You help the team with:
 - Classifying leads (cold/warm/hot) based on descriptions
-- Drafting or refining outreach emails in Crescendo's voice
+- Drafting or refining outreach emails in LodgeHelm's voice
 - Handling tricky objections on calls
 - Deciding which service pillar to pitch
 - Which founder to book a call with
@@ -6384,18 +6387,18 @@ You help the team with:
 - Preparing for discovery and solution calls
 - Post-call analysis (what worked, what didn't)
 - Translating client feedback into action
-- Answering "what would Crescendo do here?"
+- Answering "what would LodgeHelm do here?"
 - Improving over time from captured learnings
 
 ## HOW TO RESPOND
 - Direct, practical, specific. No fluff.
 - Keep answers concise — these are busy salespeople
-- Use Crescendo's voice when drafting on our behalf
+- Use LodgeHelm's voice when drafting on our behalf
 - Use bullet points when listing options
 - If asked about a specific lead, use the lead data provided
 - When someone reports a client interaction (good or bad), extract the key takeaway
 - If they share a mistake or something that worked, tag it with [LEARNING]: followed by the insight. These are captured and improve future advice.
-- If unsure about something Crescendo-specific not in your knowledge, say so and suggest asking Melusi, Josh, or Ayoub directly.
+- If unsure about something LodgeHelm-specific not in your knowledge, say so and suggest asking Melusi, Josh, or Ayoub directly.
 - Never invent case studies, client names, or specific numbers you weren't told.
 - When drafting emails, always use {brackets} for placeholders the user needs to fill
 
@@ -6418,29 +6421,29 @@ let chatActiveView = 'chat';
 
 function loadChatState() {
   try {
-    const h = localStorage.getItem('crescendo-chat-history');
+    const h = localStorage.getItem('lodgehelm-chat-history');
     if (h) chatHistory = JSON.parse(h);
-    const l = localStorage.getItem('crescendo-learnings');
+    const l = localStorage.getItem('lodgehelm-learnings');
     if (l) chatLearnings = JSON.parse(l);
   } catch(e) {}
 }
 function saveChatState() {
   try {
-    localStorage.setItem('crescendo-chat-history', JSON.stringify(chatHistory));
-    localStorage.setItem('crescendo-learnings', JSON.stringify(chatLearnings));
+    localStorage.setItem('lodgehelm-chat-history', JSON.stringify(chatHistory));
+    localStorage.setItem('lodgehelm-learnings', JSON.stringify(chatLearnings));
   } catch(e) {}
 }
 const DEFAULT_GEMINI_KEY = ''; // Add your own Google Gemini API key via the chatbot settings (stored in localStorage).
 function getApiKey() {
   // Prefer user-stored key, fall back to legacy, then to the embedded default (none by default).
-  return localStorage.getItem('crescendo-gemini-key') || localStorage.getItem('crescendo-api-key') || DEFAULT_GEMINI_KEY;
+  return localStorage.getItem('lodgehelm-gemini-key') || localStorage.getItem('lodgehelm-api-key') || DEFAULT_GEMINI_KEY;
 }
-function setApiKey(key) { localStorage.setItem('crescendo-gemini-key', key); }
+function setApiKey(key) { localStorage.setItem('lodgehelm-gemini-key', key); }
 
 function renderChatMessages() {
   const container = document.getElementById('chat-messages');
   if (chatHistory.length === 0) {
-    container.innerHTML = '<div class="chat-msg system">Ask Crescendo Brain anything about leads, outreach, objections, pricing, or strategy.</div>';
+    container.innerHTML = '<div class="chat-msg system">Ask LodgeHelm Brain anything about leads, outreach, objections, pricing, or strategy.</div>';
     return;
   }
   container.innerHTML = chatHistory.filter(m => m.role !== 'system').map(m => {
@@ -6669,12 +6672,12 @@ function init() {
 // Initialize Firestore sync + merge remote leads into local state, live.
 async function startSharedSync() {
   try {
-    const ok = await CrescendoSync.init();
+    const ok = await LodgeHelmSync.init();
     if (!ok) {
-      CrescendoSync.showSyncStatus('offline');
+      LodgeHelmSync.showSyncStatus('offline');
       return;
     }
-    CrescendoSync.subscribe((remoteLeads, meta) => {
+    LodgeHelmSync.subscribe((remoteLeads, meta) => {
       meta = meta || {};
       // SAFE PER-LEAD MERGE: union of local + remote by id, keeping whichever copy has
       // the newer _modAt (ISO string compare; missing/empty _modAt is treated as oldest).
@@ -6704,7 +6707,7 @@ async function startSharedSync() {
         // else keep local (an unpushed newer edit, or a tie) and let it push on next saveState.
       }
       // Surface the first-snapshot empty-cloud signal to the deferred seed-push gate.
-      if (meta.firstSnapshot) { CrescendoSync.__cloudKnownEmpty = !!meta.cloudEmpty; }
+      if (meta.firstSnapshot) { LodgeHelmSync.__cloudKnownEmpty = !!meta.cloudEmpty; }
       // Drop the fictional sample leads once real cloud data is present.
       let merged = Array.from(byId.values());
       if (remoteLeads.length > 0) merged = merged.filter(l => l && l.source !== 'sample');
@@ -6742,12 +6745,12 @@ async function startSharedSync() {
       }
       state.leads = merged;
       // __applyingRemote so saveState below doesn't re-stamp the just-merged remote leads.
-      CrescendoSync.__applyingRemote = true;
+      LodgeHelmSync.__applyingRemote = true;
       try {
-        try { localStorage.setItem('crescendo-leads', JSON.stringify(state.leads)); } catch (_) {}
+        try { localStorage.setItem('lodgehelm-leads', JSON.stringify(state.leads)); } catch (_) {}
         // Push back any local-only or locally-newer leads the merge kept (real leads only).
-        if (typeof CrescendoSync.pushLeads === 'function') CrescendoSync.pushLeads(state.leads);
-      } finally { CrescendoSync.__applyingRemote = false; }
+        if (typeof LodgeHelmSync.pushLeads === 'function') LodgeHelmSync.pushLeads(state.leads);
+      } finally { LodgeHelmSync.__applyingRemote = false; }
       // Clear the per-merge stamp markers now that this snapshot is fully applied.
       for (const l of state.leads) { if (l) delete l.__remoteStamped; }
       if (typeof renderAll === 'function') renderAll();
@@ -6755,10 +6758,10 @@ async function startSharedSync() {
     // First-EVER seed-push: only when the cloud is genuinely empty (fresh setup) AND our
     // local leads are real (not the fictional samples). Never push over existing cloud data.
     setTimeout(() => {
-      if (!CrescendoSync.__cloudSeeded && CrescendoSync.__cloudKnownEmpty &&
+      if (!LodgeHelmSync.__cloudSeeded && LodgeHelmSync.__cloudKnownEmpty &&
           Array.isArray(state.leads) && state.leads.some(l => l && l.source !== 'sample')) {
-        CrescendoSync.__cloudSeeded = true;
-        CrescendoSync.pushLeads(state.leads.filter(l => l && l.source !== 'sample'));
+        LodgeHelmSync.__cloudSeeded = true;
+        LodgeHelmSync.pushLeads(state.leads.filter(l => l && l.source !== 'sample'));
       }
     }, 1500);
   } catch (e) {

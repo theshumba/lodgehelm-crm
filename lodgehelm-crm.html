@@ -51,7 +51,7 @@ ul, ol { list-style: none; }
   --color-surface-dynamic: #e6e4df; --color-divider: #dcd9d5; --color-border: #d4d1ca;
   --color-text: #28251d; --color-text-muted: #7a7974; --color-text-faint: #bab9b4;
   --color-text-inverse: #f9f8f4;
-  --color-primary: #C9821E; --color-primary-hover: #A66A14; --color-primary-active: #0f3638;
+  --color-primary: #C9821E; --color-primary-hover: #A66A14; --color-primary-active: #8A5A12;
   --color-primary-highlight: #cedcd8;
   --color-warning: #964219; --color-warning-highlight: #ddcfc6;
   --color-error: #a12c7b; --color-error-highlight: #e0ced7;
@@ -84,7 +84,7 @@ ul, ol { list-style: none; }
   --color-surface-dynamic: #2d2c2a; --color-divider: #262523; --color-border: #393836;
   --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
   --color-text-inverse: #2b2a28;
-  --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-active: #1a626b;
+  --color-primary: #D9962E; --color-primary-hover: #C9821E; --color-primary-active: #A66A14;
   --color-primary-highlight: #313b3b;
   --color-warning: #bb653b; --color-warning-highlight: #564942;
   --color-error: #d163a7; --color-error-highlight: #4c3d46;
@@ -2005,11 +2005,11 @@ function moveToCRM(id) {
       meetingNotes: '',
       notes: [],
       dateMovedToCRM: todayISO,
-      dealValue: 15000,
+      dealValue: 1200,
       outcomeReason: ''
     };
   } else if (lead.crm.dealValue == null) {
-    lead.crm.dealValue = 15000;
+    lead.crm.dealValue = 1200;
   }
   addActivity(lead, 'moved to CRM');
   saveState();
@@ -2207,7 +2207,7 @@ const STAGE_PROBABILITY = { 1: 0.05, 2: 0.15, 3: 0.35, 4: 0.50, 5: 0.70, 6: 1.00
 function getDealValue(lead) {
   if (!lead || !lead.crm) return 0;
   const v = Number(lead.crm.dealValue);
-  return Number.isFinite(v) ? v : 15000;
+  return Number.isFinite(v) ? v : 1200;
 }
 function formatMoney(n) {
   const v = Number(n) || 0;

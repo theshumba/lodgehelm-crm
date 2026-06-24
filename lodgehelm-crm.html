@@ -852,7 +852,8 @@ ul, ol { list-style: none; }
       </div>
       <div class="top-bar-user" id="top-bar-user">
         Signed in as: <strong id="current-user-display"></strong>
-        <a id="switch-user-btn" role="button" tabindex="0">Switch</a>
+        <!-- Single-user mode: Switch button hidden -->
+        <a id="switch-user-btn" role="button" tabindex="-1" style="display:none;" aria-hidden="true">Switch</a>
       </div>
       <div class="top-bar-actions">
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
@@ -1295,8 +1296,9 @@ function showLoginOverlay() {
 function isMasterUser() {
   return getCurrentUser() === 'Master';
 }
-const CONSULTANTS = ['Muneeb Moiz', 'Yousuf Zacky', 'Ameer Munj'];
-const CEOS = ['Melusi Ndoro', 'Joshua Khalili', 'Ayoub Rasol'];
+// Single-user mode: rosters emptied — Master account only.
+const CONSULTANTS = [];
+const CEOS = [];
 // Who may OPEN the Activity Monitor (master tracker). Owner (Master) + CEO roster ONLY —
 // callers/consultants must NOT see it. Centralised so nav, redirect, and render gates can't
 // drift apart (M5).
@@ -1324,13 +1326,12 @@ function addCustomRep(name) {
   }
 }
 // Full ordered list of selectable identities (roster + persisted custom reps, de-duped).
+// Single-user mode: always returns [] — only the Master account is used.
 function getKnownReps() {
-  const all = [...CEOS, ...CONSULTANTS, ...getCustomReps()];
-  const seen = new Set();
-  return all.filter(n => { const k = n.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+  return [];
 }
 // Collapse a free-typed name onto its existing canonical spelling if one exists
-// (case/whitespace-insensitive). Prevents 'ameer' / 'Ameer ' splitting history.
+// (case/whitespace-insensitive). Prevents near-duplicate spellings splitting history.
 function resolveRepName(name) {
   const clean = String(name || '').replace(/\s+/g, ' ').trim();
   if (!clean) return clean;
@@ -1444,6 +1445,7 @@ function releaseLead(lead) {
 }
 // Visible badge for the lead lists/cards/panel. Empty string if free / mine.
 function renderClaimBadge(lead) {
+  return ''; // Single-user mode: no claim badges (no co-workers to claim against).
   const other = claimedByOther(lead);
   if (other) {
     return '<div class="claim-badge live"><span class="live-dot"></span> ' + escapeHtml(other) + ' is on this</div>';
@@ -2484,10 +2486,8 @@ function renderMap() {
     });
     const name = escapeHtml(lead.businessName || 'Unnamed lead');
     const statusLabel = escapeHtml(leadStatusLabel(lead.status));
-    const assigned = lead.assignedTo ? escapeHtml(lead.assignedTo) : 'Unclaimed';
-    const claim = (lead.claimedBy && lead.claimedBy !== lead.assignedTo)
-      ? '<br>Last claimed by ' + escapeHtml(lead.claimedBy) : '';
-    m.bindPopup(`<strong>${name}</strong><br>Status: ${statusLabel}<br>Assigned: ${assigned}${claim}`);
+    // Single-user mode: no assignment/claim info in map popup
+    m.bindPopup(`<strong>${name}</strong><br>Status: ${statusLabel}`);
     m.on('click', () => { try { openPanel('view-lead', getLeadById(lead.id)); } catch (_) {} });
     m.addTo(map);
     markers.push(m);
@@ -2867,11 +2867,8 @@ function renderLeadBank() {
         <option value="all"${f.source==='all'?' selected':''}>All Sources</option>
         ${SOURCES.map(s => `<option value="${s}"${f.source===s?' selected':''}>${sourceLabel(s)}</option>`).join('')}
       </select>
-      <select class="form-select" data-filter="lb-assigned" aria-label="Filter by assigned consultant">
-        <option value="all"${f.assignedTo==='all'?' selected':''}>All Consultants</option>
-        ${CONSULTANTS.map(c => `<option value="${c}"${f.assignedTo===c?' selected':''}>${c}</option>`).join('')}
-      </select>
-      <button class="today-chip${f.assignedTo === getCurrentUser() ? ' active' : ''}" data-filter="lb-mine" aria-pressed="${f.assignedTo === getCurrentUser()}"><i data-lucide="user-check" aria-hidden="true"></i> Mine</button>
+      <!-- Single-user mode: assigned-to filter hidden -->
+      <button class="today-chip${f.today ? ' active' : ''}" style="display:none" data-filter="lb-mine" aria-pressed="false" aria-hidden="true"></button>
       <button class="today-chip${f.today ? ' active' : ''}" data-action="toggle-today-filter" data-scope="lead-bank" aria-pressed="${!!f.today}"><i data-lucide="calendar-clock" aria-hidden="true"></i> Today</button>
       <select class="form-select" data-filter="lb-sort" aria-label="Sort leads">
         <option value="date"${(state.filters.leadBank.sort||'date')==='date'?' selected':''}>Sort by Date</option>
@@ -2942,8 +2939,6 @@ function renderLeadBank() {
             <span><i data-lucide="clock" aria-hidden="true"></i> ${formatDate(l.dateAdded)}</span>
             ${l.source ? `<span class="badge badge-neutral">${sourceLabel(l.source)}</span>` : ''}
           </div>
-          ${l.assignedTo ? `<div class="assigned-badge"><i data-lucide="user" aria-hidden="true"></i> ${escapeHtml(l.assignedTo) === getCurrentUser() ? 'You' : 'Assigned: ' + escapeHtml(l.assignedTo)}</div>` : '<div class="assigned-badge" style="color:var(--color-warning);"><i data-lucide="user-plus" aria-hidden="true"></i> Unclaimed</div>'}
-          ${renderClaimBadge(l)}
           ${renderAttribution(l)}
           ${renderLastActivity(l)}
           <div class="lead-card-actions">
@@ -3289,10 +3284,7 @@ function renderCRM() {
         <option value="medium"${f.priority==='medium'?' selected':''}>Medium</option>
         <option value="low"${f.priority==='low'?' selected':''}>Low</option>
       </select>
-      <select class="form-select" data-filter="crm-assigned" aria-label="Filter by assigned consultant">
-        <option value="all"${f.assignedTo==='all'?' selected':''}>All Consultants</option>
-        ${CONSULTANTS.map(c => `<option value="${c}"${f.assignedTo===c?' selected':''}>${c}</option>`).join('')}
-      </select>
+      <!-- Single-user mode: assigned-to filter hidden -->
       <button class="today-chip${f.today ? ' active' : ''}" data-action="toggle-today-filter" data-scope="crm" aria-pressed="${!!f.today}"><i data-lucide="calendar-clock" aria-hidden="true"></i> Today</button>
       <label class="overdue-check">
         <input type="checkbox" data-filter="crm-overdue" ${f.overdueOnly ? 'checked' : ''}>
@@ -3374,7 +3366,7 @@ function renderCRMList(leads) {
           </div>
           ${l.industry ? `<span class="badge badge-neutral" style="align-self:flex-start;">${escapeHtml(l.industry)}</span>` : ''}
           ${pc ? `<div class="contact-info">${escapeHtml(pc.name)}${pc.title ? ' - ' + escapeHtml(pc.title) : ''}</div>` : ''}
-          ${canReassignLeads() ? `<select class="reassign-select" data-action="reassign-lead" data-id="${l.id}" aria-label="Reassign lead">${CONSULTANTS.map(c => `<option value="${c}"${l.assignedTo===c?' selected':''}>${c}</option>`).join('')}</select>` : (l.assignedTo ? `<div class="assigned-badge"><i data-lucide="user" aria-hidden="true"></i> Assigned: ${escapeHtml(l.assignedTo)}</div>` : '')}
+          <!-- Single-user mode: no reassign/assigned-badge -->
           <div class="deal-value-wrap${dealProminent ? ' prominent' : ''}">
             <label class="form-label" style="margin-bottom:2px;display:block;">Deal value</label>
             <div class="deal-value-input">
@@ -3529,7 +3521,7 @@ function renderCRMBoard(leads) {
                   ${crm.followUpDate ? `<span style="font-size:0.65rem;color:${fuDays !== null && fuDays <= 0 ? 'var(--color-warning)' : 'var(--color-text-muted)'};">${fuDays !== null && fuDays <= 0 ? 'Overdue' : 'Follow up ' + formatDate(crm.followUpDate)}</span>` : ''}
                   ${crm.meetingBooked ? `<span class="badge badge-purple">Meeting</span>` : ''}
                 </div>
-                ${l.assignedTo ? `<div class="assigned-badge"><i data-lucide="user" aria-hidden="true"></i> ${escapeHtml(l.assignedTo)}</div>` : ''}
+                <!-- Single-user mode: no assigned-badge -->
                 ${l.activity && l.activity.length > 0 ? `<div style="font-size:0.6rem;color:var(--color-text-faint);margin-top:4px;">${escapeHtml(l.activity[0].by)} ${escapeHtml(l.activity[0].action)} ${formatTimeAgo(l.activity[0].date)}</div>` : ''}
                 <button class="btn btn-ghost btn-sm btn-generate-email" style="margin-top:4px;font-size:0.6rem;padding:2px 6px;" data-action="generate-email" data-id="${l.id}"><i data-lucide="mail" aria-hidden="true" style="width:10px;height:10px;"></i> Email</button>
               </div>
@@ -5219,7 +5211,8 @@ document.getElementById('switch-user-btn').addEventListener('click', () => {
 });
 
 // ========== ACTIVITY MONITOR ==========
-const AM_TEAM_MEMBERS = ['Ayoub Rasol', 'Melusi Ndoro', 'Joshua Khalili', 'Muneeb Moiz', 'Yousuf Zacky', 'Ameer Munj'];
+// Single-user mode: no fixed team roster for Activity Monitor.
+const AM_TEAM_MEMBERS = [];
 const AM_ACTION_TYPES = [
   { value: 'all', label: 'All Actions' },
   { value: 'call', label: 'Calls' },
@@ -5583,7 +5576,8 @@ function renderReports() {
   }
 
   const currentUser = getCurrentUser();
-  const users = isMasterUser() ? [...CONSULTANTS, ...CEOS] : [currentUser];
+  // Single-user mode: always show stats for the current user (Master).
+  const users = [currentUser];
 
   function renderUserStats(user) {
     const calls = countActions(user, 'added lead') + countActions(user, 'changed stage');
@@ -5631,10 +5625,9 @@ document.getElementById('section-reports').addEventListener('change', e => {
 
 // ========== EMAIL SIGNATURES ==========
 function showSignaturesModal() {
-  const allTeam = [...CEOS, ...CONSULTANTS];
   const current = getCurrentUser();
-  // Sort so current user is first
-  const sorted = [current, ...allTeam.filter(n => n !== current)];
+  // Single-user mode: only show the current user's signature.
+  const sorted = [current];
 
   let html = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-5);">
@@ -5798,15 +5791,8 @@ function applyBulkAction(scope, value) {
 
 // ========== MEETING BRIEF ==========
 function pickFounderForLead(lead) {
-  const q = lead.qualification || {};
-  const scores = {
-    'Melusi Ndoro': (q.strategyDesign || '').length,
-    'Ayoub Rasol':  (q.experienceDesign || '').length,
-    'Joshua Khalili': (q.digitalCommerce || '').length
-  };
-  let best = 'Melusi Ndoro', bestV = 0;
-  Object.keys(scores).forEach(k => { if (scores[k] > bestV) { best = k; bestV = scores[k]; } });
-  return bestV > 0 ? best : 'Melusi Ndoro';
+  // Single-user mode: always returns the current user (Master).
+  return getCurrentUser();
 }
 function getPrimaryGap(lead) {
   const w = (lead.qualification && lead.qualification.weaknessesOpportunities) || '';
@@ -5814,16 +5800,7 @@ function getPrimaryGap(lead) {
   return first || 'Not yet identified — probe for the single biggest friction point in the first 10 minutes.';
 }
 function getRecommendedAngle(lead) {
-  const founder = pickFounderForLead(lead);
-  const pillar = founder === 'Melusi Ndoro' ? 'Strategy & Design'
-               : founder === 'Ayoub Rasol' ? 'Experience Design'
-               : 'Digital Commerce';
-  const mapping = {
-    'Strategy & Design': "Lead with positioning. Most of their friction is upstream — the offer, the story, the brand. Show them we fix the root cause, not the symptoms.",
-    'Experience Design': "Lead with the journey. Their growth ceiling is UX. Walk them through one concrete screen-level improvement we'd ship in week one.",
-    'Digital Commerce':  "Lead with the funnel. They're leaking revenue somewhere specific. Name the leak, size it, then show how we plug it."
-  };
-  return mapping[pillar];
+  return "Lead with positioning. Most of their friction is upstream — the offer, the story, the brand. Show them you fix the root cause, not the symptoms.";
 }
 function getOpeningQuestions(lead) {
   const industry = (lead.industry || '').toLowerCase();
@@ -6029,41 +6006,12 @@ Direct. Confident. Plain-spoken. No buzzwords. No fluff. We talk like smart oper
 
 When you write on LodgeHelm's behalf (emails, scripts, responses), use this voice.
 
-# THE FOUNDERS
+# THE OPERATOR
 
-## Melusi Ndoro — CEO & Creative Director
-- Leads creative direction, branding, strategic storytelling
-- Client-facing on brand and creative engagements
-- Runs the creative team and output
-- Default founder for general discovery calls
-
-## Joshua Khalili — COO & CSO
-- Leads operational excellence, strategic planning, commercial
-- Background in economics, consulting, and sales
-- Handles strategy-heavy discovery calls
-- Runs internal operations
-
-## Ayoub Rasool — CPM & EIC
-- Leads content performance management, editorial strategy, digital engagement
-- Handles content and performance-led discovery calls
-- Runs digital editorial output
-
-**Routing rule for bookings:**
-- Brand/creative focus → Melusi
-- Strategy/commercial/growth focus → Josh
-- Content/performance/editorial focus → Ayoub
-- Unclear or general → Melusi (default)
-
-# THE SALES TEAM (THE CONSULTANTS)
-
-Three independent contractors who handle the top of funnel:
-- **Muneeb Moiz** — Consultant
-- **Yousuf Zacky** — Consultant
-- **Ameer Munj** — Consultant
-
-Their job: qualify leads, cold call, cold email, follow up, book discovery calls. The founders run the discovery and solution calls and close.
-
-Each has ~180 leads assigned in the CRM. They log in with their name and see their assigned leads.
+## Melusi Ndoro — Founder & Director
+- Runs all client work: creative direction, strategy, business development
+- Handles all discovery and solution calls
+- Default contact for all leads
 
 # THE THREE SERVICE PILLARS
 
@@ -6075,7 +6023,7 @@ Each has ~180 leads assigned in the CRM. They log in with their name and see the
 - Retail distribution
 - Wholesale partnerships
 - We execute, not just recommend
-- Lead: Josh
+- Lead: Melusi
 
 ## Pillar 2: Brand, Product & Experience Design
 - Brand identity development
@@ -6091,7 +6039,7 @@ Each has ~180 leads assigned in the CRM. They log in with their name and see the
 - Email marketing and retention systems
 - Analytics and measurement
 - Customer lifecycle design
-- Lead: Ayoub (with support from others)
+- Lead: Melusi
 
 # ENGAGEMENT MODEL
 
@@ -6544,7 +6492,7 @@ LodgeHelm has 4 featured case studies on the website:
 
 If asked specifics about a case study, admit you have limited details and suggest checking the website or asking a founder. Don't fabricate specifics.
 
-# AI TOOLS THE CONSULTANTS CAN USE
+# AI TOOLS YOU CAN USE
 
 **Research Tools (all free):**
 - ChatGPT / Gemini — summarise a website, identify digital presence gaps
@@ -6574,13 +6522,13 @@ You help the team with:
 
 ## HOW TO RESPOND
 - Direct, practical, specific. No fluff.
-- Keep answers concise — these are busy salespeople
+- Keep answers concise — operator is busy
 - Use LodgeHelm's voice when drafting on our behalf
 - Use bullet points when listing options
 - If asked about a specific lead, use the lead data provided
 - When someone reports a client interaction (good or bad), extract the key takeaway
 - If they share a mistake or something that worked, tag it with [LEARNING]: followed by the insight. These are captured and improve future advice.
-- If unsure about something LodgeHelm-specific not in your knowledge, say so and suggest asking Melusi, Josh, or Ayoub directly.
+- If unsure about something LodgeHelm-specific not in your knowledge, say so and suggest checking with Melusi directly.
 - Never invent case studies, client names, or specific numbers you weren't told.
 - When drafting emails, always use {brackets} for placeholders the user needs to fill
 
@@ -6828,15 +6776,12 @@ document.getElementById('chat-test-key').addEventListener('click', testGeminiCon
 
 // ========== INIT ==========
 function init() {
-  // Check if user is already logged in
-  if (isLoggedIn()) {
-    const user = getCurrentUser();
-    document.getElementById('current-user-display').textContent = user;
-    hideLoginOverlay();
-  } else if (typeof rebuildLoginRepOptions === 'function') {
-    // Not logged in: the overlay is visible by default — populate the rep picker now.
-    rebuildLoginRepOptions();
+  // Single-user mode: always log in as Master — skip the login picker entirely.
+  if (!isLoggedIn()) {
+    setCurrentUser('Master');
   }
+  document.getElementById('current-user-display').textContent = getCurrentUser();
+  hideLoginOverlay();
   updateMasterUI();
   renderResetButton();
   renderExportButton();

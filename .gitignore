@@ -6,3 +6,4 @@ serviceAccountKey.json
 functions/.runtimeconfig.json
 *.local
 .DS_Store
+.superpowers/

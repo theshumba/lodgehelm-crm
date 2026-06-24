@@ -17,7 +17,7 @@
 - **Source repo (read-only reference):** `~/Documents/GitHub/crescendo-crm/crescendo-crm.html`.
 - **New repo (work here):** `~/Documents/GitHub/lodgehelm-crm/`.
 - **Master leads CSV (read-only source):** `~/Desktop/Projects/LodgeHelm/leads/lodgehelm_leads_master.csv` (501 lines incl. header; columns: Name,Country,Region/Park,Type,Website,Email,Phone,WhatsApp,Established/Size,Description,BookingChannels,FunnelLeak/Audit,OutreachAngle/Message,Source).
-- **Pipeline stages (LodgeHelm):** `New → Researched → Contacted → Follow-up → Replied → Won → Lost`.
+- **Pipeline stages (LodgeHelm):** 6 numeric stages, labels `1 New → 2 Researched → 3 Contacted → 4 Follow-up → 5 Replied → 6 Won` (matches the existing 6-entry STAGES array where stage 6 is the terminal Win). **Lost is NOT a stage** — it is tracked via the existing `crm.disposition`/`crm.outcomeReason` (the app already handles Lost this way). Re-label only; never change stage numeric logic.
 - **Segments:** `small_lodge | large_collection | small_operator | large_operator | phone_only`.
 - **Secrets never committed:** service-account JSON and any keys are gitignored.
 

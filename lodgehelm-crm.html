@@ -773,7 +773,12 @@ ul, ol { list-style: none; }
       <span>LodgeHelm</span>
     </div>
     <nav class="sidebar-nav" aria-label="Sections">
-      <button class="nav-item active" data-section="home" aria-current="page">
+      <button class="nav-item" data-section="today" aria-current="false">
+        <i data-lucide="sun" aria-hidden="true"></i>
+        Today
+        <span class="nav-badge nav-badge-teal" id="badge-today" aria-live="polite" style="display:none;">0</span>
+      </button>
+      <button class="nav-item" data-section="home" aria-current="false">
         <i data-lucide="home" aria-hidden="true"></i>
         Home
       </button>
@@ -859,8 +864,13 @@ ul, ol { list-style: none; }
 
     <!-- Main content -->
     <main class="main-content" id="main-content">
+      <!-- Today / Daily Worklist -->
+      <section id="section-today" aria-label="Today">
+        <div id="today-content"></div>
+      </section>
+
       <!-- Home / Dashboard -->
-      <section id="section-home" class="active" aria-label="Home">
+      <section id="section-home" aria-label="Home">
         <div id="home-content"></div>
       </section>
 
@@ -973,7 +983,7 @@ ul, ol { list-style: none; }
 // ========== STATE ==========
 const state = {
   leads: [],
-  activeSection: 'home',
+  activeSection: 'today',
   crmView: 'list',
   meetingsView: 'list',
   calendarMonth: new Date().getMonth(),
@@ -2236,6 +2246,7 @@ function showSection(sectionId) {
 }
 function renderActiveSection() {
   switch (state.activeSection) {
+    case 'today': renderToday(); break;
     case 'home': renderHome(); break;
     case 'lead-bank': renderLeadBank(); break;
     case 'qualified-leads': renderQualifiedLeads(); break;
@@ -2569,6 +2580,105 @@ function closeModal() {
     state.modalTrigger.focus();
     state.modalTrigger = null;
   }
+}
+
+// ========== RENDER: TODAY / DAILY WORKLIST ==========
+function renderToday() {
+  const container = document.getElementById('today-content');
+  if (!container) return;
+
+  const allLeads = state.leads || [];
+
+  // Group 1: Follow-ups due (followUpDate set, daysUntil <= 0, not Won/Lost)
+  const followUpsDue = allLeads.filter(l => {
+    if (!l.crm || !l.crm.followUpDate) return false;
+    const d = daysUntil(l.crm.followUpDate);
+    if (d === null || d > 0) return false;
+    if (l.crm.stage === 6) return false; // Won
+    const disp = l.crm.disposition || '';
+    if (disp === 'not_interested' || disp === 'archived') return false;
+    return true;
+  });
+
+  // Group 2: Callbacks / meetings today (isTodayLead)
+  const callbacksToday = allLeads.filter(l => isTodayLead(l));
+
+  // Group 3: Not yet contacted — stage <= 2, no activity, capped at 25, sorted segment then name
+  const notContacted = allLeads
+    .filter(l => l.crm && l.crm.stage <= 2 && (!l.activity || l.activity.length === 0))
+    .sort((a, b) => {
+      const segA = (a.segment || '').toLowerCase();
+      const segB = (b.segment || '').toLowerCase();
+      if (segA < segB) return -1;
+      if (segA > segB) return 1;
+      return (a.businessName || '').localeCompare(b.businessName || '');
+    })
+    .slice(0, 25);
+
+  // Update badge
+  const badgeEl = document.getElementById('badge-today');
+  const totalActionable = followUpsDue.length + callbacksToday.length;
+  if (badgeEl) {
+    if (totalActionable > 0) {
+      badgeEl.textContent = totalActionable;
+      badgeEl.style.display = '';
+    } else {
+      badgeEl.style.display = 'none';
+    }
+  }
+
+  function renderTodayRow(l) {
+    const primaryPhone = (l.phones && l.phones[0] && l.phones[0].number) || '';
+    const phoneEl = primaryPhone
+      ? `<a href="tel:${escapeHtml(primaryPhone.replace(/[^+0-9]/g, ''))}" class="today-phone-link" aria-label="Call ${escapeHtml(l.businessName)}"><i data-lucide="phone" aria-hidden="true"></i>${escapeHtml(primaryPhone)}</a>`
+      : `<span class="today-no-phone">No phone</span>`;
+    const segBadge = l.segment ? `<span class="badge badge-neutral">${escapeHtml(l.segment)}</span>` : '';
+    const stageBadge = l.crm ? `<span class="badge ${getStageBadge(l.crm.stage)}">${getStageName(l.crm.stage)}</span>` : '';
+    const country = l.country ? `<span class="today-country">${escapeHtml(l.country)}</span>` : '';
+    return `
+      <div class="today-row card" style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <button class="btn btn-ghost" style="font-weight:600;padding:0;text-align:left;font-size:var(--text-sm);" data-action="view-lead" data-id="${escapeHtml(l.id)}">${escapeHtml(l.businessName || 'Unnamed')}</button>
+          <div style="display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-1);flex-wrap:wrap;">
+            ${segBadge}${stageBadge}${country}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;">
+          ${phoneEl}
+          <select class="form-select call-outcome-select" data-action="log-call" data-id="${escapeHtml(l.id)}" aria-label="Log call outcome for ${escapeHtml(l.businessName)}" style="font-size:var(--text-xs);min-width:160px;">
+            <option value="" selected>Log call…</option>
+            ${CALL_OUTCOMES.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+  }
+
+  function renderGroup(title, icon, leads, emptyMsg) {
+    return `
+      <div class="today-group" style="margin-bottom:var(--space-6);">
+        <h3 style="font-size:var(--text-sm);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2);">
+          <i data-lucide="${icon}" aria-hidden="true" style="width:15px;height:15px;"></i>
+          ${title}
+          <span style="font-size:var(--text-xs);font-weight:400;color:var(--color-text-faint);">(${leads.length})</span>
+        </h3>
+        ${leads.length > 0
+          ? leads.map(renderTodayRow).join('')
+          : `<p style="color:var(--color-text-faint);font-size:var(--text-sm);padding:var(--space-2) 0;">${emptyMsg}</p>`}
+      </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="page-header" style="padding:var(--space-5) var(--space-6) var(--space-4);">
+      <h1 class="page-title">Today</h1>
+      <p class="page-subtitle" style="margin-top:var(--space-1);">Your daily worklist — ${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+    </div>
+    <div style="padding:0 var(--space-6) var(--space-6);">
+      ${renderGroup('Follow-ups Due', 'alarm-clock', followUpsDue, 'No overdue follow-ups.')}
+      ${renderGroup('Callbacks &amp; Meetings Today', 'phone-incoming', callbacksToday, 'Nothing scheduled for today.')}
+      ${renderGroup('Not Yet Contacted', 'user-plus', notContacted, 'All leads have been contacted.')}
+    </div>`;
+
+  lucide.createIcons({ nodes: [container] });
 }
 
 // ========== RENDER: HOME / DASHBOARD ==========
@@ -4632,6 +4742,26 @@ document.getElementById('section-crm').addEventListener('input', e => {
   if (f === 'crm-search') { state.filters.crm.search = e.target.value; saveState(); renderCRM(); }
 });
 
+// Today (daily worklist) events
+document.getElementById('section-today').addEventListener('click', e => {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+  const id = target.dataset.id;
+  if (action === 'view-lead') openPanel('view-lead', getLeadById(id));
+});
+document.getElementById('section-today').addEventListener('change', e => {
+  if (e.target.dataset.action === 'log-call') {
+    const outcome = e.target.value;
+    if (outcome) {
+      logCall(e.target.dataset.id, outcome);
+      showToast('Call logged: ' + callOutcomeLabel(outcome), 'success');
+      e.target.value = '';
+      renderToday();
+    }
+  }
+});
+
 // Meetings events
 document.getElementById('section-meetings').addEventListener('click', e => {
   const target = e.target.closest('[data-action]');
@@ -6667,8 +6797,8 @@ function init() {
   renderExportButton();
   applyConsultantDefaults();
   loadChatState();
-  // Ensure home is the default section on first login unless user has a saved pref
-  if (!state.activeSection) state.activeSection = 'home';
+  // Ensure Today is the default section on first login unless user has a saved pref
+  if (!state.activeSection) state.activeSection = 'today';
   // Reflect persisted activeSection into UI
   showSection(state.activeSection);
   lucide.createIcons();

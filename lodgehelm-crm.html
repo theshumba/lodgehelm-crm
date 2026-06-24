@@ -1445,6 +1445,7 @@ function releaseLead(lead) {
 }
 // Visible badge for the lead lists/cards/panel. Empty string if free / mine.
 function renderClaimBadge(lead) {
+  return ''; // Single-user mode: no claim badges (no co-workers to claim against).
   const other = claimedByOther(lead);
   if (other) {
     return '<div class="claim-badge live"><span class="live-dot"></span> ' + escapeHtml(other) + ' is on this</div>';

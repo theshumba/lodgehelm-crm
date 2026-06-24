@@ -1776,6 +1776,13 @@ function normalizeLead(l) {
   if (typeof l.businessName !== 'string') l.businessName = l.businessName == null ? '' : String(l.businessName);
   if (typeof l.description !== 'string') l.description = l.description == null ? '' : String(l.description);
   if (typeof l.industry !== 'string') l.industry = l.industry == null ? '' : String(l.industry);
+  if (typeof l.country !== 'string') l.country = l.country == null ? '' : String(l.country);
+  if (typeof l.region !== 'string') l.region = l.region == null ? '' : String(l.region);
+  if (typeof l.segment !== 'string') l.segment = l.segment == null ? '' : String(l.segment);
+  if (typeof l.funnelLeak !== 'string') l.funnelLeak = l.funnelLeak == null ? '' : String(l.funnelLeak);
+  if (typeof l.outreachAngle !== 'string') l.outreachAngle = l.outreachAngle == null ? '' : String(l.outreachAngle);
+  if (typeof l.whatsapp !== 'string') l.whatsapp = l.whatsapp == null ? '' : String(l.whatsapp);
+  if (typeof l.ownerName !== 'string') l.ownerName = l.ownerName == null ? '' : String(l.ownerName);
   if (!Array.isArray(l.phones)) l.phones = [];
   if (!Array.isArray(l.emails)) l.emails = [];
   if (!Array.isArray(l.contacts)) l.contacts = [];
@@ -1789,7 +1796,7 @@ function normalizeLead(l) {
     if (!Array.isArray(l.crm.notes)) l.crm.notes = [];
     if (!l.crm.priority) l.crm.priority = 'medium';
     if (l.crm.disposition == null) l.crm.disposition = 'nurture';
-    if (l.crm.dealValue == null) l.crm.dealValue = 15000;
+    if (l.crm.dealValue == null) l.crm.dealValue = 1200;
     if (l.crm.outcomeReason == null) l.crm.outcomeReason = '';
     if (typeof l.crm.stage !== 'number') l.crm.stage = Number(l.crm.stage) || 1;
   }
@@ -1861,12 +1868,12 @@ function escapeHtml(str) {
 
 // Stage info
 const STAGES = [
-  { num: 1, name: 'Attempting Contact', badge: 'badge-neutral' },
-  { num: 2, name: 'Contacted', badge: 'badge-blue' },
-  { num: 3, name: 'Meeting Booked', badge: 'badge-purple' },
-  { num: 4, name: 'Meeting Completed', badge: 'badge-orange' },
-  { num: 5, name: 'Proposal / Next Step', badge: 'badge-gold' },
-  { num: 6, name: 'Closed Won', badge: 'badge-success' }
+  { num: 1, name: 'New', badge: 'badge-neutral' },
+  { num: 2, name: 'Researched', badge: 'badge-blue' },
+  { num: 3, name: 'Contacted', badge: 'badge-purple' },
+  { num: 4, name: 'Follow-up', badge: 'badge-orange' },
+  { num: 5, name: 'Replied', badge: 'badge-gold' },
+  { num: 6, name: 'Won', badge: 'badge-success' }
 ];
 function getStageName(num) { return STAGES.find(s => s.num === num)?.name || 'Unknown'; }
 function getStageBadge(num) { return STAGES.find(s => s.num === num)?.badge || 'badge-neutral'; }

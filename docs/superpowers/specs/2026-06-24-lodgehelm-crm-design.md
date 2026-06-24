@@ -75,7 +75,8 @@ is `lodgehelm-crm.html`; functions live in `functions/`.
    close cousin domain (e.g. `getlodgehelm.com` / `try-lodgehelm.com`), put a Google
    Workspace mailbox on it (`melusi@getlodgehelm.com`, ~$6/mo), and set **SPF, 2048-bit
    DKIM, and DMARC** (`p=quarantine`+) on it (guided copy-paste). This protects the main
-   `lodgehelm` domain's reputation if outreach ever dips. Run a warm-up tool on the inbox.
+   `lodgehelm` domain's reputation if outreach ever dips. (Manual volume ramp, no warm-up
+   tooling — out of scope per founder.)
 2. **Anthropic API key** (drafting/research).
 3. **Firebase Blaze plan** enabled on the LodgeHelm CRM project (pay-as-you-go, ~£0–2/mo).
 4. **Google OAuth consent + client credentials** for the Gmail connection (we set up once).
@@ -145,8 +146,9 @@ columns 1:1 and auto-deriving `segment` from Type + Established/Size.
 - **4-step follow-up cadence** over ~18 days (Day 0 / 3 / 8–10 / 16–18), each adding new
   value on the same thread, ending in a soft "breakup"; founder approves each, or enables
   auto-send within caps. (~42% of replies come from follow-ups — §8.)
-- **Daily send cap + throttling + 30–45 day warmup ramp** (start 5–10/day → ramp to 40–50;
-  founder-led ideal 20–40/day) to protect domain reputation.
+- **Simple daily send cap + throttling** (a single configurable cap, default low) to protect
+  domain reputation. **Automated warm-up is out of scope** — the founder ramps volume
+  manually, bit by bit. The playbook's warm-up guidance (§8.2) stays as reference only.
 - **One-click unsubscribe / opt-out** link + `doNotContact` enforcement (EU/UK compliant);
   physical address + opt-out in footer.
 - **Timezone-aware** send suggestions (use lead country → local business morning).

@@ -1525,6 +1525,27 @@ const CALL_OUTCOMES = [
   { value: 'not_interested', label: 'Not interested' }
 ];
 function callOutcomeLabel(v) { return (CALL_OUTCOMES.find(o => o.value === v) || {}).label || v; }
+
+// ===== WHATSAPP DEEP-LINK + PER-SEGMENT TEMPLATES =====
+const WA_TEMPLATES = {
+  small_lodge: (l) => `Hi ${l.ownerName || 'there'} — quick one about ${l.businessName}. When you're out with guests, do booking enquiries ever sit a while before someone replies? I built a simple tool that catches them instantly. Mind if I share how it works? — Melusi, LodgeHelm`,
+  large_collection: (l) => `Hi ${l.ownerName || 'there'} — across a collection like ${l.businessName}, even a few-hour delay on enquiries quietly costs bookings at the busiest camps. I run LodgeHelm — happy to show how it keeps response instant across properties. — Melusi`,
+  small_operator: (l) => `Hi ${l.ownerName || 'there'} — in safari the operator who sends the first solid quote usually wins it. LodgeHelm helps ${l.businessName} reply instantly 24/7. Worth a 2-min look? — Melusi`,
+  large_operator: (l) => `Hi ${l.ownerName || 'there'} — at ${l.businessName}'s enquiry volume, nights/weekends/time-zones are where bookings leak. LodgeHelm covers those automatically. Could I send a short demo? — Melusi`,
+  phone_only: (l) => `Hi ${l.ownerName || 'there'} — bet a few enquiries slip past when you're on a game drive. There's a simple fix — mind if I show you? — Melusi, LodgeHelm`,
+};
+function waMessageFor(l) { return (WA_TEMPLATES[l.segment] || WA_TEMPLATES.small_lodge)(l); }
+function waLink(l) {
+  const num = (l.whatsapp || (l.phones && l.phones[0] && l.phones[0].number) || '').replace(/[^0-9]/g, '');
+  return num ? `https://wa.me/${num}?text=${encodeURIComponent(waMessageFor(l))}` : '';
+}
+function logWhatsApp(id) {
+  const lead = getLeadById(id);
+  if (!lead) return;
+  addActivity(lead, 'WhatsApp opened with template');
+  saveState();
+}
+
 // Logs a call attempt + its disposition as a synced activity entry and stamps last-contact.
 function logCall(id, outcome) {
   const lead = getLeadById(id);
@@ -2635,6 +2656,7 @@ function renderToday() {
     const segBadge = l.segment ? `<span class="badge badge-neutral">${escapeHtml(l.segment)}</span>` : '';
     const stageBadge = l.crm ? `<span class="badge ${getStageBadge(l.crm.stage)}">${getStageName(l.crm.stage)}</span>` : '';
     const country = l.country ? `<span class="today-country">${escapeHtml(l.country)}</span>` : '';
+    const waBtn = waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:4px;font-size:var(--text-xs);min-height:28px;padding:2px var(--space-2);" data-action="whatsapp-lead" data-id="${escapeHtml(l.id)}"><i data-lucide="message-circle" style="width:13px;height:13px;" aria-hidden="true"></i> WA</button>` : '';
     return `
       <div class="today-row card" style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);flex-wrap:wrap;">
         <div style="flex:1;min-width:0;">
@@ -2645,6 +2667,7 @@ function renderToday() {
         </div>
         <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;">
           ${phoneEl}
+          ${waBtn}
           <select class="form-select call-outcome-select" data-action="log-call" data-id="${escapeHtml(l.id)}" aria-label="Log call outcome for ${escapeHtml(l.businessName)}" style="font-size:var(--text-xs);min-width:160px;">
             <option value="" selected>Log call…</option>
             ${CALL_OUTCOMES.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
@@ -3025,6 +3048,7 @@ function renderViewLeadPanel(lead) {
     ${lead.address ? `<div class="form-group"><span class="form-label">Address</span><span style="font-size:var(--text-sm);">${escapeHtml(lead.address)}</span></div>` : ''}
     ${renderClaimBadge(lead)}
     ${lead.phones.length ? `<div class="form-group"><span class="form-label">Phone Numbers</span>${lead.phones.map(p => `<div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-1);"><a href="tel:${escapeHtml(p.number.replace(/[^+0-9]/g,''))}" style="font-size:var(--text-sm);color:var(--color-primary);text-decoration:underline;text-underline-offset:2px;"><i data-lucide="phone" style="width:13px;height:13px;vertical-align:-2px;margin-right:3px;" aria-hidden="true"></i>${escapeHtml(p.number)}</a><button class="btn btn-ghost btn-sm" style="min-height:26px;padding:2px var(--space-2);font-size:var(--text-xs);" data-action="log-call" data-id="${lead.id}" data-num="${escapeHtml(p.number)}"><i data-lucide="phone-call" style="width:12px;height:12px;" aria-hidden="true"></i> Log call</button></div>`).join('')}</div>` : ''}
+    ${waLink(lead) ? `<div class="form-group"><button class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:var(--space-2);" data-action="whatsapp-lead" data-id="${lead.id}"><i data-lucide="message-circle" style="width:14px;height:14px;" aria-hidden="true"></i> WhatsApp</button></div>` : ''}
     ${lead.emails.length ? `<div class="form-group"><span class="form-label">Email Addresses</span>${lead.emails.map(e => `<span style="font-size:var(--text-sm);">${escapeHtml(e.address)}</span>`).join('')}</div>` : ''}
     ${lead.contacts.length ? `
       <div class="form-group">
@@ -4749,6 +4773,17 @@ document.getElementById('section-today').addEventListener('click', e => {
   const action = target.dataset.action;
   const id = target.dataset.id;
   if (action === 'view-lead') openPanel('view-lead', getLeadById(id));
+  else if (action === 'whatsapp-lead') {
+    const lead = getLeadById(id);
+    if (lead) {
+      const link = waLink(lead);
+      if (link) {
+        window.open(link, '_blank');
+        logWhatsApp(lead.id);
+        showToast('WhatsApp opened for ' + lead.businessName, 'success');
+      }
+    }
+  }
 });
 document.getElementById('section-today').addEventListener('change', e => {
   if (e.target.dataset.action === 'log-call') {
@@ -4958,6 +4993,17 @@ document.getElementById('side-panel').addEventListener('click', e => {
 
   if (action === 'close-panel') closePanel();
   else if (action === 'call-lead') openDialer(target.dataset.id, target.dataset.num);
+  else if (action === 'whatsapp-lead') {
+    const lead = getLeadById(target.dataset.id);
+    if (lead) {
+      const link = waLink(lead);
+      if (link) {
+        window.open(link, '_blank');
+        logWhatsApp(lead.id);
+        showToast('WhatsApp opened for ' + lead.businessName, 'success');
+      }
+    }
+  }
   else if (action === 'log-call') {
     const lead = getLeadById(target.dataset.id);
     if (lead) {

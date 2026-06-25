@@ -386,6 +386,10 @@ ul, ol { list-style: none; }
 
 /* Priority cycling */
 .priority-badge { cursor: pointer; user-select: none; }
+.data-chips { display: flex; gap: 4px; margin: var(--space-2) 0; }
+.data-chip { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: var(--radius-sm); background: var(--color-surface-2); color: var(--color-text-muted); opacity: 0.4; border: 1px solid var(--color-border); }
+.data-chip.on { opacity: 1; background: color-mix(in srgb, var(--color-primary) 14%, transparent); color: var(--color-primary); border-color: color-mix(in srgb, var(--color-primary) 35%, transparent); }
+.data-chip i { width: 13px; height: 13px; }
 
 /* ========== KANBAN ========== */
 .kanban-board { display: flex; gap: var(--space-4); overflow-x: auto; padding-bottom: var(--space-4); min-height: 400px; }
@@ -990,7 +994,7 @@ const state = {
   calendarYear: new Date().getFullYear(),
   archiveTab: 'follow_up',
   filters: {
-    leadBank: { search: '', status: 'all', source: 'all', assignedTo: 'all', today: false },
+    leadBank: { search: '', status: 'all', source: 'all', completeness: 'all', assignedTo: 'all', today: false },
     crm: { search: '', stage: 'all', priority: 'all', overdueOnly: false, assignedTo: 'all', today: false },
     archive: {}
   },
@@ -2204,6 +2208,49 @@ function renderScoreBadge(lead) {
   return '<span class="opp-score-badge ' + cls + '" title="Opportunity Score: ' + score + '">' + score + '</span>';
 }
 
+// ========== DATA COMPLETENESS (triage by how much we know about a lead) ==========
+// Mirrors scripts/organize-leads.mjs — keep rubric in sync.
+function getDataCompleteness(lead) {
+  const hasEmail = (lead.emails && lead.emails.length > 0) || (lead.contacts && lead.contacts.some(c => c.email));
+  const hasPhone = (lead.phones && lead.phones.length > 0) || (lead.contacts && lead.contacts.some(c => c.phone));
+  const hasSite = !!(lead.website && lead.website.trim());
+  const desc = (lead.description || '').trim();
+  const hasDesc = !!desc;
+  const fg = lead.firmographics || {};
+  const hasSize = !!(fg.employees || fg.revenue || fg.founded);
+  const hasContacts = !!(lead.contacts && lead.contacts.some(c => c.name));
+  const hasOwner = !!(lead.ownerName && lead.ownerName.trim());
+  const hasAngle = !!(((lead.funnelLeak || '').trim()) || ((lead.outreachAngle || '').trim()));
+  const hasLoc = !!(lead.country && lead.country.trim());
+  let score = 0;
+  if (hasEmail) score += 20;
+  if (hasPhone) score += 15;
+  if (hasSite) score += 10;
+  if (hasDesc) score += 10;
+  if (desc.length > 120) score += 5;
+  if (hasSize) score += 10;
+  if (hasContacts) score += 10;
+  if (hasOwner) score += 5;
+  if (hasAngle) score += 10;
+  if (hasLoc) score += 5;
+  score = Math.min(score, 100);
+  const tier = score >= 65 ? 'rich' : score >= 35 ? 'partial' : 'bare';
+  return { score, tier, hasEmail, hasPhone, hasSite, hasDesc, hasSize, hasContacts };
+}
+function renderDataBadges(lead) {
+  const c = getDataCompleteness(lead);
+  const chip = (on, icon, label) =>
+    `<span class="data-chip${on ? ' on' : ''}" title="${label}: ${on ? 'yes' : 'no'}"><i data-lucide="${icon}" aria-hidden="true"></i></span>`;
+  return `<div class="data-chips" aria-label="Data completeness">
+    ${chip(c.hasEmail, 'mail', 'Email')}
+    ${chip(c.hasPhone, 'phone', 'Phone')}
+    ${chip(c.hasSite, 'globe', 'Website')}
+    ${chip(c.hasContacts, 'user', 'Named contact')}
+    ${chip(c.hasSize, 'bar-chart-2', 'Company size')}
+    ${chip(c.hasDesc, 'file-text', 'Description')}
+  </div>`;
+}
+
 // ========== DEAL VALUE & PIPELINE ==========
 const STAGE_PROBABILITY = { 1: 0.05, 2: 0.15, 3: 0.35, 4: 0.50, 5: 0.70, 6: 1.00 };
 function getDealValue(lead) {
@@ -2847,6 +2894,21 @@ function renderLeadBank() {
   }
   if (f.status !== 'all') leads = leads.filter(l => l.status === f.status);
   if (f.source !== 'all') leads = leads.filter(l => l.source === f.source);
+  if (f.completeness && f.completeness !== 'all') {
+    leads = leads.filter(l => {
+      const c = getDataCompleteness(l);
+      switch (f.completeness) {
+        case 'rich': case 'partial': case 'bare': return c.tier === f.completeness;
+        case 'has-email': return c.hasEmail;
+        case 'no-email': return !c.hasEmail;
+        case 'has-phone': return c.hasPhone;
+        case 'no-phone': return !c.hasPhone;
+        case 'email-and-phone': return c.hasEmail && c.hasPhone;
+        case 'no-contact': return !c.hasEmail && !c.hasPhone;
+        default: return true;
+      }
+    });
+  }
   if (f.assignedTo !== 'all') leads = leads.filter(l => l.assignedTo === f.assignedTo);
   if (f.today) leads = leads.filter(l => isTodayLead(l));
 
@@ -2867,11 +2929,24 @@ function renderLeadBank() {
         <option value="all"${f.source==='all'?' selected':''}>All Sources</option>
         ${SOURCES.map(s => `<option value="${s}"${f.source===s?' selected':''}>${sourceLabel(s)}</option>`).join('')}
       </select>
+      <select class="form-select" data-filter="lb-completeness" aria-label="Filter by data completeness">
+        <option value="all"${(f.completeness||'all')==='all'?' selected':''}>All Data</option>
+        <option value="rich"${f.completeness==='rich'?' selected':''}>Rich — full info</option>
+        <option value="partial"${f.completeness==='partial'?' selected':''}>Partial</option>
+        <option value="bare"${f.completeness==='bare'?' selected':''}>Bare — name only</option>
+        <option value="has-email"${f.completeness==='has-email'?' selected':''}>Has email</option>
+        <option value="no-email"${f.completeness==='no-email'?' selected':''}>No email</option>
+        <option value="has-phone"${f.completeness==='has-phone'?' selected':''}>Has phone</option>
+        <option value="no-phone"${f.completeness==='no-phone'?' selected':''}>No phone</option>
+        <option value="email-and-phone"${f.completeness==='email-and-phone'?' selected':''}>Email + phone</option>
+        <option value="no-contact"${f.completeness==='no-contact'?' selected':''}>No email or phone</option>
+      </select>
       <!-- Single-user mode: assigned-to filter hidden -->
       <button class="today-chip${f.today ? ' active' : ''}" style="display:none" data-filter="lb-mine" aria-pressed="false" aria-hidden="true"></button>
       <button class="today-chip${f.today ? ' active' : ''}" data-action="toggle-today-filter" data-scope="lead-bank" aria-pressed="${!!f.today}"><i data-lucide="calendar-clock" aria-hidden="true"></i> Today</button>
       <select class="form-select" data-filter="lb-sort" aria-label="Sort leads">
         <option value="date"${(state.filters.leadBank.sort||'date')==='date'?' selected':''}>Sort by Date</option>
+        <option value="completeness"${state.filters.leadBank.sort==='completeness'?' selected':''}>Sort by Completeness</option>
         <option value="score"${state.filters.leadBank.sort==='score'?' selected':''}>Sort by Score</option>
         <option value="name"${state.filters.leadBank.sort==='name'?' selected':''}>Sort by Name</option>
       </select>
@@ -2893,6 +2968,7 @@ function renderLeadBank() {
   // Apply sorting
   const lbSort = state.filters.leadBank.sort || 'date';
   if (lbSort === 'score') leads.sort((a, b) => getOpportunityScore(b) - getOpportunityScore(a));
+  else if (lbSort === 'completeness') leads.sort((a, b) => getDataCompleteness(b).score - getDataCompleteness(a).score);
   else if (lbSort === 'name') leads.sort((a, b) => a.businessName.localeCompare(b.businessName));
 
   if (leads.length === 0) {
@@ -2934,6 +3010,7 @@ function renderLeadBank() {
             </div>
           </div>
           <p class="lead-card-desc">${escapeHtml(l.description)}</p>
+          ${renderDataBadges(l)}
           <div class="lead-card-meta">
             <span><i data-lucide="users" aria-hidden="true"></i> ${l.contacts.length} contact${l.contacts.length !== 1 ? 's' : ''}</span>
             <span><i data-lucide="clock" aria-hidden="true"></i> ${formatDate(l.dateAdded)}</span>
@@ -4522,6 +4599,7 @@ document.getElementById('section-lead-bank').addEventListener('change', e => {
   }
   if (f === 'lb-status') { state.filters.leadBank.status = e.target.value; saveState(); renderLeadBank(); }
   if (f === 'lb-source') { state.filters.leadBank.source = e.target.value; saveState(); renderLeadBank(); }
+  if (f === 'lb-completeness') { state.filters.leadBank.completeness = e.target.value; saveState(); renderLeadBank(); }
   if (f === 'lb-assigned') { state.filters.leadBank.assignedTo = e.target.value; saveState(); renderLeadBank(); }
   if (f === 'lb-sort') { state.filters.leadBank.sort = e.target.value; saveState(); renderLeadBank(); }
   if (f === 'lb-show-all') { state.filters.leadBank.assignedTo = e.target.checked ? 'all' : getCurrentUser(); saveState(); renderLeadBank(); }

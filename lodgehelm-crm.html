@@ -3091,6 +3091,8 @@ function renderLeadBank() {
           <div class="lead-card-actions">
             <button class="btn btn-ghost btn-sm" data-action="view-lead" data-id="${l.id}"><i data-lucide="eye" aria-hidden="true"></i> View</button>
             ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
+            ${waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white" data-action="whatsapp-lead" data-id="${l.id}"><i data-lucide="message-circle" aria-hidden="true"></i> WhatsApp</button>` : ''}
+            <button class="btn btn-ghost btn-sm" data-action="generate-email" data-id="${l.id}"><i data-lucide="mail" aria-hidden="true"></i> Draft</button>
             <button class="btn btn-primary btn-sm" data-action="qualify" data-id="${l.id}"><i data-lucide="check-circle" aria-hidden="true"></i> Force-qualify</button>
           </div>
         </div>
@@ -3345,6 +3347,8 @@ function renderQualifiedLeads() {
           ${renderLastActivity(l)}
           <div class="lead-card-actions">
             ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
+            ${waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white" data-action="whatsapp-lead" data-id="${l.id}"><i data-lucide="message-circle" aria-hidden="true"></i> WhatsApp</button>` : ''}
+            <button class="btn btn-ghost btn-sm" data-action="generate-email" data-id="${l.id}"><i data-lucide="mail" aria-hidden="true"></i> Draft</button>
             <button class="btn btn-ghost btn-sm" data-action="view-qual" data-id="${l.id}"><i data-lucide="eye" aria-hidden="true"></i> View Full</button>
             ${l.status === 'qualified' ? `<button class="btn btn-ghost btn-sm" data-action="send-to-bank" data-id="${l.id}"><i data-lucide="undo-2" aria-hidden="true"></i> To bank</button>` : ''}
             ${l.status === 'qualified' ? `<button class="btn btn-primary btn-sm" data-action="move-to-crm" data-id="${l.id}"><i data-lucide="arrow-right" aria-hidden="true"></i> Move to CRM</button>` : ''}
@@ -3726,74 +3730,64 @@ function initKanbanDrag() {
 }
 
 // ========== EMAIL GENERATION ==========
+// Segment drives the value-prop line; falls back to small_lodge.
 function getEmailTemplate(lead) {
-  const ind = (lead.industry || '').toLowerCase();
-  if (/food|beverage|restaurant|bakery|coffee|pizza|chicken|dessert/.test(ind)) return 'restaurant';
-  if (/health|clinic|medical|dental|beauty|aesthetics/.test(ind)) return 'healthcare';
-  if (/e-commerce|ecommerce|retail|shop|fashion|boutique/.test(ind)) return 'ecommerce';
-  if (/professional|law|legal|finance|consulting|agency/.test(ind)) return 'professional';
-  if (/tourism|hotel|travel|experience/.test(ind)) return 'tourism';
-  return 'general';
+  const seg = (lead.segment || '').toLowerCase();
+  if (['small_lodge','large_collection','small_operator','large_operator','phone_only'].includes(seg)) return seg;
+  return 'small_lodge';
 }
 
-function getWeaknessNote(lead) {
-  if (lead.qualification && lead.qualification.weaknessesOpportunities) {
-    const raw = lead.qualification.weaknessesOpportunities.trim();
-    const firstLine = raw.split('\n')[0].replace(/^[-*\s]+/, '').trim();
-    if (firstLine.length > 10) {
-      const note = firstLine.endsWith('.') ? firstLine : firstLine + '.';
-      return 'I noticed ' + note.charAt(0).toLowerCase() + note.slice(1);
-    }
+// Personalisation line built from the lead's hand-written outreach angle / funnel leak.
+// Returns '' when we have nothing specific (the email then reads cleanly without it).
+function getAngleLine(lead) {
+  const angle = (lead.outreachAngle || '').trim();
+  if (angle.length > 5) {
+    const first = angle.split('\n')[0].replace(/^[-*\s]+/, '').trim();
+    return first.charAt(0).toUpperCase() + first.slice(1) + (/[.!?]$/.test(first) ? '' : '.');
   }
-  return 'Right now, the site could do more to convert mobile visitors.';
+  const leak = (lead.funnelLeak || '').trim();
+  if (leak.length > 5) {
+    const first = leak.split('\n')[0].replace(/^[-*\s]+/, '').trim();
+    return 'I noticed ' + first.charAt(0).toLowerCase() + first.slice(1) + (/[.!?]$/.test(first) ? '' : '.');
+  }
+  return '';
 }
 
 function generateEmail(lead) {
-  const pc = getPrimaryContact(lead);
-  const contactName = pc ? pc.name.split(' ')[0] : 'there';
+  const contactName = (lead.ownerName && lead.ownerName.trim().split(' ')[0])
+    || (getPrimaryContact(lead) && getPrimaryContact(lead).name && getPrimaryContact(lead).name.split(' ')[0])
+    || 'there';
   const biz = lead.businessName;
-  const user = getCurrentUser();
-  const weakness = getWeaknessNote(lead);
-  const tmpl = getEmailTemplate(lead);
-  const sign = user + '\nLodgeHelm Strategy\nCambridge\ncrsndo.com';
+  const angle = getAngleLine(lead);
+  const seg = getEmailTemplate(lead);
+  const sign = 'Melusi\nLodgeHelm\nlodgehelm.app';
 
-  const templates = {
-    restaurant: {
-      subject: 'Quick note about ' + biz,
-      body: 'Hi ' + contactName + ',\n\nI was looking at ' + biz + ' online and the menu and reviews look strong.\n\nThe booking and ordering journey could make it easier for people to commit. ' + weakness + '\n\nIf useful, I can send three quick fixes and a simple way to surface your best reviews and signature dishes so new customers decide faster.\n\nShould I send it over?\n\nRegards,\n' + sign
-    },
-    healthcare: {
-      subject: biz + ' trust and booking',
-      body: 'Hi ' + contactName + ',\n\nI was looking at ' + biz + ' online and it is clear you take quality seriously.\n\nOne thing that could be tightened is how trust and safety are communicated at the point of decision. ' + weakness + '\n\nIf you want, I can send a short mini audit focused on credentials visibility, clear expectations, and a simpler path to booking.\n\nReply yes and I will send it over.\n\nRegards,\n' + sign
-    },
-    ecommerce: {
-      subject: biz + ' conversion review',
-      body: 'Hi ' + contactName + ',\n\nQuick note after a fast review of ' + biz + ' online.\n\nYour products look strong, but a few details in the decision journey are likely suppressing conversion. ' + weakness + '\n\nIf you want, I can send three specific fixes and the first set of events to track so you can measure uplift.\n\nShould I send that in a reply?\n\nRegards,\n' + sign
-    },
-    professional: {
-      subject: biz + ' positioning question',
-      body: 'Hi ' + contactName + ',\n\nI took a look at ' + biz + '. The capability looks strong, but the positioning is not landing as quickly as it could.\n\n' + weakness + ' That tends to create slower decision cycles because the site does not answer the first three questions a buyer has: Who is this for? What outcome do you deliver? Why should I trust you?\n\nIf useful, I can send a mini audit with copy and structure changes that make enquiries more qualified.\n\nOpen to a quick call, or should I send the bullets?\n\nRegards,\n' + sign
-    },
-    tourism: {
-      subject: biz + ' booking journey',
-      body: 'Hi ' + contactName + ',\n\nI was reviewing ' + biz + ' online and the experience looks strong.\n\nThe booking and pre arrival journey could match that quality more closely. ' + weakness + '\n\nIf you want, I can send a mini audit with the key changes I would make for clarity, reassurance, and faster bookings, plus the one metric to track week by week.\n\nShould I send it over?\n\nRegards,\n' + sign
-    },
-    general: {
-      subject: 'Quick note about ' + biz,
-      body: 'Hi ' + contactName + ',\n\nI was looking at ' + biz + ' online and one thing stood out.\n\nThe offer looks strong, but the path from interest to booking is not as clear as it could be, especially on mobile. That is usually where good businesses quietly lose enquiries.\n\n' + weakness + '\n\nIf you want, I can send a short mini audit with three specific fixes based on what I saw, plus the one change I would prioritise first.\n\nIf that is useful, just reply yes and tell me who owns the website decisions.\n\nRegards,\n' + sign
-    }
+  // Why-it-matters line, tailored to segment.
+  const valueProp = {
+    small_lodge: 'When you\'re out with guests, booking enquiries can sit for hours before anyone replies — and that\'s often where a booking quietly slips away.',
+    large_collection: 'Across a collection like ' + biz + ', even a few-hour delay on enquiries quietly costs bookings at your busiest camps.',
+    small_operator: 'In safari, the operator who sends the first solid quote usually wins it — speed of reply matters more than almost anything.',
+    large_operator: 'At ' + biz + '\'s enquiry volume, nights, weekends and time-zones are where bookings quietly leak.',
+    phone_only: 'A few booking enquiries always slip past when you\'re on a game drive or off-grid.'
+  }[seg];
+
+  const opener = angle ? (angle + '\n\n') : '';
+  const subject = 'Quick one about ' + biz;
+  const email = {
+    subject,
+    body: 'Hi ' + contactName + ',\n\nI came across ' + biz + ' and wanted to reach out. ' + opener
+      + valueProp + '\n\n'
+      + 'I built LodgeHelm to catch every booking enquiry and reply instantly, 24/7 — so fewer slip away and more turn into confirmed bookings.\n\n'
+      + 'Happy to show you a 2-minute example using your own enquiry flow. Worth a look?\n\nRegards,\n' + sign
   };
 
-  const email = templates[tmpl];
-
-  // Follow-up email
   const followUp = {
-    subject: 'Re: ' + email.subject,
-    body: 'Hi ' + contactName + ',\n\nJust following up on my note from a couple of days ago.\n\nI had a few specific ideas for ' + biz + ' that I think could make a real difference. Happy to share them if you are interested.\n\nNo worries if the timing is not right.\n\nRegards,\n' + sign
+    subject: 'Re: ' + subject,
+    body: 'Hi ' + contactName + ',\n\nJust following up on my note about ' + biz + '.\n\n'
+      + 'If catching booking enquiries faster is useful, I can send a short demo — no obligation. No worries at all if the timing isn\'t right.\n\nRegards,\n' + sign
   };
 
-  // LinkedIn message
-  const linkedin = 'Hi ' + contactName + ', I took a look at ' + biz + ' online and had a few ideas on how to improve the customer journey. Would you be open to a quick chat or should I send a few bullet points over?';
+  const linkedin = 'Hi ' + contactName + ', I came across ' + biz + '. I help safari lodges and operators catch booking enquiries instantly so fewer slip away on evenings and weekends. Open to a quick look?';
 
   return { email, followUp, linkedin };
 }
@@ -3804,7 +3798,7 @@ function renderEmailModal(lead) {
     <div class="modal-header">
       <div>
         <h2 id="modal-title">Outreach Email for ${escapeHtml(lead.businessName)}</h2>
-        <span class="badge badge-neutral" style="margin-top:4px;">${escapeHtml(getEmailTemplate(lead))} template</span>
+        <span class="badge ${getAngleLine(lead) ? 'badge-success' : 'badge-neutral'}" style="margin-top:4px;">${getAngleLine(lead) ? 'Personalised with your angle' : 'Generic — no angle on file'} · ${escapeHtml((lead.segment || 'small_lodge').replace(/_/g,' '))}</span>
       </div>
       <button class="panel-close" data-action="close-modal" aria-label="Close modal"><i data-lucide="x" aria-hidden="true"></i></button>
     </div>
@@ -4623,6 +4617,8 @@ document.getElementById('section-lead-bank').addEventListener('click', e => {
   if (action === 'open-add-lead') openPanel('add-lead');
   else if (action === 'call-lead') openDialer(id, target.dataset.num);
   else if (action === 'view-lead') openPanel('view-lead', getLeadById(id));
+  else if (action === 'generate-email') { const lead = getLeadById(id); if (lead) openModal('email', lead); }
+  else if (action === 'whatsapp-lead') { const lead = getLeadById(id); const link = lead && waLink(lead); if (link) { window.open(link, '_blank'); logWhatsApp(lead.id); showToast('WhatsApp opened for ' + lead.businessName, 'success'); } }
   else if (action === 'qualify') {
     autoQualifyLead(id, { manual: true });
     showToast('Lead qualified', 'success');
@@ -4696,6 +4692,8 @@ document.getElementById('section-qualified-leads').addEventListener('click', e =
     renderAll();
   }
   else if (action === 'call-lead') openDialer(id, target.dataset.num);
+  else if (action === 'generate-email') { const lead = getLeadById(id); if (lead) openModal('email', lead); }
+  else if (action === 'whatsapp-lead') { const lead = getLeadById(id); const link = lead && waLink(lead); if (link) { window.open(link, '_blank'); logWhatsApp(lead.id); showToast('WhatsApp opened for ' + lead.businessName, 'success'); } }
   else if (action === 'move-to-crm') {
     moveToCRM(id);
     showToast('Lead moved to CRM', 'success');
@@ -5793,7 +5791,7 @@ function showSignaturesModal() {
     </div>
   `;
   sorted.forEach(name => {
-    const sig = name + '\nConsultant | LodgeHelm Strategy\nCambridge, UK\ncrsndo.com\ncontact@crsndo.com | +44 7777 932 599';
+    const sig = 'Melusi\nLodgeHelm\nlodgehelm.app';
     const isMe = name === current;
     html += `
       <div class="sig-card ${isMe ? 'sig-highlight' : ''}">

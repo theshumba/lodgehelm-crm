@@ -46,13 +46,13 @@ ul, ol { list-style: none; }
 
 /* ========== DESIGN TOKENS ========== */
 :root, [data-theme="light"] {
-  --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9;
-  --color-surface-offset: #f3f0ec; --color-surface-offset-2: #edeae5;
-  --color-surface-dynamic: #e6e4df; --color-divider: #dcd9d5; --color-border: #d4d1ca;
-  --color-text: #28251d; --color-text-muted: #7a7974; --color-text-faint: #bab9b4;
-  --color-text-inverse: #f9f8f4;
-  --color-primary: #C9821E; --color-primary-hover: #A66A14; --color-primary-active: #8A5A12;
-  --color-primary-highlight: #cedcd8;
+  --color-bg: #f6f4ee; --color-surface: #faf9f4; --color-surface-2: #fdfcf8;
+  --color-surface-offset: #f1efe8; --color-surface-offset-2: #e9e7df;
+  --color-surface-dynamic: #e3e1d8; --color-divider: #dad8d0; --color-border: #d1cfc6;
+  --color-text: #1c2b24; --color-text-muted: #6f7873; --color-text-faint: #b3bab5;
+  --color-text-inverse: #f7f5ef;
+  --color-primary: #0F5132; --color-primary-hover: #0C4429; --color-primary-active: #0A3A23;
+  --color-primary-highlight: #d7e8df;
   --color-warning: #964219; --color-warning-highlight: #ddcfc6;
   --color-error: #a12c7b; --color-error-highlight: #e0ced7;
   --color-success: #437a22; --color-success-highlight: #d4dfcc;
@@ -84,8 +84,8 @@ ul, ol { list-style: none; }
   --color-surface-dynamic: #2d2c2a; --color-divider: #262523; --color-border: #393836;
   --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
   --color-text-inverse: #2b2a28;
-  --color-primary: #D9962E; --color-primary-hover: #C9821E; --color-primary-active: #A66A14;
-  --color-primary-highlight: #313b3b;
+  --color-primary: #2FA968; --color-primary-hover: #1A7A4C; --color-primary-active: #0F5132;
+  --color-primary-highlight: #16302a;
   --color-warning: #bb653b; --color-warning-highlight: #564942;
   --color-error: #d163a7; --color-error-highlight: #4c3d46;
   --color-success: #6daa45; --color-success-highlight: #3a4435;
@@ -1957,8 +1957,11 @@ function addLead(formData) {
     crm: null,
     assignedTo: CONSULTANTS[state.leads.length % CONSULTANTS.length]
   };
+  const cq = computeQualification(lead);
+  lead.status = cq.qualified ? 'qualified' : 'unqualified';
+  lead.qualReason = cq.qualified ? cq.reason : cq.bankReason;
   state.leads.unshift(lead);
-  addActivity(lead, 'added lead');
+  addActivity(lead, cq.qualified ? 'added lead (auto-qualified)' : 'added lead');
   saveState();
   return lead;
 }
@@ -1981,6 +1984,34 @@ function qualifyLead(id, qualData) {
     dateQualified: todayISO
   };
   addActivity(lead, 'qualified');
+  saveState();
+}
+// Auto-qualify a lead by the rule (used for new/edited leads and manual force-qualify).
+function autoQualifyLead(id, { manual = false } = {}) {
+  const lead = getLeadById(id);
+  if (!lead) return;
+  const cq = computeQualification(lead);
+  if (manual) {
+    lead.status = 'qualified';
+    lead.qualReason = cq.qualified ? cq.reason : 'Manual override';
+    lead.qualifiedBy = getCurrentUser();
+    tagWorker(lead);
+    addActivity(lead, 'force-qualified');
+  } else {
+    lead.status = cq.qualified ? 'qualified' : 'unqualified';
+    lead.qualReason = cq.qualified ? cq.reason : cq.bankReason;
+  }
+  saveState();
+}
+// Send a qualified lead back to the Lead Bank.
+function sendLeadToBank(id) {
+  const lead = getLeadById(id);
+  if (!lead) return;
+  lead.status = 'unqualified';
+  const cq = computeQualification(lead);
+  lead.qualReason = 'Sent back manually' + (cq.bankReason ? ' · ' + cq.bankReason : '');
+  tagWorker(lead);
+  addActivity(lead, 'sent back to Lead Bank');
   saveState();
 }
 function saveDraftQualification(id, qualData) {
@@ -2236,6 +2267,50 @@ function getDataCompleteness(lead) {
   score = Math.min(score, 100);
   const tier = score >= 65 ? 'rich' : score >= 35 ? 'partial' : 'bare';
   return { score, tier, hasEmail, hasPhone, hasSite, hasDesc, hasSize, hasContacts };
+}
+
+// ========== QUALIFICATION RULE (keep in sync with scripts/backfill-qualification.mjs) ==========
+// A lead is QUALIFIED when ALL hold:
+//  1. Reachable  — email OR phone OR WhatsApp (any channel)
+//  2. ICP fit    — country is known (foreign operators included; only blank country fails)
+//  3. Decision-maker (two-track) — has a named owner/contact, OR has email + a written outreach angle
+function computeQualification(lead) {
+  const hasEmail = (lead.emails && lead.emails.length > 0) || !!lead.email || (lead.contacts && lead.contacts.some(c => c.email));
+  const hasPhone = (lead.phones && lead.phones.length > 0) || !!lead.phone || (lead.contacts && lead.contacts.some(c => c.phone));
+  const hasWhats = !!(lead.whatsapp && String(lead.whatsapp).trim());
+  const hasName = !!(lead.ownerName && lead.ownerName.trim()) || (lead.contacts && lead.contacts.some(c => c.name));
+  const hasAngle = !!(((lead.funnelLeak || '').trim()) || ((lead.outreachAngle || '').trim()));
+  const hasCountry = !!(lead.country && lead.country.trim());
+
+  const reachable = hasEmail || hasPhone || hasWhats;
+  const icpFit = hasCountry;
+  const decisionMaker = hasName || (hasEmail && hasAngle);
+  const qualified = reachable && icpFit && decisionMaker;
+
+  let reason, bankReason = '';
+  if (qualified) {
+    reason = hasName ? 'Has named contact' : 'Email + outreach angle';
+  } else {
+    const missing = [];
+    if (!reachable) missing.push('no contact channel');
+    if (!icpFit) missing.push('country unknown');
+    if (!decisionMaker) missing.push('no contact name or angle');
+    reason = '';
+    bankReason = missing.join(' · ');
+  }
+  return { qualified, reason, bankReason, reachable, icpFit, decisionMaker };
+}
+// Short label shown on a lead card explaining its qualified/bank status.
+function getQualLabel(lead) {
+  if (lead.qualReason && String(lead.qualReason).trim()) {
+    return (lead.status === 'unqualified')
+      ? { text: 'In bank: ' + lead.qualReason, cls: 'badge-neutral' }
+      : { text: 'Qualified: ' + lead.qualReason, cls: 'badge-success' };
+  }
+  const cq = computeQualification(lead);
+  return cq.qualified
+    ? { text: 'Qualified: ' + cq.reason, cls: 'badge-success' }
+    : { text: 'In bank: ' + cq.bankReason, cls: 'badge-neutral' };
 }
 function renderDataBadges(lead) {
   const c = getDataCompleteness(lead);
@@ -2557,7 +2632,7 @@ function renderMap() {
 
 // ========== SIDEBAR BADGES ==========
 function renderSidebarBadges() {
-  const leadBankCount = state.leads.filter(l => l.status !== 'archive').length;
+  const leadBankCount = state.leads.filter(l => l.status === 'unqualified').length;
   const qualCount = state.leads.filter(l => l.status === 'qualified' || l.status === 'crm').length;
   const crmCount = state.leads.filter(l => l.status === 'crm').length;
   const meetCount = state.leads.filter(l => l.status === 'crm' && l.crm && l.crm.meetingBooked).length;
@@ -2881,7 +2956,7 @@ function renderHome() {
 function renderLeadBank() {
   const container = document.getElementById('lead-bank-content');
   const f = state.filters.leadBank;
-  let leads = state.leads.filter(l => l.status !== 'archive');
+  let leads = state.leads.filter(l => l.status === 'unqualified');
   const totalCount = leads.length;
 
   if (f.search) {
@@ -2919,12 +2994,6 @@ function renderLeadBank() {
     </div>
     <div class="filter-bar">
       <input type="text" class="form-input" placeholder="Search leads..." value="${escapeHtml(f.search)}" data-filter="lb-search" aria-label="Search leads">
-      <select class="form-select" data-filter="lb-status" aria-label="Filter by status">
-        <option value="all"${f.status==='all'?' selected':''}>All Status</option>
-        <option value="unqualified"${f.status==='unqualified'?' selected':''}>Unqualified</option>
-        <option value="qualified"${f.status==='qualified'?' selected':''}>Qualified</option>
-        <option value="crm"${f.status==='crm'?' selected':''}>In CRM</option>
-      </select>
       <select class="form-select" data-filter="lb-source" aria-label="Filter by source">
         <option value="all"${f.source==='all'?' selected':''}>All Sources</option>
         ${SOURCES.map(s => `<option value="${s}"${f.source===s?' selected':''}>${sourceLabel(s)}</option>`).join('')}
@@ -3011,6 +3080,7 @@ function renderLeadBank() {
           </div>
           <p class="lead-card-desc">${escapeHtml(l.description)}</p>
           ${renderDataBadges(l)}
+          ${(() => { const ql = getQualLabel(l); return `<div style="margin-top:var(--space-2)"><span class="badge ${ql.cls}" title="Why this lead is in the Lead Bank">${escapeHtml(ql.text)}</span></div>`; })()}
           <div class="lead-card-meta">
             <span><i data-lucide="users" aria-hidden="true"></i> ${l.contacts.length} contact${l.contacts.length !== 1 ? 's' : ''}</span>
             <span><i data-lucide="clock" aria-hidden="true"></i> ${formatDate(l.dateAdded)}</span>
@@ -3021,8 +3091,7 @@ function renderLeadBank() {
           <div class="lead-card-actions">
             <button class="btn btn-ghost btn-sm" data-action="view-lead" data-id="${l.id}"><i data-lucide="eye" aria-hidden="true"></i> View</button>
             ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
-            ${l.status === 'unqualified' ? `<button class="btn btn-primary btn-sm" data-action="qualify" data-id="${l.id}"><i data-lucide="check-circle" aria-hidden="true"></i> Qualify</button>` : ''}
-            ${l.status === 'qualified' ? `<button class="btn btn-sm" style="background:var(--color-blue);color:white" data-action="move-to-crm" data-id="${l.id}"><i data-lucide="arrow-right" aria-hidden="true"></i> Move to CRM</button>` : ''}
+            <button class="btn btn-primary btn-sm" data-action="qualify" data-id="${l.id}"><i data-lucide="check-circle" aria-hidden="true"></i> Force-qualify</button>
           </div>
         </div>
       `;
@@ -3265,12 +3334,9 @@ function renderQualifiedLeads() {
               <span class="badge ${sb.cls}">${sb.label}</span>
             </div>
           </div>
-          <div class="service-tags">
-            <span class="service-tag ${q.strategyDesign?.trim() ? 'filled' : 'empty'}">Strategy & Design ${q.strategyDesign?.trim() ? '&#10003;' : ''}</span>
-            <span class="service-tag ${q.experienceDesign?.trim() ? 'filled' : 'empty'}">Experience Design ${q.experienceDesign?.trim() ? '&#10003;' : ''}</span>
-            <span class="service-tag ${q.digitalCommerce?.trim() ? 'filled' : 'empty'}">Digital Commerce ${q.digitalCommerce?.trim() ? '&#10003;' : ''}</span>
-          </div>
-          ${q.growthIntent ? `<p class="lead-card-desc" style="-webkit-line-clamp:1;">${escapeHtml(q.growthIntent)}</p>` : ''}
+          ${renderDataBadges(l)}
+          ${(() => { const ql = getQualLabel(l); return `<div style="margin-top:var(--space-2)"><span class="badge ${ql.cls}" title="Why this lead qualified">${escapeHtml(ql.text)}</span></div>`; })()}
+          ${l.ownerName ? `<p class="lead-card-desc" style="-webkit-line-clamp:1;"><i data-lucide="user" aria-hidden="true"></i> ${escapeHtml(l.ownerName)}</p>` : ''}
           <div class="lead-card-meta">
             <span>${formatDate(q.dateQualified || l.dateAdded)}</span>
           </div>
@@ -3280,6 +3346,7 @@ function renderQualifiedLeads() {
           <div class="lead-card-actions">
             ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
             <button class="btn btn-ghost btn-sm" data-action="view-qual" data-id="${l.id}"><i data-lucide="eye" aria-hidden="true"></i> View Full</button>
+            ${l.status === 'qualified' ? `<button class="btn btn-ghost btn-sm" data-action="send-to-bank" data-id="${l.id}"><i data-lucide="undo-2" aria-hidden="true"></i> To bank</button>` : ''}
             ${l.status === 'qualified' ? `<button class="btn btn-primary btn-sm" data-action="move-to-crm" data-id="${l.id}"><i data-lucide="arrow-right" aria-hidden="true"></i> Move to CRM</button>` : ''}
           </div>
         </div>
@@ -3293,7 +3360,7 @@ function renderQualifiedLeads() {
   if (hasUnqual) {
     html += `
       <div class="qual-sidebar">
-        <div class="qual-sidebar-title">Ready to Qualify (${unqualified.length})</div>
+        <div class="qual-sidebar-title">In Lead Bank — not auto-qualified (${unqualified.length})</div>
         ${unqualified.map(l => `
           <div class="qual-sidebar-item">
             <span>${escapeHtml(l.businessName)}</span>
@@ -4556,7 +4623,11 @@ document.getElementById('section-lead-bank').addEventListener('click', e => {
   if (action === 'open-add-lead') openPanel('add-lead');
   else if (action === 'call-lead') openDialer(id, target.dataset.num);
   else if (action === 'view-lead') openPanel('view-lead', getLeadById(id));
-  else if (action === 'qualify') openModal('qualify', getLeadById(id));
+  else if (action === 'qualify') {
+    autoQualifyLead(id, { manual: true });
+    showToast('Lead qualified', 'success');
+    renderAll();
+  }
   else if (action === 'move-to-crm') {
     moveToCRM(id);
     showToast('Lead moved to CRM', 'success');
@@ -4619,11 +4690,19 @@ document.getElementById('section-qualified-leads').addEventListener('click', e =
   const action = target.dataset.action;
   const id = target.dataset.id;
 
-  if (action === 'qualify') openModal('qualify', getLeadById(id));
+  if (action === 'qualify') {
+    autoQualifyLead(id, { manual: true });
+    showToast('Lead qualified', 'success');
+    renderAll();
+  }
   else if (action === 'call-lead') openDialer(id, target.dataset.num);
   else if (action === 'move-to-crm') {
     moveToCRM(id);
     showToast('Lead moved to CRM', 'success');
+    renderAll();
+  } else if (action === 'send-to-bank') {
+    sendLeadToBank(id);
+    showToast('Sent back to Lead Bank', 'info');
     renderAll();
   } else if (action === 'view-qual') {
     openPanel('view-qualification', getLeadById(id));

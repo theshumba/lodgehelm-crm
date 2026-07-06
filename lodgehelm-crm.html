@@ -573,6 +573,30 @@ ul, ol { list-style: none; }
 .opp-score-badge.score-mid { background: var(--color-orange); }
 .opp-score-badge.score-low { background: var(--color-text-faint); }
 
+/* ========== CALL LIST (ranked cold-call queue) ========== */
+.call-list-intro { color: var(--color-text-muted); font-size: var(--text-sm); margin: 0 0 var(--space-4); max-width: 70ch; }
+.call-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.call-row { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); }
+.call-row.called { opacity: 0.6; }
+.call-rank { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-text-faint); min-width: 2.5ch; text-align: center; }
+.call-info-score { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; color: white; flex-shrink: 0; line-height: 1; }
+.call-info-score.score-high { background: var(--color-success); }
+.call-info-score.score-mid { background: var(--color-orange); }
+.call-info-score.score-low { background: var(--color-text-faint); }
+.call-score-num { font-family: var(--font-display); font-size: var(--text-md); font-weight: 700; }
+.call-score-lbl { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+.call-main { min-width: 0; }
+.call-name-row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-2); }
+.call-meta { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-2); font-size: var(--text-sm); color: var(--color-text-muted); }
+.call-phone { display: inline-flex; align-items: center; gap: 4px; color: var(--color-primary); font-weight: 600; text-decoration: none; }
+.call-phone:hover { text-decoration: underline; }
+.call-phone i { width: 14px; height: 14px; }
+.call-actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 720px) {
+  .call-row { grid-template-columns: auto auto 1fr; }
+  .call-actions { grid-column: 1 / -1; justify-content: flex-start; }
+}
+
 /* ========== RESEARCH CHECKLIST ========== */
 .research-checklist { margin-top: var(--space-4); padding: var(--space-4); background: var(--color-surface-offset); border-radius: var(--radius-md); border: 1px solid oklch(from var(--color-text) l c h / 0.08); }
 .research-checklist h4 { font-family: var(--font-display); font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-3); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -795,6 +819,11 @@ ul, ol { list-style: none; }
         Qualified Leads
         <span class="nav-badge nav-badge-teal" id="badge-qualified" aria-live="polite">0</span>
       </button>
+      <button class="nav-item" data-section="call-list">
+        <i data-lucide="phone-call" aria-hidden="true"></i>
+        Call List
+        <span class="nav-badge nav-badge-teal" id="badge-call-list" aria-live="polite">0</span>
+      </button>
       <button class="nav-item" data-section="crm">
         <i data-lucide="target" aria-hidden="true"></i>
         CRM / Outreach
@@ -886,6 +915,11 @@ ul, ol { list-style: none; }
       <!-- Qualified Leads -->
       <section id="section-qualified-leads" aria-label="Qualified Leads">
         <div id="qualified-leads-content"></div>
+      </section>
+
+      <!-- Call List -->
+      <section id="section-call-list" aria-label="Call List">
+        <div id="call-list-content"></div>
       </section>
 
       <!-- CRM -->
@@ -995,6 +1029,7 @@ const state = {
   archiveTab: 'follow_up',
   filters: {
     leadBank: { search: '', status: 'all', source: 'all', completeness: 'all', assignedTo: 'all', today: false },
+    callList: { cohort: 'ready', hideCalled: false },
     crm: { search: '', stage: 'all', priority: 'all', overdueOnly: false, assignedTo: 'all', today: false },
     archive: {}
   },
@@ -2394,6 +2429,7 @@ function renderActiveSection() {
     case 'home': renderHome(); break;
     case 'lead-bank': renderLeadBank(); break;
     case 'qualified-leads': renderQualifiedLeads(); break;
+    case 'call-list': renderCallList(); break;
     case 'crm': renderCRM(); break;
     case 'meetings': renderMeetings(); break;
     case 'archive': renderArchive(); break;
@@ -2642,6 +2678,15 @@ function renderSidebarBadges() {
 
   document.getElementById('badge-lead-bank').textContent = leadBankCount;
   document.getElementById('badge-qualified').textContent = qualCount;
+
+  // Call List badge = leads ready to call (Bank + Qualified, with a phone, not yet contacted)
+  const callListCount = state.leads.filter(l =>
+    (l.status === 'unqualified' || l.status === 'qualified') &&
+    ((l.phones && l.phones.length > 0) || (l.contacts && l.contacts.some(c => c.phone))) &&
+    !(l.crm && l.crm.dateLastContact)
+  ).length;
+  const callListBadge = document.getElementById('badge-call-list');
+  if (callListBadge) callListBadge.textContent = callListCount;
 
   const crmBadge = document.getElementById('badge-crm');
   if (overdueInCRM > 0) {
@@ -3376,6 +3421,115 @@ function renderQualifiedLeads() {
   }
   html += '</div>';
 
+  container.innerHTML = html;
+  lucide.createIcons({ nodes: [container] });
+}
+
+// ========== RENDER: CALL LIST (ranked cold-call queue) ==========
+// A phone-first prospecting queue. Every callable lead is ranked by DATA COMPLETENESS
+// (getDataCompleteness score, 0-100) descending — i.e. the leads we know the most about
+// sit at the top. That is the "more detail / more information = higher priority" rule:
+// a richer lead is a warmer, better-researched call. Work top-down from #1.
+function getCallList() {
+  const f = state.filters.callList || { cohort: 'ready', hideCalled: false };
+  const hasPhone = l => (l.phones && l.phones.length > 0) || (l.contacts && l.contacts.some(c => c.phone));
+  let leads = state.leads.filter(l => l.status !== 'archive' && hasPhone(l));
+  if (f.cohort === 'ready') leads = leads.filter(l => l.status === 'unqualified' || l.status === 'qualified');
+  else if (f.cohort === 'qualified') leads = leads.filter(l => l.status === 'qualified');
+  else if (f.cohort === 'bank') leads = leads.filter(l => l.status === 'unqualified');
+  // 'all' = every non-archived callable lead (includes those already in CRM)
+  if (f.hideCalled) leads = leads.filter(l => !(l.crm && l.crm.dateLastContact));
+  leads.sort((a, b) => {
+    const d = getDataCompleteness(b).score - getDataCompleteness(a).score;
+    if (d !== 0) return d;
+    const o = getOpportunityScore(b) - getOpportunityScore(a);
+    if (o !== 0) return o;
+    return (a.businessName || '').localeCompare(b.businessName || '');
+  });
+  return leads;
+}
+function renderCallList() {
+  const container = document.getElementById('call-list-content');
+  const f = state.filters.callList || (state.filters.callList = { cohort: 'ready', hideCalled: false });
+  const hasPhone = l => (l.phones && l.phones.length > 0) || (l.contacts && l.contacts.some(c => c.phone));
+  const leads = getCallList();
+  const totalCallable = state.leads.filter(l => l.status !== 'archive' && hasPhone(l)).length;
+
+  let html = `
+    <div class="section-header">
+      <h1>Call List</h1>
+    </div>
+    <p class="call-list-intro">Your callable leads, ranked <strong>richest-first</strong> — the ones you know most about sit at the top. Start at <strong>#1</strong> and work down; log every outcome as you go.</p>
+    <div class="filter-bar">
+      <select class="form-select" data-filter="cl-cohort" aria-label="Which leads to call">
+        <option value="ready"${f.cohort==='ready'?' selected':''}>Ready to call — Bank + Qualified</option>
+        <option value="qualified"${f.cohort==='qualified'?' selected':''}>Qualified only</option>
+        <option value="bank"${f.cohort==='bank'?' selected':''}>Lead Bank only</option>
+        <option value="all"${f.cohort==='all'?' selected':''}>All callable (incl. CRM)</option>
+      </select>
+      <label class="consultant-view-toggle"><input type="checkbox" data-filter="cl-hidecalled" ${f.hideCalled?'checked':''}> Hide already-contacted</label>
+      <span class="count-label">${leads.length} in queue · ${totalCallable} callable total</span>
+    </div>
+  `;
+
+  if (leads.length === 0) {
+    html += `
+      <div class="empty-state">
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="60" cy="60" r="40" stroke="currentColor" stroke-width="2" fill="none"/>
+          <path d="M48 46c0 14 12 26 26 26" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <h3>No callable leads here</h3>
+        <p>No leads with a phone number match this view. Try a different cohort, uncheck "Hide already-contacted", or add phone numbers in the Lead Bank.</p>
+      </div>
+    `;
+  } else {
+    html += '<div class="call-list">';
+    leads.forEach((l, i) => {
+      const dc = getDataCompleteness(l);
+      const scoreCls = dc.tier === 'rich' ? 'score-high' : dc.tier === 'partial' ? 'score-mid' : 'score-low';
+      const primaryPhone = (l.phones && l.phones[0] && l.phones[0].number) || (l.contacts && (l.contacts.find(c => c.phone) || {}).phone) || '';
+      const ql = getQualLabel(l);
+      const sb = STATUS_BADGES[l.status];
+      const contacted = l.crm && l.crm.dateLastContact;
+      html += `
+        <div class="card call-row${contacted ? ' called' : ''}">
+          <div class="call-rank">#${i + 1}</div>
+          <div class="call-info-score ${scoreCls}" title="Information completeness: ${dc.score}/100 (${dc.tier}) — this is what ranks the list">
+            <span class="call-score-num">${dc.score}</span>
+            <span class="call-score-lbl">info</span>
+          </div>
+          <div class="call-main">
+            <div class="call-name-row">
+              <span class="lead-card-name">${escapeHtml(l.businessName)}</span>
+              ${l.industry ? `<span class="badge badge-neutral">${escapeHtml(l.industry)}</span>` : ''}
+              <span class="badge ${sb.cls}">${sb.label}</span>
+              ${contacted ? `<span class="badge badge-neutral" title="Last contacted ${formatDate(l.crm.dateLastContact)}"><i data-lucide="check" aria-hidden="true"></i> contacted</span>` : ''}
+            </div>
+            ${renderDataBadges(l)}
+            <div style="margin-top:var(--space-2)"><span class="badge ${ql.cls}" title="Qualification status">${escapeHtml(ql.text)}</span></div>
+            <div class="call-meta">
+              ${primaryPhone ? `<a href="tel:${escapeHtml(primaryPhone.replace(/[^+0-9]/g, ''))}" class="call-phone"><i data-lucide="phone" aria-hidden="true"></i>${escapeHtml(primaryPhone)}</a>` : ''}
+              ${l.country ? `<span class="today-country">${escapeHtml(l.country)}</span>` : ''}
+              <span><i data-lucide="users" aria-hidden="true"></i> ${l.contacts.length} contact${l.contacts.length !== 1 ? 's' : ''}</span>
+            </div>
+            ${renderLastActivity(l)}
+          </div>
+          <div class="call-actions">
+            <button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>
+            ${waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white" data-action="whatsapp-lead" data-id="${l.id}"><i data-lucide="message-circle" aria-hidden="true"></i> WhatsApp</button>` : ''}
+            <select class="form-select call-outcome-select" data-action="log-call" data-id="${l.id}" aria-label="Log call outcome for ${escapeHtml(l.businessName)}" style="font-size:var(--text-xs);min-width:150px;">
+              <option value="" selected>Log call…</option>
+              ${CALL_OUTCOMES.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
+            </select>
+            <button class="btn btn-ghost btn-sm" data-action="generate-email" data-id="${l.id}"><i data-lucide="mail" aria-hidden="true"></i> Draft</button>
+            <button class="btn btn-ghost btn-sm" data-action="view-lead" data-id="${l.id}"><i data-lucide="eye" aria-hidden="true"></i> View</button>
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+  }
   container.innerHTML = html;
   lucide.createIcons({ nodes: [container] });
 }
@@ -4751,6 +4905,34 @@ document.getElementById('section-qualified-leads').addEventListener('click', e =
   } else if (action === 'view-qual') {
     openPanel('view-qualification', getLeadById(id));
   }
+});
+
+// Call List events
+document.getElementById('section-call-list').addEventListener('click', e => {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+  const id = target.dataset.id;
+  if (action === 'call-lead') openDialer(id, target.dataset.num);
+  else if (action === 'view-lead') openPanel('view-lead', getLeadById(id));
+  else if (action === 'generate-email') { const lead = getLeadById(id); if (lead) openModal('email', lead); }
+  else if (action === 'whatsapp-lead') { const lead = getLeadById(id); const link = lead && waLink(lead); if (link) { window.open(link, '_blank'); logWhatsApp(lead.id); showToast('WhatsApp opened for ' + lead.businessName, 'success'); } }
+});
+document.getElementById('section-call-list').addEventListener('change', e => {
+  const action = e.target.dataset.action;
+  const f = e.target.dataset.filter;
+  if (action === 'log-call') {
+    const outcome = e.target.value;
+    if (outcome) {
+      logCall(e.target.dataset.id, outcome);
+      showToast('Call logged: ' + callOutcomeLabel(outcome), 'success');
+      renderCallList();
+      renderSidebarBadges();
+    }
+    return;
+  }
+  if (f === 'cl-cohort') { state.filters.callList.cohort = e.target.value; saveState(); renderCallList(); }
+  if (f === 'cl-hidecalled') { state.filters.callList.hideCalled = e.target.checked; saveState(); renderCallList(); }
 });
 
 // CRM events

@@ -576,6 +576,15 @@ ul, ol { list-style: none; }
 /* ========== CALL LIST (ranked cold-call queue) ========== */
 .call-list-intro { color: var(--color-text-muted); font-size: var(--text-sm); margin: 0 0 var(--space-4); max-width: 70ch; }
 .call-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.cl-countries { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.country-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; min-height: 30px; border-radius: var(--radius-full); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 500; cursor: pointer; transition: background-color var(--transition-interactive), color var(--transition-interactive), border-color var(--transition-interactive), transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.country-chip:active { transform: scale(0.96); }
+@media (hover: hover) and (pointer: fine) {
+  .country-chip:not(.active):hover { border-color: var(--color-primary); color: var(--color-text); }
+}
+.country-chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.country-chip .chip-count { font-size: 0.65rem; line-height: 1.4; padding: 0 6px; border-radius: var(--radius-full); background: var(--color-surface-dynamic); }
+.country-chip.active .chip-count { background: rgba(255, 255, 255, 0.22); }
 .call-row { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); }
 .call-row.called { opacity: 0.6; }
 .call-rank { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-text-faint); min-width: 2.5ch; text-align: center; }
@@ -1029,7 +1038,7 @@ const state = {
   archiveTab: 'follow_up',
   filters: {
     leadBank: { search: '', status: 'all', source: 'all', completeness: 'all', assignedTo: 'all', today: false },
-    callList: { cohort: 'ready', hideCalled: false },
+    callList: { cohort: 'ready', hideCalled: false, countries: [] },
     crm: { search: '', stage: 'all', priority: 'all', overdueOnly: false, assignedTo: 'all', today: false },
     archive: {}
   },
@@ -3457,8 +3466,8 @@ function renderQualifiedLeads() {
 // (getDataCompleteness score, 0-100) descending — i.e. the leads we know the most about
 // sit at the top. That is the "more detail / more information = higher priority" rule:
 // a richer lead is a warmer, better-researched call. Work top-down from #1.
-function getCallList() {
-  const f = state.filters.callList || { cohort: 'ready', hideCalled: false };
+function callCountryOf(l) { return (l.country && l.country.trim()) || 'Unknown'; }
+function getCallListBase(f) {
   const hasPhone = l => (l.phones && l.phones.length > 0) || (l.contacts && l.contacts.some(c => c.phone));
   let leads = state.leads.filter(l => l.status !== 'archive' && hasPhone(l));
   if (f.cohort === 'ready') leads = leads.filter(l => l.status === 'unqualified' || l.status === 'qualified');
@@ -3466,6 +3475,13 @@ function getCallList() {
   else if (f.cohort === 'bank') leads = leads.filter(l => l.status === 'unqualified');
   // 'all' = every non-archived callable lead (includes those already in CRM)
   if (f.hideCalled) leads = leads.filter(l => !(l.crm && l.crm.dateLastContact));
+  return leads;
+}
+function getCallList() {
+  const f = state.filters.callList || { cohort: 'ready', hideCalled: false, countries: [] };
+  let leads = getCallListBase(f);
+  const sel = Array.isArray(f.countries) ? f.countries : [];
+  if (sel.length) leads = leads.filter(l => sel.includes(callCountryOf(l)));
   leads.sort((a, b) => {
     const d = getDataCompleteness(b).score - getDataCompleteness(a).score;
     if (d !== 0) return d;
@@ -3477,10 +3493,24 @@ function getCallList() {
 }
 function renderCallList() {
   const container = document.getElementById('call-list-content');
-  const f = state.filters.callList || (state.filters.callList = { cohort: 'ready', hideCalled: false });
+  const f = state.filters.callList || (state.filters.callList = { cohort: 'ready', hideCalled: false, countries: [] });
+  if (!Array.isArray(f.countries)) f.countries = [];
   const hasPhone = l => (l.phones && l.phones.length > 0) || (l.contacts && l.contacts.some(c => c.phone));
   const leads = getCallList();
   const totalCallable = state.leads.filter(l => l.status !== 'archive' && hasPhone(l)).length;
+
+  // Country chips come from the cohort view BEFORE the country filter, so every country
+  // stays clickable; selected countries absent from the cohort keep a 0-count chip so an
+  // active filter is never invisible.
+  const countryCounts = new Map();
+  getCallListBase(f).forEach(l => { const c = callCountryOf(l); countryCounts.set(c, (countryCounts.get(c) || 0) + 1); });
+  f.countries.forEach(c => { if (!countryCounts.has(c)) countryCounts.set(c, 0); });
+  const chipCountries = [...countryCounts.entries()].sort((a, b) => {
+    if (a[0] === 'Unknown') return 1;
+    if (b[0] === 'Unknown') return -1;
+    return b[1] - a[1] || a[0].localeCompare(b[0]);
+  });
+  const chipAttr = s => escapeHtml(s).replace(/"/g, '&quot;');
 
   let html = `
     <div class="section-header">
@@ -3496,6 +3526,11 @@ function renderCallList() {
       </select>
       <label class="consultant-view-toggle"><input type="checkbox" data-filter="cl-hidecalled" ${f.hideCalled?'checked':''}> Hide already-contacted</label>
       <span class="count-label">${leads.length} in queue · ${totalCallable} callable total</span>
+      ${chipCountries.length > 1 ? `
+      <div class="cl-countries" role="group" aria-label="Filter by country">
+        <button type="button" class="country-chip${f.countries.length === 0 ? ' active' : ''}" data-action="cl-country-all" aria-pressed="${f.countries.length === 0}">All countries</button>
+        ${chipCountries.map(([name, n]) => `<button type="button" class="country-chip${f.countries.includes(name) ? ' active' : ''}" data-action="cl-country" data-country="${chipAttr(name)}" aria-pressed="${f.countries.includes(name)}">${escapeHtml(name)} <span class="chip-count">${n}</span></button>`).join('')}
+      </div>` : ''}
     </div>
   `;
 
@@ -3507,7 +3542,7 @@ function renderCallList() {
           <path d="M48 46c0 14 12 26 26 26" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
         </svg>
         <h3>No callable leads here</h3>
-        <p>No leads with a phone number match this view. Try a different cohort, uncheck "Hide already-contacted", or add phone numbers in the Lead Bank.</p>
+        <p>No leads with a phone number match this view. ${f.countries.length ? 'Click "All countries" to clear the country filter, or try' : 'Try'} a different cohort, uncheck "Hide already-contacted", or add phone numbers in the Lead Bank.</p>
       </div>
     `;
   } else {
@@ -4946,6 +4981,18 @@ document.getElementById('section-call-list').addEventListener('click', e => {
   else if (action === 'view-lead') openPanel('view-lead', getLeadById(id));
   else if (action === 'generate-email') { const lead = getLeadById(id); if (lead) openModal('email', lead); }
   else if (action === 'whatsapp-lead') { const lead = getLeadById(id); const link = lead && waLink(lead); if (link) { window.open(link, '_blank'); logWhatsApp(lead.id); showToast('WhatsApp opened for ' + lead.businessName, 'success'); } }
+  else if (action === 'cl-country') {
+    const f = state.filters.callList;
+    if (!Array.isArray(f.countries)) f.countries = [];
+    const c = target.dataset.country;
+    const i = f.countries.indexOf(c);
+    if (i === -1) f.countries.push(c); else f.countries.splice(i, 1);
+    saveState(); renderCallList();
+  }
+  else if (action === 'cl-country-all') {
+    state.filters.callList.countries = [];
+    saveState(); renderCallList();
+  }
 });
 document.getElementById('section-call-list').addEventListener('change', e => {
   const action = e.target.dataset.action;

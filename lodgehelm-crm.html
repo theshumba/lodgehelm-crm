@@ -311,7 +311,8 @@ ul, ol { list-style: none; }
 .email-modal-section h4 { font-size: var(--text-xs); font-weight: 600; margin-bottom: var(--space-2); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .email-subject-field { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
 .email-subject-field input { flex: 1; font-size: var(--text-sm); padding: var(--space-2) var(--space-3); border: 1px solid oklch(from var(--color-text) l c h / 0.15); border-radius: var(--radius-md); background: oklch(from var(--color-text) l c h / 0.03); color: var(--color-text); }
-.email-body-display { font-size: var(--text-sm); line-height: 1.6; white-space: pre-wrap; padding: var(--space-4); border: 1px solid oklch(from var(--color-text) l c h / 0.1); border-radius: var(--radius-md); background: oklch(from var(--color-text) l c h / 0.02); color: var(--color-text); max-height: 300px; overflow-y: auto; }
+.email-body-display { display: block; width: 100%; box-sizing: border-box; font-family: inherit; font-size: var(--text-sm); line-height: 1.6; white-space: pre-wrap; padding: var(--space-4); border: 1px solid oklch(from var(--color-text) l c h / 0.1); border-radius: var(--radius-md); background: oklch(from var(--color-text) l c h / 0.02); color: var(--color-text); min-height: 160px; resize: vertical; overflow-y: auto; }
+.email-body-display:focus { outline: none; border-color: var(--color-primary); }
 .email-copy-actions { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
 .email-divider { border: none; border-top: 1px solid oklch(from var(--color-text) l c h / 0.08); margin: var(--space-6) 0; }
 .linkedin-msg-display { font-size: var(--text-sm); line-height: 1.5; white-space: pre-wrap; padding: var(--space-3); border: 1px solid oklch(from var(--color-text) l c h / 0.1); border-radius: var(--radius-md); background: oklch(from var(--color-text) l c h / 0.02); color: var(--color-text); }
@@ -1576,14 +1577,26 @@ const CALL_OUTCOMES = [
 function callOutcomeLabel(v) { return (CALL_OUTCOMES.find(o => o.value === v) || {}).label || v; }
 
 // ===== WHATSAPP DEEP-LINK + PER-SEGMENT TEMPLATES =====
+// Melusi wants ZERO em/en dashes in any outreach copy. This catch-all converts
+// stray dashes (including any coming from a lead's own angle/funnel-leak text, or
+// from an AI-generated draft) into natural punctuation before anything is shown.
+function stripEmDashes(s) {
+  return String(s == null ? '' : s)
+    .replace(/\s*[—–]\s*/g, ', ')     // spaced em/en dash -> comma
+    .replace(/[—–]/g, ', ')            // any remaining em/en dash -> comma
+    .replace(/ +,/g, ',')              // no space before comma
+    .replace(/,\s*,/g, ', ')           // collapse doubled commas
+    .replace(/,([.!?])/g, '$1')        // comma glued before end punctuation -> just the punctuation
+    .replace(/,\s*$/g, '');            // drop a trailing comma at the very end
+}
 const WA_TEMPLATES = {
-  small_lodge: (l) => `Hi ${l.ownerName || 'there'} — quick one about ${l.businessName}. When you're out with guests, do booking enquiries ever sit a while before someone replies? I built a simple tool that catches them instantly. Mind if I share how it works? — Melusi, LodgeHelm`,
-  large_collection: (l) => `Hi ${l.ownerName || 'there'} — across a collection like ${l.businessName}, even a few-hour delay on enquiries quietly costs bookings at the busiest camps. I run LodgeHelm — happy to show how it keeps response instant across properties. — Melusi`,
-  small_operator: (l) => `Hi ${l.ownerName || 'there'} — in safari the operator who sends the first solid quote usually wins it. LodgeHelm helps ${l.businessName} reply instantly 24/7. Worth a 2-min look? — Melusi`,
-  large_operator: (l) => `Hi ${l.ownerName || 'there'} — at ${l.businessName}'s enquiry volume, nights/weekends/time-zones are where bookings leak. LodgeHelm covers those automatically. Could I send a short demo? — Melusi`,
-  phone_only: (l) => `Hi ${l.ownerName || 'there'} — bet a few enquiries slip past when you're on a game drive. There's a simple fix — mind if I show you? — Melusi, LodgeHelm`,
+  small_lodge: (l) => `Hi ${l.ownerName || 'there'}, quick one about ${l.businessName}. When you're out with guests, do booking enquiries ever sit a while before someone replies? I built a simple tool that catches them instantly. Mind if I share how it works?\n\nMelusi, LodgeHelm`,
+  large_collection: (l) => `Hi ${l.ownerName || 'there'}, across a collection like ${l.businessName}, even a few-hour delay on enquiries quietly costs bookings at the busiest camps. I run LodgeHelm and I'm happy to show how it keeps response instant across properties.\n\nMelusi`,
+  small_operator: (l) => `Hi ${l.ownerName || 'there'}, in safari the operator who sends the first solid quote usually wins it. LodgeHelm helps ${l.businessName} reply instantly 24/7. Worth a 2-min look?\n\nMelusi`,
+  large_operator: (l) => `Hi ${l.ownerName || 'there'}, at ${l.businessName}'s enquiry volume, nights, weekends and time-zones are where bookings leak. LodgeHelm covers those automatically. Could I send a short demo?\n\nMelusi`,
+  phone_only: (l) => `Hi ${l.ownerName || 'there'}, bet a few enquiries slip past when you're on a game drive. There's a simple fix. Mind if I show you?\n\nMelusi, LodgeHelm`,
 };
-function waMessageFor(l) { return (WA_TEMPLATES[l.segment] || WA_TEMPLATES.small_lodge)(l); }
+function waMessageFor(l) { return stripEmDashes((WA_TEMPLATES[l.segment] || WA_TEMPLATES.small_lodge)(l)); }
 function waLink(l) {
   const num = (l.whatsapp || (l.phones && l.phones[0] && l.phones[0].number) || '').replace(/[^0-9]/g, '');
   return num ? `https://wa.me/${num}?text=${encodeURIComponent(waMessageFor(l))}` : '';
@@ -3980,9 +3993,9 @@ function generateEmail(lead) {
 
   // Why-it-matters line, tailored to segment.
   const valueProp = {
-    small_lodge: 'When you\'re out with guests, booking enquiries can sit for hours before anyone replies — and that\'s often where a booking quietly slips away.',
+    small_lodge: 'When you\'re out with guests, booking enquiries can sit for hours before anyone replies, and that\'s often where a booking quietly slips away.',
     large_collection: 'Across a collection like ' + biz + ', even a few-hour delay on enquiries quietly costs bookings at your busiest camps.',
-    small_operator: 'In safari, the operator who sends the first solid quote usually wins it — speed of reply matters more than almost anything.',
+    small_operator: 'In safari, the operator who sends the first solid quote usually wins it, so speed of reply matters more than almost anything.',
     large_operator: 'At ' + biz + '\'s enquiry volume, nights, weekends and time-zones are where bookings quietly leak.',
     phone_only: 'A few booking enquiries always slip past when you\'re on a game drive or off-grid.'
   }[seg];
@@ -3993,19 +4006,22 @@ function generateEmail(lead) {
     subject,
     body: 'Hi ' + contactName + ',\n\nI came across ' + biz + ' and wanted to reach out. ' + opener
       + valueProp + '\n\n'
-      + 'I built LodgeHelm to catch every booking enquiry and reply instantly, 24/7 — so fewer slip away and more turn into confirmed bookings.\n\n'
+      + 'I built LodgeHelm to catch every booking enquiry and reply instantly, 24/7, so fewer slip away and more turn into confirmed bookings.\n\n'
       + 'Happy to show you a 2-minute example using your own enquiry flow. Worth a look?\n\nRegards,\n' + sign
   };
 
   const followUp = {
     subject: 'Re: ' + subject,
     body: 'Hi ' + contactName + ',\n\nJust following up on my note about ' + biz + '.\n\n'
-      + 'If catching booking enquiries faster is useful, I can send a short demo — no obligation. No worries at all if the timing isn\'t right.\n\nRegards,\n' + sign
+      + 'If catching booking enquiries faster is useful, I can send a short demo, no obligation. No worries at all if the timing isn\'t right.\n\nRegards,\n' + sign
   };
 
   const linkedin = 'Hi ' + contactName + ', I came across ' + biz + '. I help safari lodges and operators catch booking enquiries instantly so fewer slip away on evenings and weekends. Open to a quick look?';
 
-  return { email, followUp, linkedin };
+  // Final safety net: scrub any em/en dashes that arrived via the injected angle line.
+  email.subject = stripEmDashes(email.subject); email.body = stripEmDashes(email.body);
+  followUp.subject = stripEmDashes(followUp.subject); followUp.body = stripEmDashes(followUp.body);
+  return { email, followUp, linkedin: stripEmDashes(linkedin) };
 }
 
 // Generate a bespoke outreach email for ONE lead via Gemini (reuses the chatbot's key).
@@ -4023,6 +4039,7 @@ LodgeHelm is software that catches every booking enquiry and replies instantly, 
 Rules:
 - Under 140 words. Plain English. No buzzwords, no hype, no exclamation marks.
 - Never use the word "free".
+- Never use em dashes or en dashes (the "—" or "–" characters). Use commas or full stops instead.
 - Open with something specific to THIS business (use its outreach angle / funnel leak if given) rather than a generic compliment.
 - Exactly one soft call to action: offer a 2-minute example using their own enquiry flow.
 - Sign exactly: Melusi\nLodgeHelm
@@ -4059,7 +4076,7 @@ function renderEmailModal(lead) {
     <div class="modal-header">
       <div>
         <h2 id="modal-title">Outreach Email for ${escapeHtml(lead.businessName)}</h2>
-        <span class="badge ${getAngleLine(lead) ? 'badge-success' : 'badge-neutral'}" style="margin-top:4px;">${getAngleLine(lead) ? 'Personalised with your angle' : 'Generic — no angle on file'} · ${escapeHtml((lead.segment || 'small_lodge').replace(/_/g,' '))}</span>
+        <span class="badge ${getAngleLine(lead) ? 'badge-success' : 'badge-neutral'}" style="margin-top:4px;">${getAngleLine(lead) ? 'Personalised with your angle' : 'Generic, no angle on file'} · ${escapeHtml((lead.segment || 'small_lodge').replace(/_/g,' '))}</span>
       </div>
       <button class="panel-close" data-action="close-modal" aria-label="Close modal"><i data-lucide="x" aria-hidden="true"></i></button>
     </div>
@@ -4068,9 +4085,9 @@ function renderEmailModal(lead) {
         <h3>Initial Outreach</h3>
         <div class="email-subject-field">
           <label style="font-size:var(--text-xs);font-weight:600;white-space:nowrap;">Subject:</label>
-          <input type="text" id="email-subject" value="${escapeHtml(email.subject)}" readonly>
+          <input type="text" id="email-subject" value="${escapeHtml(email.subject)}">
         </div>
-        <div class="email-body-display" id="email-body">${escapeHtml(email.body)}</div>
+        <textarea class="email-body-display" id="email-body" rows="12" spellcheck="true">${escapeHtml(email.body)}</textarea>
         <div class="email-copy-actions">
           <button class="btn btn-sm" style="background:#1a73e8;color:white" data-action="send-gmail" data-id="${lead.id}"><i data-lucide="send" aria-hidden="true"></i> Send in Gmail</button>
           <button class="btn btn-primary btn-sm" data-action="copy-email"><i data-lucide="copy" aria-hidden="true"></i> Copy Email</button>
@@ -4085,9 +4102,9 @@ function renderEmailModal(lead) {
         <h3>Follow-up (2 days later)</h3>
         <div class="email-subject-field">
           <label style="font-size:var(--text-xs);font-weight:600;white-space:nowrap;">Subject:</label>
-          <input type="text" id="followup-subject" value="${escapeHtml(followUp.subject)}" readonly>
+          <input type="text" id="followup-subject" value="${escapeHtml(followUp.subject)}">
         </div>
-        <div class="email-body-display" id="followup-body">${escapeHtml(followUp.body)}</div>
+        <textarea class="email-body-display" id="followup-body" rows="10" spellcheck="true">${escapeHtml(followUp.body)}</textarea>
         <div class="email-copy-actions">
           <button class="btn btn-sm" style="background:#1a73e8;color:white" data-action="send-gmail-followup" data-id="${lead.id}"><i data-lucide="send" aria-hidden="true"></i> Send in Gmail</button>
           <button class="btn btn-primary btn-sm" data-action="copy-followup"><i data-lucide="copy" aria-hidden="true"></i> Copy Follow-up</button>
@@ -5379,15 +5396,15 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
     if (!lead || !bodyEl) return;
     const orig = target.innerHTML;
     target.disabled = true; target.textContent = 'Writing…';
-    bodyEl.textContent = 'Generating a tailored draft…';
+    bodyEl.value = 'Generating a tailored draft…';
     generateAIDraft(lead).then(text => {
       target.disabled = false; target.innerHTML = orig;
       try { lucide.createIcons({ nodes: [target] }); } catch (_) {}
-      if (!text) { bodyEl.textContent = generateEmail(lead).email.body; return; }
+      if (!text) { bodyEl.value = generateEmail(lead).email.body; return; }
       const m = text.match(/^\s*Subject:\s*(.+?)\n([\s\S]*)$/i);
-      if (m) { if (subjEl) subjEl.value = m[1].trim(); bodyEl.textContent = m[2].trim(); }
-      else { bodyEl.textContent = text; }
-      showToast('AI draft ready — review before sending', 'success');
+      if (m) { if (subjEl) subjEl.value = stripEmDashes(m[1].trim()); bodyEl.value = stripEmDashes(m[2].trim()); }
+      else { bodyEl.value = stripEmDashes(text); }
+      showToast('AI draft ready, review before sending', 'success');
     });
   }
   else if (action === 'send-gmail' || action === 'send-gmail-followup') {
@@ -5397,19 +5414,19 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
     const subjEl = document.getElementById(isFollowup ? 'followup-subject' : 'email-subject');
     const bodyEl = document.getElementById(isFollowup ? 'followup-body' : 'email-body');
     const to = leadEmailAddr(lead);
-    window.open(gmailComposeUrl(to, subjEl ? subjEl.value : '', bodyEl ? bodyEl.textContent : ''), '_blank');
+    window.open(gmailComposeUrl(to, subjEl ? subjEl.value : '', bodyEl ? bodyEl.value : ''), '_blank');
     logEmailSend(lead.id, isFollowup ? 'follow-up' : 'initial outreach');
     showToast(to ? 'Gmail opened for ' + lead.businessName : 'No email on file — add the recipient in Gmail', to ? 'success' : 'info');
   }
   else if (action === 'copy-email') {
     const body = document.getElementById('email-body');
-    if (body) { navigator.clipboard.writeText(body.textContent); showToast('Email copied', 'success'); }
+    if (body) { navigator.clipboard.writeText(body.value); showToast('Email copied', 'success'); }
   } else if (action === 'copy-subject') {
     const subj = document.getElementById('email-subject');
     if (subj) { navigator.clipboard.writeText(subj.value); showToast('Subject copied', 'success'); }
   } else if (action === 'copy-followup') {
     const body = document.getElementById('followup-body');
-    if (body) { navigator.clipboard.writeText(body.textContent); showToast('Follow-up copied', 'success'); }
+    if (body) { navigator.clipboard.writeText(body.value); showToast('Follow-up copied', 'success'); }
   } else if (action === 'copy-followup-subject') {
     const subj = document.getElementById('followup-subject');
     if (subj) { navigator.clipboard.writeText(subj.value); showToast('Subject copied', 'success'); }

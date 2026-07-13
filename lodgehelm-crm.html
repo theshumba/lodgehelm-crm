@@ -6940,6 +6940,16 @@ document.getElementById('chat-test-key').addEventListener('click', testGeminiCon
 
 // ========== INIT ==========
 function init() {
+  // One-click AI-key setup: open the app with #key=YOUR_KEY and it stores the key on this
+  // device, then scrubs it from the URL. Saves pasting into a prompt.
+  try {
+    const km = (location.hash || '').match(/[#&]key=([^&]+)/);
+    if (km && km[1]) {
+      localStorage.setItem('lodgehelm-gemini-key', decodeURIComponent(km[1]).trim());
+      history.replaceState(null, '', location.pathname + location.search);
+      if (typeof showToast === 'function') showToast('AI key saved on this device', 'success');
+    }
+  } catch (_) {}
   // Single-user mode: always log in as Master — skip the login picker entirely.
   if (!isLoggedIn()) {
     setCurrentUser('Master');

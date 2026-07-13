@@ -4246,6 +4246,11 @@ function renderEmailModal(lead) {
       <button class="panel-close" data-action="close-modal" aria-label="Close modal"><i data-lucide="x" aria-hidden="true"></i></button>
     </div>
     <div class="modal-body">
+      ${hasSubstantialNotes(lead) && !(typeof getApiKey === 'function' && getApiKey()) ? `
+      <div class="ai-notes-banner" style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-3);justify-content:space-between;padding:var(--space-3) var(--space-4);margin-bottom:var(--space-4);border:1px solid var(--color-primary);border-radius:var(--radius-md);background:oklch(from var(--color-primary) l c h / 0.08);">
+        <span style="font-size:var(--text-sm);flex:1;min-width:200px;">This lead has notes worth drafting from. Add your free Google AI key once and this email will be written from them.</span>
+        <button class="btn btn-primary btn-sm" data-action="add-ai-key" data-id="${lead.id}"><i data-lucide="sparkles" aria-hidden="true"></i> Add AI key &amp; draft</button>
+      </div>` : ''}
       <div class="email-modal-section">
         <h3>Initial Outreach</h3>
         <div class="email-subject-field">
@@ -5561,6 +5566,16 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
   else if (action === 'ai-draft') {
     const lead = getLeadById(target.dataset.id);
     if (lead) fillDraftWithAI(lead, { auto: false });
+  }
+  else if (action === 'add-ai-key') {
+    const lead = getLeadById(id);
+    if (!lead) return;
+    const k = window.prompt('Paste your Google AI (Gemini) API key to draft emails from your notes.\n\nGet one free (no billing) at: aistudio.google.com/apikey');
+    if (!k || !k.trim()) { showToast('No key entered', 'info'); return; }
+    setApiKey(k.trim());
+    const banner = document.querySelector('#modal-content .ai-notes-banner');
+    if (banner) banner.remove();
+    fillDraftWithAI(lead, { auto: true });
   }
   else if (action === 'standard-draft') {
     const lead = getLeadById(target.dataset.id);

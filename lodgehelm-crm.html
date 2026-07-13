@@ -4176,12 +4176,12 @@ Subject: <subject line>
     callNotes: noteText || null
   };
   try {
-    const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey), {
+    const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: 'Write the outreach email for this lead:\n' + JSON.stringify(profile, null, 2) }] }],
         systemInstruction: { parts: [{ text: sys }] },
-        generationConfig: { temperature: 0.8, maxOutputTokens: 512 }
+        generationConfig: { temperature: 0.8, maxOutputTokens: 1024, thinkingConfig: { thinkingBudget: 0 } }
       })
     });
     if (!resp.ok) { const e = await resp.json().catch(() => ({})); showToast('AI error: ' + (e.error?.message || resp.status), 'error'); return null; }
@@ -6825,13 +6825,13 @@ async function sendChatMessage(text) {
   }
 
   try {
-    const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey), {
+    const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents,
         systemInstruction: { parts: [{ text: systemMsg }] },
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1024, thinkingConfig: { thinkingBudget: 0 } }
       })
     });
     typing.remove();
@@ -6872,12 +6872,12 @@ async function testGeminiConnection() {
   resultEl.textContent = 'Testing...';
   resultEl.style.color = 'var(--color-text-muted)';
   try {
-    const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey), {
+    const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: 'Reply with the single word: ok' }] }],
-        generationConfig: { temperature: 0, maxOutputTokens: 10 }
+        generationConfig: { temperature: 0, maxOutputTokens: 10, thinkingConfig: { thinkingBudget: 0 } }
       })
     });
     if (!resp.ok) {

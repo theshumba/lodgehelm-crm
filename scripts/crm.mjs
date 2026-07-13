@@ -81,15 +81,26 @@ const OUTCOME_ALIASES = {
   'wrong-number': 'wrong_number', wrong_number: 'wrong_number',
 };
 
-// WhatsApp per-segment templates — verbatim from WA_TEMPLATES in lodgehelm-crm.html.
+// Melusi wants ZERO em/en dashes in any outreach copy. Convert stray dashes
+// (from templates or a lead's own angle/funnel-leak text) into natural punctuation.
+function stripEmDashes(s) {
+  return String(s == null ? '' : s)
+    .replace(/\s*[—–]\s*/g, ', ')
+    .replace(/[—–]/g, ', ')
+    .replace(/ +,/g, ',')
+    .replace(/,\s*,/g, ', ')
+    .replace(/,([.!?])/g, '$1')
+    .replace(/,\s*$/g, '');
+}
+// WhatsApp per-segment templates — mirror WA_TEMPLATES in lodgehelm-crm.html (dash-free).
 const WA_TEMPLATES = {
-  small_lodge: (l) => `Hi ${l.ownerName || 'there'} — quick one about ${l.businessName}. When you're out with guests, do booking enquiries ever sit a while before someone replies? I built a simple tool that catches them instantly. Mind if I share how it works? — Melusi, LodgeHelm`,
-  large_collection: (l) => `Hi ${l.ownerName || 'there'} — across a collection like ${l.businessName}, even a few-hour delay on enquiries quietly costs bookings at the busiest camps. I run LodgeHelm — happy to show how it keeps response instant across properties. — Melusi`,
-  small_operator: (l) => `Hi ${l.ownerName || 'there'} — in safari the operator who sends the first solid quote usually wins it. LodgeHelm helps ${l.businessName} reply instantly 24/7. Worth a 2-min look? — Melusi`,
-  large_operator: (l) => `Hi ${l.ownerName || 'there'} — at ${l.businessName}'s enquiry volume, nights/weekends/time-zones are where bookings leak. LodgeHelm covers those automatically. Could I send a short demo? — Melusi`,
-  phone_only: (l) => `Hi ${l.ownerName || 'there'} — bet a few enquiries slip past when you're on a game drive. There's a simple fix — mind if I show you? — Melusi, LodgeHelm`,
+  small_lodge: (l) => `Hi ${l.ownerName || 'there'}, quick one about ${l.businessName}. When you're out with guests, do booking enquiries ever sit a while before someone replies? I built a simple tool that catches them instantly. Mind if I share how it works?\n\nMelusi, LodgeHelm`,
+  large_collection: (l) => `Hi ${l.ownerName || 'there'}, across a collection like ${l.businessName}, even a few-hour delay on enquiries quietly costs bookings at the busiest camps. I run LodgeHelm and I'm happy to show how it keeps response instant across properties.\n\nMelusi`,
+  small_operator: (l) => `Hi ${l.ownerName || 'there'}, in safari the operator who sends the first solid quote usually wins it. LodgeHelm helps ${l.businessName} reply instantly 24/7. Worth a 2-min look?\n\nMelusi`,
+  large_operator: (l) => `Hi ${l.ownerName || 'there'}, at ${l.businessName}'s enquiry volume, nights, weekends and time-zones are where bookings leak. LodgeHelm covers those automatically. Could I send a short demo?\n\nMelusi`,
+  phone_only: (l) => `Hi ${l.ownerName || 'there'}, bet a few enquiries slip past when you're on a game drive. There's a simple fix. Mind if I show you?\n\nMelusi, LodgeHelm`,
 };
-const waMessageFor = (l) => (WA_TEMPLATES[l.segment] || WA_TEMPLATES.small_lodge)(l);
+const waMessageFor = (l) => stripEmDashes((WA_TEMPLATES[l.segment] || WA_TEMPLATES.small_lodge)(l));
 const waLink = (l) => {
   const num = (l.whatsapp || (l.phones && l.phones[0] && l.phones[0].number) || '').replace(/[^0-9]/g, '');
   return num ? `https://wa.me/${num}?text=${encodeURIComponent(waMessageFor(l))}` : '';
@@ -472,21 +483,21 @@ async function cmdDraft() {
     || (l.contacts && l.contacts[0] && l.contacts[0].name && l.contacts[0].name.split(' ')[0]) || 'there';
   const biz = l.businessName;
   const valueProp = {
-    small_lodge: "When you're out with guests, booking enquiries can sit for hours before anyone replies — and that's often where a booking quietly slips away.",
+    small_lodge: "When you're out with guests, booking enquiries can sit for hours before anyone replies, and that's often where a booking quietly slips away.",
     large_collection: 'Across a collection like ' + biz + ', even a few-hour delay on enquiries quietly costs bookings at your busiest camps.',
-    small_operator: 'In safari, the operator who sends the first solid quote usually wins it — speed of reply matters more than almost anything.',
+    small_operator: 'In safari, the operator who sends the first solid quote usually wins it, so speed of reply matters more than almost anything.',
     large_operator: 'At ' + biz + "'s enquiry volume, nights, weekends and time-zones are where bookings quietly leak.",
     phone_only: 'A few booking enquiries always slip past when you\'re on a game drive or off-grid.',
   }[seg];
   const opener = angleLine(l) ? angleLine(l) + '\n\n' : '';
   const sign = 'Melusi\nLodgeHelm\nlodgehelm.app';
-  console.log(`\nEmail draft for ${biz} (${seg})${angleLine(l) ? ' — personalised with angle' : ' — generic (no angle on file)'}`);
+  console.log(`\nEmail draft for ${biz} (${seg})${angleLine(l) ? ' (personalised with angle)' : ' (generic, no angle on file)'}`);
   console.log(`To: ${bestEmail(l) || '(no email on file)'}`);
   console.log(`\nSubject: Quick one about ${biz}\n`);
-  console.log(`Hi ${contactName},\n\nI came across ${biz} and wanted to reach out. ${opener}${valueProp}\n\nI built LodgeHelm to catch every booking enquiry and reply instantly, 24/7 — so fewer slip away and more turn into confirmed bookings.\n\nHappy to show you a 2-minute example using your own enquiry flow. Worth a look?\n\nRegards,\n${sign}`);
+  console.log(stripEmDashes(`Hi ${contactName},\n\nI came across ${biz} and wanted to reach out. ${opener}${valueProp}\n\nI built LodgeHelm to catch every booking enquiry and reply instantly, 24/7, so fewer slip away and more turn into confirmed bookings.\n\nHappy to show you a 2-minute example using your own enquiry flow. Worth a look?\n\nRegards,\n${sign}`));
   console.log(`\n--- Follow-up (if no reply) ---\n`);
   console.log(`Subject: Re: Quick one about ${biz}\n`);
-  console.log(`Hi ${contactName},\n\nJust following up on my note about ${biz}.\n\nIf catching booking enquiries faster is useful, I can send a short demo — no obligation. No worries at all if the timing isn't right.\n\nRegards,\n${sign}`);
+  console.log(stripEmDashes(`Hi ${contactName},\n\nJust following up on my note about ${biz}.\n\nIf catching booking enquiries faster is useful, I can send a short demo, no obligation. No worries at all if the timing isn't right.\n\nRegards,\n${sign}`));
 }
 
 // ---------- dispatch ----------

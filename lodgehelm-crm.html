@@ -4116,7 +4116,7 @@ function generateEmail(lead) {
   const biz = lead.businessName;
   const angle = getAngleLine(lead);
   const seg = getEmailTemplate(lead);
-  const sign = 'Melusi\nLodgeHelm';
+  const sign = 'Melusi\nLodgeHelm\nlodgehelm.com\nBook a call: calendly.com/ndoromelusi/30min';
 
   // Why-it-matters line, tailored to segment.
   const valueProp = {
@@ -4170,7 +4170,7 @@ Rules:
 - CALL NOTES ARE THE MOST IMPORTANT INPUT. If notes are provided, base the email on them: reflect what was actually discussed, the contact's situation, needs, objections and any agreed next step, and continue that conversation naturally (do not sound like a first cold email if you have clearly already spoken to them). If the notes are empty or hold nothing useful for an email, write a standard concise first-touch outreach instead.
 - Otherwise open with something specific to THIS business (use its outreach angle / funnel leak if given) rather than a generic compliment.
 - Exactly one soft call to action: offer a 2-minute example using their own enquiry flow.
-- Sign exactly: Melusi\nLodgeHelm
+- End with exactly this sign-off on its own lines, and do not alter the links: Melusi\nLodgeHelm\nlodgehelm.com\nBook a call: calendly.com/ndoromelusi/30min
 Return EXACTLY in this format and nothing else:
 Subject: <subject line>
 
@@ -6353,7 +6353,7 @@ function showSignaturesModal() {
     </div>
   `;
   sorted.forEach(name => {
-    const sig = 'Melusi\nLodgeHelm';
+    const sig = 'Melusi\nLodgeHelm\nlodgehelm.com\nBook a call: calendly.com/ndoromelusi/30min';
     const isMe = name === current;
     html += `
       <div class="sig-card ${isMe ? 'sig-highlight' : ''}">

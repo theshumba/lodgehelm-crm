@@ -498,7 +498,7 @@ async function cmdDraft() {
     phone_only: 'A few booking enquiries always slip past when you\'re on a game drive or off-grid.',
   }[seg];
   const opener = angleLine(l) ? angleLine(l) + '\n\n' : '';
-  const sign = 'Melusi\nLodgeHelm';
+  const sign = 'Melusi\nLodgeHelm\nlodgehelm.com\nBook a call: calendly.com/ndoromelusi/30min';
   console.log(`\nEmail draft for ${biz} (${seg})${angleLine(l) ? ' (personalised with angle)' : ' (generic, no angle on file)'}`);
   console.log(`To: ${bestEmail(l) || '(no email on file)'}`);
   console.log(`\nSubject: Quick one about ${biz}\n`);

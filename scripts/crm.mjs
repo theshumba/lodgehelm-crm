@@ -354,8 +354,8 @@ async function cmdCall() {
     l.crm.disposition = 'not_interested';
     summary.push(`disposition -> not_interested`);
   }
-  // A no-answer call routes the lead into the Archive > No Answer backlog (out of active lists).
-  if (outcome === 'no_answer') {
+  // A no-answer or voicemail call routes the lead into the Archive > No Answer backlog (out of active lists).
+  if (outcome === 'no_answer' || outcome === 'voicemail') {
     l.status = 'archive';
     l.crm.disposition = 'no_answer';
     addActivity(l, 'moved to No Answer');

@@ -1751,8 +1751,8 @@ function logCall(id, outcome) {
   if (!lead.crm.dateFirstContact) lead.crm.dateFirstContact = todayISO;
   tagWorker(lead);
   addActivity(lead, 'logged call (' + callOutcomeLabel(outcome) + ')');
-  // A no-answer call routes the lead into the Archive > No Answer backlog (out of active lists).
-  if (outcome === 'no_answer') {
+  // A no-answer or voicemail call routes the lead into the Archive > No Answer backlog (out of active lists).
+  if (outcome === 'no_answer' || outcome === 'voicemail') {
     lead.status = 'archive';
     lead.crm.disposition = 'no_answer';
     addActivity(lead, 'moved to No Answer');
@@ -2912,6 +2912,10 @@ function openModal(type, data) {
     content.innerHTML = renderQualificationModal(data);
   } else if (type === 'email') {
     content.innerHTML = renderEmailModal(data);
+    // If the lead's notes carry real context and an AI key is set, draft from the notes automatically.
+    if (willDraftFromNotes(data)) {
+      fillDraftWithAI(data, { auto: true });
+    }
   }
   overlay.classList.add('active');
   overlay.setAttribute('aria-hidden', 'false');
@@ -4154,17 +4158,22 @@ Rules:
 - Under 140 words. Plain English. No buzzwords, no hype, no exclamation marks.
 - Never use the word "free".
 - Never use em dashes or en dashes (the "—" or "–" characters). Use commas or full stops instead.
-- Open with something specific to THIS business (use its outreach angle / funnel leak if given) rather than a generic compliment.
+- CALL NOTES ARE THE MOST IMPORTANT INPUT. If notes are provided, base the email on them: reflect what was actually discussed, the contact's situation, needs, objections and any agreed next step, and continue that conversation naturally (do not sound like a first cold email if you have clearly already spoken to them). If the notes are empty or hold nothing useful for an email, write a standard concise first-touch outreach instead.
+- Otherwise open with something specific to THIS business (use its outreach angle / funnel leak if given) rather than a generic compliment.
 - Exactly one soft call to action: offer a 2-minute example using their own enquiry flow.
 - Sign exactly: Melusi\nLodgeHelm
 Return EXACTLY in this format and nothing else:
 Subject: <subject line>
 
 <email body>`;
+  const noteText = (lead.crm && Array.isArray(lead.crm.notes))
+    ? lead.crm.notes.map(n => (n && n.text) ? String(n.text) : '').filter(Boolean).join(' | ')
+    : '';
   const profile = {
     business: lead.businessName, segment: lead.segment, country: lead.country,
     website: lead.website, owner: lead.ownerName || null, description: lead.description || null,
-    outreachAngle: lead.outreachAngle || null, funnelLeak: lead.funnelLeak || null
+    outreachAngle: lead.outreachAngle || null, funnelLeak: lead.funnelLeak || null,
+    callNotes: noteText || null
   };
   try {
     const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey), {
@@ -4184,13 +4193,55 @@ Subject: <subject line>
   }
 }
 
+// "Enough to write from" = the lead's notes carry real context, not a one-word scribble.
+function hasSubstantialNotes(lead) {
+  const notes = (lead && lead.crm && Array.isArray(lead.crm.notes)) ? lead.crm.notes : [];
+  const combined = notes.map(n => (n && n.text) ? String(n.text) : '').join(' ').trim();
+  return combined.length >= 40;
+}
+// The email modal auto-drafts from notes only when there's real context AND an AI key is set.
+function willDraftFromNotes(lead) {
+  return hasSubstantialNotes(lead) && typeof getApiKey === 'function' && !!getApiKey();
+}
+
+// Fill the open email modal with an AI draft. opts.auto = triggered on open from the
+// lead's notes (silent fallback to the template on any failure); manual = user clicked "Write with AI".
+async function fillDraftWithAI(lead, opts) {
+  opts = opts || {};
+  const bodyEl = document.getElementById('email-body');
+  const subjEl = document.getElementById('email-subject');
+  if (!lead || !bodyEl) return;
+  const btn = document.querySelector('#modal-content [data-action="ai-draft"]');
+  const orig = btn ? btn.innerHTML : '';
+  const prevBody = bodyEl.value, prevSubj = subjEl ? subjEl.value : '';
+  if (btn) { btn.disabled = true; btn.textContent = opts.auto ? 'Reading your notes…' : 'Writing…'; }
+  bodyEl.value = opts.auto ? 'Drafting from your notes…' : 'Generating a tailored draft…';
+  try {
+    const text = await generateAIDraft(lead);
+    if (!text) {
+      // No key / error: manual falls back to the standard template; auto restores what was there.
+      bodyEl.value = opts.auto ? prevBody : generateEmail(lead).email.body;
+      if (opts.auto && subjEl) subjEl.value = prevSubj;
+      return;
+    }
+    const m = text.match(/^\s*Subject:\s*(.+?)\n([\s\S]*)$/i);
+    if (m) { if (subjEl) subjEl.value = stripEmDashes(m[1].trim()); bodyEl.value = stripEmDashes(m[2].trim()); }
+    else { bodyEl.value = stripEmDashes(text); }
+    const badge = document.getElementById('email-source-badge');
+    if (badge && opts.auto) { badge.textContent = 'Drafted from your notes'; badge.className = 'badge badge-purple'; }
+    showToast(opts.auto ? 'Drafted from your notes, review before sending' : 'AI draft ready, review before sending', 'success');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = orig; try { lucide.createIcons({ nodes: [btn] }); } catch (_) {} }
+  }
+}
+
 function renderEmailModal(lead) {
   const { email, followUp, linkedin } = generateEmail(lead);
   return `
     <div class="modal-header">
       <div>
         <h2 id="modal-title">Outreach Email for ${escapeHtml(lead.businessName)}</h2>
-        <span class="badge ${getAngleLine(lead) ? 'badge-success' : 'badge-neutral'}" style="margin-top:4px;">${getAngleLine(lead) ? 'Personalised with your angle' : 'Generic, no angle on file'} · ${escapeHtml((lead.segment || 'small_lodge').replace(/_/g,' '))}</span>
+        <span id="email-source-badge" class="badge ${willDraftFromNotes(lead) ? 'badge-purple' : (getAngleLine(lead) ? 'badge-success' : 'badge-neutral')}" style="margin-top:4px;">${willDraftFromNotes(lead) ? 'Drafting from your notes' : (getAngleLine(lead) ? 'Personalised with your angle' : 'Generic, no angle on file')} · ${escapeHtml((lead.segment || 'small_lodge').replace(/_/g,' '))}</span>
       </div>
       <button class="panel-close" data-action="close-modal" aria-label="Close modal"><i data-lucide="x" aria-hidden="true"></i></button>
     </div>
@@ -4207,6 +4258,7 @@ function renderEmailModal(lead) {
           <button class="btn btn-primary btn-sm" data-action="copy-email"><i data-lucide="copy" aria-hidden="true"></i> Copy Email</button>
           <button class="btn btn-ghost btn-sm" data-action="copy-subject"><i data-lucide="copy" aria-hidden="true"></i> Copy Subject</button>
           <button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="ai-draft" data-id="${lead.id}"><i data-lucide="sparkles" aria-hidden="true"></i> Write with AI</button>
+          <button class="btn btn-ghost btn-sm" data-action="standard-draft" data-id="${lead.id}"><i data-lucide="file-text" aria-hidden="true"></i> Standard</button>
         </div>
       </div>
 
@@ -5508,21 +5560,19 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
   if (action === 'close-modal') closeModal();
   else if (action === 'ai-draft') {
     const lead = getLeadById(target.dataset.id);
+    if (lead) fillDraftWithAI(lead, { auto: false });
+  }
+  else if (action === 'standard-draft') {
+    const lead = getLeadById(target.dataset.id);
+    if (!lead) return;
+    const { email } = generateEmail(lead);
     const bodyEl = document.getElementById('email-body');
     const subjEl = document.getElementById('email-subject');
-    if (!lead || !bodyEl) return;
-    const orig = target.innerHTML;
-    target.disabled = true; target.textContent = 'Writing…';
-    bodyEl.value = 'Generating a tailored draft…';
-    generateAIDraft(lead).then(text => {
-      target.disabled = false; target.innerHTML = orig;
-      try { lucide.createIcons({ nodes: [target] }); } catch (_) {}
-      if (!text) { bodyEl.value = generateEmail(lead).email.body; return; }
-      const m = text.match(/^\s*Subject:\s*(.+?)\n([\s\S]*)$/i);
-      if (m) { if (subjEl) subjEl.value = stripEmDashes(m[1].trim()); bodyEl.value = stripEmDashes(m[2].trim()); }
-      else { bodyEl.value = stripEmDashes(text); }
-      showToast('AI draft ready, review before sending', 'success');
-    });
+    if (bodyEl) bodyEl.value = email.body;
+    if (subjEl) subjEl.value = email.subject;
+    const badge = document.getElementById('email-source-badge');
+    if (badge) { badge.textContent = (getAngleLine(lead) ? 'Personalised with your angle' : 'Generic, no angle on file') + ' · ' + (lead.segment || 'small_lodge').replace(/_/g,' '); badge.className = 'badge ' + (getAngleLine(lead) ? 'badge-success' : 'badge-neutral'); }
+    showToast('Standard template loaded', 'info');
   }
   else if (action === 'send-gmail' || action === 'send-gmail-followup') {
     const lead = getLeadById(id);

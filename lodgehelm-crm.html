@@ -1751,6 +1751,12 @@ function logCall(id, outcome) {
   if (!lead.crm.dateFirstContact) lead.crm.dateFirstContact = todayISO;
   tagWorker(lead);
   addActivity(lead, 'logged call (' + callOutcomeLabel(outcome) + ')');
+  // A no-answer call routes the lead into the Archive > No Answer backlog (out of active lists).
+  if (outcome === 'no_answer') {
+    lead.status = 'archive';
+    lead.crm.disposition = 'no_answer';
+    addActivity(lead, 'moved to No Answer');
+  }
   // Calling is the most important rep action — also release the active-call lock.
   if (typeof releaseLead === 'function') releaseLead(lead);
   saveState();
@@ -2110,6 +2116,7 @@ const DISPOSITIONS = [
   { value: 'nurture', label: 'Nurturing', badge: 'badge-teal' },
   { value: 'revisit', label: 'Revisit Later', badge: 'badge-blue' },
   { value: 'follow_up', label: 'Follow Up Later', badge: 'badge-orange' },
+  { value: 'no_answer', label: 'No Answer', badge: 'badge-purple' },
   { value: 'not_interested', label: 'Not Interested', badge: 'badge-error' },
   { value: 'archived', label: 'Archived', badge: 'badge-neutral' }
 ];
@@ -4403,6 +4410,7 @@ function renderArchive() {
   const archived = state.leads.filter(l => l.status === 'archive');
 
   const followUpLeads = archived.filter(l => l.crm && (l.crm.disposition === 'follow_up' || l.crm.disposition === 'revisit'));
+  const noAnswerLeads = archived.filter(l => l.crm && l.crm.disposition === 'no_answer');
   const notInterestedLeads = archived.filter(l => l.crm && l.crm.disposition === 'not_interested');
   const archivedLeads = archived.filter(l => l.crm && l.crm.disposition === 'archived');
 
@@ -4410,6 +4418,7 @@ function renderArchive() {
 
   let currentLeads;
   if (state.archiveTab === 'follow_up') currentLeads = followUpLeads;
+  else if (state.archiveTab === 'no_answer') currentLeads = noAnswerLeads;
   else if (state.archiveTab === 'not_interested') currentLeads = notInterestedLeads;
   else currentLeads = archivedLeads;
 
@@ -4426,6 +4435,7 @@ function renderArchive() {
   html += `
     <div class="pill-tabs">
       <button class="pill-tab ${state.archiveTab === 'follow_up' ? 'active' : ''}" data-action="archive-tab" data-tab="follow_up">Follow Up Later <span class="tab-badge">${followUpLeads.length}</span></button>
+      <button class="pill-tab ${state.archiveTab === 'no_answer' ? 'active' : ''}" data-action="archive-tab" data-tab="no_answer">No Answer <span class="tab-badge">${noAnswerLeads.length}</span></button>
       <button class="pill-tab ${state.archiveTab === 'not_interested' ? 'active' : ''}" data-action="archive-tab" data-tab="not_interested">Not Interested <span class="tab-badge">${notInterestedLeads.length}</span></button>
       <button class="pill-tab ${state.archiveTab === 'archived' ? 'active' : ''}" data-action="archive-tab" data-tab="archived">Archived <span class="tab-badge">${archivedLeads.length}</span></button>
     </div>
@@ -4439,7 +4449,7 @@ function renderArchive() {
           <rect x="50" y="65" width="20" height="25" stroke="currentColor" stroke-width="2" fill="none"/>
         </svg>
         <h3>Nothing here yet</h3>
-        <p>Leads that are archived, not interested, or set for follow-up will appear here.</p>
+        <p>Leads that are archived, not interested, got no answer, or are set for follow-up will appear here.</p>
       </div>
     `;
   } else {

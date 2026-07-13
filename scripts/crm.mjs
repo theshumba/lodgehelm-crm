@@ -354,6 +354,13 @@ async function cmdCall() {
     l.crm.disposition = 'not_interested';
     summary.push(`disposition -> not_interested`);
   }
+  // A no-answer call routes the lead into the Archive > No Answer backlog (out of active lists).
+  if (outcome === 'no_answer') {
+    l.status = 'archive';
+    l.crm.disposition = 'no_answer';
+    addActivity(l, 'moved to No Answer');
+    summary.push('status -> archive, disposition -> no_answer (No Answer backlog)');
+  }
   if (flags.callback) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(flags.callback)) { console.error('--callback must be YYYY-MM-DD'); process.exit(1); }
     l.crm.followUpDate = flags.callback;

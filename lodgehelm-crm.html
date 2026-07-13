@@ -7,6 +7,8 @@
 <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<!-- Google Identity Services: used to send outreach email straight from Melusi's Gmail (gmail.send). -->
+<script src="https://accounts.google.com/gsi/client" async></script>
 <!-- Leaflet (Map view — lead density planning). Loaded from CDN; degrades gracefully if offline. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -1625,14 +1627,119 @@ function gmailComposeUrl(to, subject, body) {
     + '&su=' + encodeURIComponent(subject || '')
     + '&body=' + encodeURIComponent(body || '');
 }
-function logEmailSend(id, kind) {
+function logEmailSend(id, kind, mode) {
   const lead = getLeadById(id);
   if (!lead) return;
   if (!lead.crm) lead.crm = {};
   lead.crm.dateLastContact = todayISO;
   if (!lead.crm.dateFirstContact) lead.crm.dateFirstContact = todayISO;
-  addActivity(lead, 'Gmail compose opened (' + kind + ')');
+  addActivity(lead, (mode === 'sent' ? 'Gmail email sent (' : 'Gmail compose opened (') + kind + ')');
   saveState();
+}
+
+// ===== GMAIL DIRECT-SEND (client-side, Google Identity Services + Gmail API) =====
+// Sends the outreach email straight from Melusi's Gmail (scope gmail.send) with no
+// compose window. The OAuth Client ID is public-safe (origin-locked in Google Cloud);
+// it lives in localStorage so it can be set without a redeploy, and never needs a secret.
+const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
+let _gmailTokenClient = null, _gmailToken = '', _gmailTokenExp = 0;
+
+function getGmailClientId() {
+  try { return (localStorage.getItem('lh_gmail_client_id') || '').trim(); } catch (_) { return ''; }
+}
+function setGmailClientId(id) { try { localStorage.setItem('lh_gmail_client_id', (id || '').trim()); } catch (_) {} }
+
+// Base64url-encode a Unicode string (RFC 2045 / Gmail "raw" wants base64url, no padding).
+function b64urlUnicode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+// RFC 2047 encode a header value only if it contains non-ASCII (keeps plain subjects readable).
+function encodeMailHeader(s) {
+  s = String(s || '');
+  return /[^\x00-\x7F]/.test(s) ? '=?UTF-8?B?' + btoa(unescape(encodeURIComponent(s))) + '?=' : s;
+}
+function buildRawEmail(to, subject, body) {
+  const lines = [
+    'To: ' + to,
+    'Subject: ' + encodeMailHeader(subject),
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset="UTF-8"',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    String(body || '')
+  ];
+  return b64urlUnicode(lines.join('\r\n'));
+}
+
+// Resolve a valid access token, prompting Google consent only when needed.
+function getGmailToken() {
+  return new Promise((resolve, reject) => {
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+      return reject(new Error('Google sign-in library not loaded yet. Refresh and try again.'));
+    }
+    const clientId = getGmailClientId();
+    if (!clientId) return reject(new Error('NO_CLIENT_ID'));
+    if (_gmailToken && Date.now() < _gmailTokenExp - 60000) return resolve(_gmailToken);
+    if (!_gmailTokenClient || _gmailTokenClient._clientId !== clientId) {
+      _gmailTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId, scope: GMAIL_SCOPE,
+        callback: (resp) => {
+          if (resp && resp.access_token) {
+            _gmailToken = resp.access_token;
+            _gmailTokenExp = Date.now() + ((resp.expires_in || 3600) * 1000);
+            resolve(_gmailToken);
+          } else { reject(new Error((resp && resp.error) || 'Authorisation failed')); }
+        }
+      });
+      _gmailTokenClient._clientId = clientId;
+    } else {
+      _gmailTokenClient.callback = (resp) => {
+        if (resp && resp.access_token) {
+          _gmailToken = resp.access_token;
+          _gmailTokenExp = Date.now() + ((resp.expires_in || 3600) * 1000);
+          resolve(_gmailToken);
+        } else { reject(new Error((resp && resp.error) || 'Authorisation failed')); }
+      };
+    }
+    _gmailTokenClient.error_callback = (err) => reject(new Error((err && err.type) || 'Authorisation cancelled'));
+    _gmailTokenClient.requestAccessToken({ prompt: _gmailToken ? '' : 'consent' });
+  });
+}
+
+// One-click: send the on-screen draft from Melusi's Gmail. Returns true on success.
+async function sendViaGmail(to, subject, body, leadId, kind) {
+  if (!to) { showToast('No email address on file for this lead', 'warning'); return false; }
+  // First-run: capture the Client ID once (public-safe), stored locally.
+  if (!getGmailClientId()) {
+    const entered = window.prompt('One-time setup: paste your Google OAuth Client ID (ends in .apps.googleusercontent.com).\nAsk Claude for the 5-minute Google Cloud steps if you do not have one yet.');
+    if (!entered || !entered.trim()) { showToast('Send cancelled — no Client ID entered', 'info'); return false; }
+    setGmailClientId(entered);
+  }
+  try {
+    const token = await getGmailToken();
+    const raw = buildRawEmail(to, subject, body);
+    const resp = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ raw })
+    });
+    if (!resp.ok) {
+      const e = await resp.json().catch(() => ({}));
+      throw new Error((e.error && e.error.message) || ('Gmail API ' + resp.status));
+    }
+    logEmailSend(leadId, kind, 'sent');
+    showToast('Email sent to ' + to, 'success');
+    return true;
+  } catch (err) {
+    if (err && err.message === 'NO_CLIENT_ID') {
+      showToast('Add your Google Client ID to enable direct send', 'warning');
+    } else {
+      showToast('Could not send: ' + (err && err.message ? err.message : 'unknown error'), 'error');
+    }
+    return false;
+  }
 }
 
 // Logs a call attempt + its disposition as a synced activity entry and stamps last-contact.
@@ -4089,7 +4196,7 @@ function renderEmailModal(lead) {
         </div>
         <textarea class="email-body-display" id="email-body" rows="12" spellcheck="true">${escapeHtml(email.body)}</textarea>
         <div class="email-copy-actions">
-          <button class="btn btn-sm" style="background:#1a73e8;color:white" data-action="send-gmail" data-id="${lead.id}"><i data-lucide="send" aria-hidden="true"></i> Send in Gmail</button>
+          <button class="btn btn-sm" style="background:#1a73e8;color:white" data-action="send-gmail" data-id="${lead.id}"><i data-lucide="send" aria-hidden="true"></i> Send email</button>
           <button class="btn btn-primary btn-sm" data-action="copy-email"><i data-lucide="copy" aria-hidden="true"></i> Copy Email</button>
           <button class="btn btn-ghost btn-sm" data-action="copy-subject"><i data-lucide="copy" aria-hidden="true"></i> Copy Subject</button>
           <button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="ai-draft" data-id="${lead.id}"><i data-lucide="sparkles" aria-hidden="true"></i> Write with AI</button>
@@ -4106,7 +4213,7 @@ function renderEmailModal(lead) {
         </div>
         <textarea class="email-body-display" id="followup-body" rows="10" spellcheck="true">${escapeHtml(followUp.body)}</textarea>
         <div class="email-copy-actions">
-          <button class="btn btn-sm" style="background:#1a73e8;color:white" data-action="send-gmail-followup" data-id="${lead.id}"><i data-lucide="send" aria-hidden="true"></i> Send in Gmail</button>
+          <button class="btn btn-sm" style="background:#1a73e8;color:white" data-action="send-gmail-followup" data-id="${lead.id}"><i data-lucide="send" aria-hidden="true"></i> Send email</button>
           <button class="btn btn-primary btn-sm" data-action="copy-followup"><i data-lucide="copy" aria-hidden="true"></i> Copy Follow-up</button>
           <button class="btn btn-ghost btn-sm" data-action="copy-followup-subject"><i data-lucide="copy" aria-hidden="true"></i> Copy Subject</button>
         </div>
@@ -5414,9 +5521,17 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
     const subjEl = document.getElementById(isFollowup ? 'followup-subject' : 'email-subject');
     const bodyEl = document.getElementById(isFollowup ? 'followup-body' : 'email-body');
     const to = leadEmailAddr(lead);
-    window.open(gmailComposeUrl(to, subjEl ? subjEl.value : '', bodyEl ? bodyEl.value : ''), '_blank');
-    logEmailSend(lead.id, isFollowup ? 'follow-up' : 'initial outreach');
-    showToast(to ? 'Gmail opened for ' + lead.businessName : 'No email on file — add the recipient in Gmail', to ? 'success' : 'info');
+    const kind = isFollowup ? 'follow-up' : 'initial outreach';
+    if (target.dataset.busy) return;
+    target.dataset.busy = '1';
+    const orig = target.innerHTML;
+    target.disabled = true; target.textContent = 'Sending…';
+    sendViaGmail(to, subjEl ? subjEl.value : '', bodyEl ? bodyEl.value : '', lead.id, kind)
+      .finally(() => {
+        target.disabled = false; target.innerHTML = orig;
+        delete target.dataset.busy;
+        try { lucide.createIcons({ nodes: [target] }); } catch (_) {}
+      });
   }
   else if (action === 'copy-email') {
     const body = document.getElementById('email-body');

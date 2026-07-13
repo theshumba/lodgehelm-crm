@@ -1589,6 +1589,7 @@ function stripEmDashes(s) {
     .replace(/ +,/g, ',')              // no space before comma
     .replace(/,\s*,/g, ', ')           // collapse doubled commas
     .replace(/,([.!?])/g, '$1')        // comma glued before end punctuation -> just the punctuation
+    .replace(/[ \t]*\n?[ \t]*lodgehelm\.app/gi, '') // Melusi removed the site from the signature
     .replace(/,\s*$/g, '');            // drop a trailing comma at the very end
 }
 const WA_TEMPLATES = {
@@ -1619,6 +1620,13 @@ function leadEmailAddr(l) {
   if (fromEmails) return fromEmails;
   const c = (l.contacts || []).find(c => c && c.email);
   return c ? c.email : '';
+}
+// Every email address on the lead (lead emails + contact emails), de-duped.
+function allLeadEmails(l) {
+  const out = [];
+  ((l && l.emails) || []).forEach(e => { const a = (typeof e === 'string') ? e : (e && e.address); if (a) out.push(a); });
+  ((l && l.contacts) || []).forEach(c => { if (c && c.email) out.push(c.email); });
+  return [...new Set(out.map(x => String(x).trim()).filter(Boolean))];
 }
 function gmailComposeUrl(to, subject, body) {
   return 'https://mail.google.com/mail/?view=cm&fs=1'
@@ -1710,12 +1718,13 @@ function getGmailToken() {
 
 // One-click: send the on-screen draft from Melusi's Gmail. Returns true on success.
 async function sendViaGmail(to, subject, body, leadId, kind) {
-  if (!to) { showToast('No email address on file for this lead', 'warning'); return false; }
-  // First-run: capture the Client ID once (public-safe), stored locally.
+  if (!to) { showToast('No email address on file. Add one, or use Copy Email', 'warning'); return false; }
+  // No one-click Gmail send configured: open a prefilled compose window instead of nagging for setup.
   if (!getGmailClientId()) {
-    const entered = window.prompt('One-time setup: paste your Google OAuth Client ID (ends in .apps.googleusercontent.com).\nAsk Claude for the 5-minute Google Cloud steps if you do not have one yet.');
-    if (!entered || !entered.trim()) { showToast('Send cancelled — no Client ID entered', 'info'); return false; }
-    setGmailClientId(entered);
+    window.open(gmailComposeUrl(to, subject, body), '_blank');
+    logEmailSend(leadId, kind, 'opened');
+    showToast('Opened a prefilled email to ' + to, 'info');
+    return false;
   }
   try {
     const token = await getGmailToken();
@@ -4107,7 +4116,7 @@ function generateEmail(lead) {
   const biz = lead.businessName;
   const angle = getAngleLine(lead);
   const seg = getEmailTemplate(lead);
-  const sign = 'Melusi\nLodgeHelm\nlodgehelm.app';
+  const sign = 'Melusi\nLodgeHelm';
 
   // Why-it-matters line, tailored to segment.
   const valueProp = {
@@ -4237,6 +4246,7 @@ async function fillDraftWithAI(lead, opts) {
 
 function renderEmailModal(lead) {
   const { email, followUp, linkedin } = generateEmail(lead);
+  const toEmails = allLeadEmails(lead);
   return `
     <div class="modal-header">
       <div>
@@ -4253,6 +4263,12 @@ function renderEmailModal(lead) {
       </div>` : ''}
       <div class="email-modal-section">
         <h3>Initial Outreach</h3>
+        <div class="email-subject-field">
+          <label style="font-size:var(--text-xs);font-weight:600;white-space:nowrap;">To:</label>
+          <input type="text" id="email-to" value="${escapeHtml(toEmails[0] || '')}" placeholder="no email address on file">
+          <button class="btn btn-ghost btn-sm" data-action="copy-to" title="Copy address"><i data-lucide="copy" aria-hidden="true"></i> Copy</button>
+        </div>
+        ${toEmails.length > 1 ? `<div style="font-size:var(--text-xs);opacity:.75;margin:calc(-1 * var(--space-2)) 0 var(--space-2);">Also on file: ${toEmails.slice(1).map(e => escapeHtml(e)).join(', ')}</div>` : ''}
         <div class="email-subject-field">
           <label style="font-size:var(--text-xs);font-weight:600;white-space:nowrap;">Subject:</label>
           <input type="text" id="email-subject" value="${escapeHtml(email.subject)}">
@@ -5595,7 +5611,8 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
     const isFollowup = action === 'send-gmail-followup';
     const subjEl = document.getElementById(isFollowup ? 'followup-subject' : 'email-subject');
     const bodyEl = document.getElementById(isFollowup ? 'followup-body' : 'email-body');
-    const to = leadEmailAddr(lead);
+    const toEl = document.getElementById('email-to');
+    const to = (toEl && toEl.value.trim()) || leadEmailAddr(lead);
     const kind = isFollowup ? 'follow-up' : 'initial outreach';
     if (target.dataset.busy) return;
     target.dataset.busy = '1';
@@ -5607,6 +5624,11 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
         delete target.dataset.busy;
         try { lucide.createIcons({ nodes: [target] }); } catch (_) {}
       });
+  }
+  else if (action === 'copy-to') {
+    const to = document.getElementById('email-to');
+    if (to && to.value.trim()) { navigator.clipboard.writeText(to.value.trim()); showToast('Address copied', 'success'); }
+    else showToast('No email address on file for this lead', 'info');
   }
   else if (action === 'copy-email') {
     const body = document.getElementById('email-body');
@@ -6331,7 +6353,7 @@ function showSignaturesModal() {
     </div>
   `;
   sorted.forEach(name => {
-    const sig = 'Melusi\nLodgeHelm\nlodgehelm.app';
+    const sig = 'Melusi\nLodgeHelm';
     const isMe = name === current;
     html += `
       <div class="sig-card ${isMe ? 'sig-highlight' : ''}">

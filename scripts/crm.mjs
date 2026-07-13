@@ -90,6 +90,7 @@ function stripEmDashes(s) {
     .replace(/ +,/g, ',')
     .replace(/,\s*,/g, ', ')
     .replace(/,([.!?])/g, '$1')
+    .replace(/[ \t]*\n?[ \t]*lodgehelm\.app/gi, '')
     .replace(/,\s*$/g, '');
 }
 // WhatsApp per-segment templates — mirror WA_TEMPLATES in lodgehelm-crm.html (dash-free).
@@ -461,7 +462,7 @@ async function cmdStats() {
 }
 
 // Draft — mirrors getAngleLine()/generateEmail() tone from the app. No emojis, no hype,
-// never the word "free". Signed Melusi / LodgeHelm / lodgehelm.app.
+// never the word "free". Signed Melusi / LodgeHelm.
 function angleLine(lead) {
   const angle = (lead.outreachAngle || '').trim();
   if (angle.length > 5) {
@@ -497,7 +498,7 @@ async function cmdDraft() {
     phone_only: 'A few booking enquiries always slip past when you\'re on a game drive or off-grid.',
   }[seg];
   const opener = angleLine(l) ? angleLine(l) + '\n\n' : '';
-  const sign = 'Melusi\nLodgeHelm\nlodgehelm.app';
+  const sign = 'Melusi\nLodgeHelm';
   console.log(`\nEmail draft for ${biz} (${seg})${angleLine(l) ? ' (personalised with angle)' : ' (generic, no angle on file)'}`);
   console.log(`To: ${bestEmail(l) || '(no email on file)'}`);
   console.log(`\nSubject: Quick one about ${biz}\n`);

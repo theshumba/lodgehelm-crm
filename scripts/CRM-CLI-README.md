@@ -25,19 +25,28 @@ node scripts/crm.mjs <command>  # direct
 | `crm call <id> --outcome <no-answer\|gatekeeper\|spoke\|interested\|not-interested\|callback\|voicemail\|wrong-number> [--note "..."] [--callback YYYY-MM-DD]` | Logs a call exactly like the app's `logCall()` and advances stage (see rules below) |
 | `crm wa <id> [--sent]` | Prints the wa.me deep link with the per-segment template prefilled; `--sent` logs the app's "WhatsApp opened with template" activity |
 | `crm note <id> "text"` | Adds a note (`crm.notes` unshift) + "added note" activity |
-| `crm stage <id> <1-6\|New\|Researched\|Contacted\|Follow-up\|Replied\|Won> [--lost "reason"]` | Moves stage; `--lost` archives with `disposition=not_interested` + `outcomeReason` (Lost is a disposition, not a stage) |
+| `crm next <id> "what to do" [--due +3d\|YYYY-MM-DD]` | Sets the lead's next step (`crm.nextStep`); `followUpDate` always mirrors the due date |
+| `crm done <id> ["new step" --due +2d]` | Marks the current next step done (becomes `crm.lastAction`) and sets the new one; with no new step the lead surfaces as a dead end on Home |
+| `crm meeting-done <id> [--note "..."] [--due +2d] [--when YYYY-MM-DDTHH:MM]` | Meeting happened: stage >= 5 In discussion, stamps the meeting record, next step "Send recap / proposal" |
+| `crm stage <id> <1-6\|New\|Researched\|Contacted\|Awaiting reply\|In discussion\|Won (old names Follow-up/Replied still accepted)> [--lost "reason"]` | Moves stage; `--lost` archives with `disposition=not_interested` + `outcomeReason` (Lost is a disposition, not a stage) |
 | `crm stats` | Pipeline counts per stage, qualified/bank split, activity last 7 days, calls today, follow-ups due |
 | `crm draft <id> [--channel email\|whatsapp]` | Ready-to-send outreach draft (mirrors the app's `generateEmail()` tone; signed Melusi / LodgeHelm / lodgehelm.app; no emojis, no hype, never "free") |
 
 **Global:** `--dry-run` prints what would be written without touching Firestore.
 **Env:** `CRM_USER` sets attribution (default `Master` — matches all existing live writes).
 
-### Call outcome → stage rules
+### Call outcome → next-step + stage rules (mirrors the app's `logCall()`)
 
-- Any dial attempt on a stage-1/2 lead → stage 3 (Contacted), first/last-contact stamped.
-- `callback` → stage 4 (Follow-up) + `followUpDate` (`--callback` date, else tomorrow).
-- `interested` → stage 5 (Replied) + auto follow-up in 2 days if none set.
-- `not-interested` → `crm.disposition = not_interested` (stage untouched).
+Every outcome sets `crm.lastAction` + a dated `crm.nextStep` (never a dead end):
+
+- `spoke`/`connected` → stage ≥3 Contacted; next "Send the info / follow-up email" (+2d).
+- `interested` → stage ≥5 In discussion; next "Send the info / follow-up email" (+2d).
+- `gatekeeper` → stage ≥3; next "Call back, ask for the owner" (+2d).
+- `callback` → stage ≥3; next "Call back" (+1d; `--callback <date|+Nd>` overrides the due date).
+- `no-answer`/`voicemail` → No Answer backlog (archive) + next "Try again" (+2d) so it resurfaces.
+- `wrong-number` → next "Find a working number" (+3d).
+- `not-interested` → `crm.disposition = not_interested`, next step cleared.
+- Emailing / WhatsApp from the app → stage ≥4 Awaiting reply + next "Chase for a reply" (+3d).
 - First committing action on a `qualified` lead promotes it to `status: crm`
   ("moved to CRM" activity), mirroring the app's `moveToCRM()`.
 

@@ -47,16 +47,19 @@ const STAGES = [
   { num: 1, name: 'New' },
   { num: 2, name: 'Researched' },
   { num: 3, name: 'Contacted' },
-  { num: 4, name: 'Follow-up' },
-  { num: 5, name: 'Replied' },
+  { num: 4, name: 'Awaiting reply' },
+  { num: 5, name: 'In discussion' },
   { num: 6, name: 'Won' },
 ];
+// Old stage names still accepted as aliases.
+const STAGE_ALIASES = { 'follow-up': 4, followup: 4, 'awaiting-reply': 4, replied: 5, 'in-discussion': 5 };
 const stageName = (n) => STAGES.find((s) => s.num === n)?.name || 'Unknown';
 const stageNum = (v) => {
   const n = parseInt(v, 10);
   if (n >= 1 && n <= 6) return n;
-  const hit = STAGES.find((s) => s.name.toLowerCase() === String(v).toLowerCase());
-  return hit ? hit.num : null;
+  const key = String(v).toLowerCase();
+  const hit = STAGES.find((s) => s.name.toLowerCase() === key);
+  return hit ? hit.num : (STAGE_ALIASES[key] || null);
 };
 
 // App CALL_OUTCOMES labels — activity text must match callOutcomeLabel() output exactly.
@@ -218,6 +221,37 @@ function setStage(lead, num, summary) {
   addActivity(lead, 'changed stage to ' + stageName(num)); // exact app text
   summary.push(`stage -> ${num} (${stageName(num)})`);
 }
+// ---------- next-step engine (mirrors setNextStep/bumpStage in lodgehelm-crm.html) ----------
+// Every active lead carries one next step { label, due }; followUpDate is ALWAYS kept
+// equal to nextStep.due so the app's due/overdue logic stays the single source of truth.
+function daysFromNow(n) {
+  return new Date(Date.now() + n * 86400000).toISOString().split('T')[0];
+}
+// Accepts "+3d", "+2", or "YYYY-MM-DD".
+function parseDue(v, fallbackDays) {
+  if (!v) return daysFromNow(fallbackDays);
+  const rel = String(v).match(/^\+(\d+)d?$/);
+  if (rel) return daysFromNow(parseInt(rel[1], 10));
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return String(v);
+  console.error(`Bad due date "${v}" — use YYYY-MM-DD or +Nd (e.g. +3d).`);
+  process.exit(1);
+}
+function setNextStep(lead, label, dueISO, doneLabel, summary) {
+  if (!lead.crm) return;
+  if (doneLabel) {
+    lead.crm.lastAction = { label: doneLabel, date: todayISO };
+    summary.push(`lastAction -> ${doneLabel}`);
+  }
+  lead.crm.nextStep = label ? { label, due: dueISO || '' } : null;
+  lead.crm.followUpDate = (lead.crm.nextStep && lead.crm.nextStep.due) || '';
+  summary.push(label ? `nextStep -> ${label} (due ${dueISO || 'no date'})` : 'nextStep -> (cleared)');
+}
+function bumpStage(lead, num, summary) {
+  if (!lead.crm || lead.crm.stage >= num) return;
+  lead.crm.stage = num;
+  addActivity(lead, 'auto-moved to ' + stageName(num)); // exact app text
+  summary.push(`stage -> ${num} (${stageName(num)}, auto)`);
+}
 
 // ---------- printing ----------
 function line(l) {
@@ -307,6 +341,14 @@ async function cmdShow() {
   (l.contacts || []).forEach((ct, i) => console.log(`Contact ${i + 1}:   ${[ct.name, ct.role, ct.email, ct.phone].filter(Boolean).join(' · ')}`));
   console.log(`Funnel leak: ${l.funnelLeak || '—'}`);
   console.log(`Angle:       ${l.outreachAngle || '—'}`);
+  if (c.lastAction && c.lastAction.label) console.log(`Last action: ${c.lastAction.label} (${c.lastAction.date})`);
+  if (c.nextStep && c.nextStep.label) {
+    const d = daysUntil(c.nextStep.due);
+    const when = d === null ? 'no date' : d < 0 ? `${Math.abs(d)}d OVERDUE` : d === 0 ? 'due TODAY' : `due in ${d}d`;
+    console.log(`NEXT STEP:   ${c.nextStep.label} — ${c.nextStep.due || '—'} (${when})`);
+  } else if (l.status === 'crm' && c.stage < 6) {
+    console.log(`NEXT STEP:   (none — dead end! set one: crm next "${l.businessName}" "..." --due +3d)`);
+  }
   console.log(`First/last contact: ${c.dateFirstContact || '—'} / ${c.dateLastContact || '—'}   Follow-up: ${c.followUpDate || '—'}`);
   if (c.meetingBooked) console.log(`Meeting:     ${c.meetingDate || '(booked, no date)'} ${c.meetingNotes || ''}`);
   if (c.outcomeReason) console.log(`Outcome reason: ${c.outcomeReason}`);
@@ -339,17 +381,25 @@ async function cmdCall() {
   addActivity(l, 'logged call (' + CALL_OUTCOMES[outcome] + ')');
   summary.push(`activity: logged call (${CALL_OUTCOMES[outcome]})`);
 
-  // Stage advancement rules.
+  // Auto next-step + stage rules — EXACTLY the app's logCall() table.
   if (rawOutcome === 'interested') {
-    if (l.crm.stage < 5) setStage(l, 5, summary); // Replied
-    if (!flags.callback && !l.crm.followUpDate) {
-      l.crm.followUpDate = new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0];
-      summary.push(`followUpDate -> ${l.crm.followUpDate} (auto, interested)`);
-    }
+    bumpStage(l, 5, summary); // In discussion
+    setNextStep(l, 'Send the info / follow-up email', daysFromNow(2), 'Spoke to contact, interested', summary);
+  } else if (outcome === 'connected') {
+    bumpStage(l, 3, summary);
+    setNextStep(l, 'Send the info / follow-up email', daysFromNow(2), 'Spoke to contact', summary);
+  } else if (outcome === 'gatekeeper') {
+    bumpStage(l, 3, summary);
+    setNextStep(l, 'Call back, ask for the owner', daysFromNow(2), 'Reached gatekeeper', summary);
   } else if (outcome === 'callback') {
-    if (l.crm.stage < 4) setStage(l, 4, summary); // Follow-up
-  } else if (l.crm.stage < 3) {
-    setStage(l, 3, summary); // any dial attempt = Contacted
+    bumpStage(l, 3, summary);
+    setNextStep(l, 'Call back', daysFromNow(1), 'They asked to call back', summary);
+  } else if (outcome === 'wrong_number') {
+    setNextStep(l, 'Find a working number', daysFromNow(3), 'Wrong / dead number', summary);
+  } else if (outcome === 'not_interested') {
+    setNextStep(l, null, '', 'Not interested', summary);
+  } else if (outcome === 'no_answer' || outcome === 'voicemail') {
+    setNextStep(l, 'Try again', daysFromNow(2), outcome === 'voicemail' ? 'Left voicemail' : 'Called, no answer', summary);
   }
   if (outcome === 'not_interested') {
     l.crm.disposition = 'not_interested';
@@ -363,12 +413,9 @@ async function cmdCall() {
     summary.push('status -> archive, disposition -> no_answer (No Answer backlog)');
   }
   if (flags.callback) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(flags.callback)) { console.error('--callback must be YYYY-MM-DD'); process.exit(1); }
-    l.crm.followUpDate = flags.callback;
-    summary.push(`followUpDate -> ${flags.callback}`);
-  } else if (outcome === 'callback' && !l.crm.followUpDate) {
-    l.crm.followUpDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-    summary.push(`followUpDate -> ${l.crm.followUpDate} (default: tomorrow)`);
+    // Explicit callback date overrides the auto due date, keeps the auto label.
+    const due = parseDue(flags.callback, 1);
+    setNextStep(l, (l.crm.nextStep && l.crm.nextStep.label) || 'Call back', due, '', summary);
   }
   if (flags.note) {
     l.crm.notes = l.crm.notes || [];
@@ -429,6 +476,66 @@ async function cmdStage() {
   ensureInCRM(l, summary);
   if (l.crm.stage === num) { console.log(`Already at stage ${num} (${stageName(num)}).`); return; }
   setStage(l, num, summary);
+  await saveLead(l, summary);
+}
+
+// crm next <id> "label" [--due YYYY-MM-DD|+Nd]  — set the lead's next step.
+async function cmdNext() {
+  const l = await getLead(args[0]);
+  const label = args.slice(1).join(' ');
+  if (!label) { console.error('Usage: crm next <id> "what to do" [--due YYYY-MM-DD|+Nd]'); process.exit(1); }
+  const summary = [];
+  ensureInCRM(l, summary);
+  setNextStep(l, label, parseDue(flags.due, 3), '', summary);
+  addActivity(l, 'set next step: ' + label + ' (due ' + l.crm.nextStep.due + ')');
+  await saveLead(l, summary);
+}
+
+// crm done <id> ["new label"] [--due ...] — mark the current step done; set the new one.
+async function cmdDone() {
+  const l = await getLead(args[0]);
+  if (!l.crm) { console.error(`${l.businessName} is not in the CRM pipeline.`); process.exit(1); }
+  const doneLabel = (l.crm.nextStep && l.crm.nextStep.label) || 'Step done';
+  const newLabel = args.slice(1).join(' ');
+  const summary = [];
+  if (newLabel) {
+    setNextStep(l, newLabel, parseDue(flags.due, 3), doneLabel, summary);
+    addActivity(l, 'completed step, next: ' + newLabel + ' (due ' + l.crm.nextStep.due + ')');
+  } else {
+    setNextStep(l, null, '', doneLabel, summary);
+    addActivity(l, 'completed step: ' + doneLabel);
+    console.log(`NOTE: ${l.businessName} now has NO next step — it will surface as a dead end on Home.`);
+    console.log(`      Give it one: crm next "${l.businessName}" "..." --due +3d`);
+  }
+  await saveLead(l, summary);
+}
+
+// crm meeting-done <id> [--note "..."] [--due +Nd] [--when YYYY-MM-DDTHH:MM] — meeting happened; queue the recap.
+async function cmdMeetingDone() {
+  const l = await getLead(args[0]);
+  const summary = [];
+  ensureInCRM(l, summary);
+  bumpStage(l, 5, summary); // In discussion
+  l.crm.dateLastContact = todayISO;
+  summary.push(`dateLastContact -> ${todayISO}`);
+  // Stamp the meeting itself so it shows under Meetings > Past even if it was never booked in-app.
+  if (!l.crm.meetingBooked) { l.crm.meetingBooked = true; summary.push('meetingBooked -> true'); }
+  if (flags.when) {
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(flags.when)) { console.error('--when must be YYYY-MM-DDTHH:MM'); process.exit(1); }
+    l.crm.meetingDate = flags.when;
+    summary.push(`meetingDate -> ${flags.when}`);
+  } else if (!l.crm.meetingDate) {
+    l.crm.meetingDate = new Date().toISOString().slice(0, 16);
+    summary.push(`meetingDate -> ${l.crm.meetingDate} (now)`);
+  }
+  addActivity(l, 'meeting completed'); // exact app text
+  setNextStep(l, 'Send recap / proposal', parseDue(flags.due, 2), 'Meeting done', summary);
+  if (flags.note) {
+    l.crm.notes = l.crm.notes || [];
+    l.crm.notes.unshift({ text: String(flags.note), timestamp: new Date().toISOString(), addedBy: USER });
+    addActivity(l, 'added note');
+    summary.push(`note: ${flags.note}`);
+  }
   await saveLead(l, summary);
 }
 
@@ -518,13 +625,16 @@ const HELP = `LodgeHelm CRM CLI — live Firestore access
                 [--note "..."] [--callback YYYY-MM-DD]
   crm wa <id> [--sent]                          Print wa.me link + template; --sent logs it
   crm note <id> "text"                          Add a note
+  crm next <id> "what to do" [--due +3d]        Set the lead's next step (due: +Nd or YYYY-MM-DD)
+  crm done <id> ["new step" --due +2d]          Mark current step done; optionally set the next
+  crm meeting-done <id> [--note "..."] [--due +2d]  Meeting happened -> In discussion + "Send recap / proposal"
   crm stage <id> <1-6|name> [--lost "reason"]   Move stage / mark lost
   crm stats                                     Pipeline + activity stats
   crm draft <id> [--channel email|whatsapp]     Ready-to-send outreach draft
 
   Global: --dry-run (print writes, change nothing).  Env: CRM_USER (default "Master").`;
 
-const commands = { today: cmdToday, search: cmdSearch, show: cmdShow, call: cmdCall, wa: cmdWa, note: cmdNote, stage: cmdStage, stats: cmdStats, draft: cmdDraft };
+const commands = { today: cmdToday, search: cmdSearch, show: cmdShow, call: cmdCall, wa: cmdWa, note: cmdNote, next: cmdNext, done: cmdDone, 'meeting-done': cmdMeetingDone, stage: cmdStage, stats: cmdStats, draft: cmdDraft };
 if (!cmd || !commands[cmd]) {
   console.log(HELP);
   process.exit(cmd ? 1 : 0);

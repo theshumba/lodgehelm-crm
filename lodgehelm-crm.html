@@ -365,6 +365,24 @@ ul, ol { list-style: none; }
 
 /* ========== CRM LIST ========== */
 .crm-row { display: grid; grid-template-columns: 1.3fr 1fr 0.8fr 0.8fr 0.6fr auto; gap: var(--space-4); align-items: start; padding: var(--space-5); }
+/* Next Step band — the one clear "what do I do now" strip on every CRM card */
+.next-step-band { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); border-left: 3px solid var(--color-primary); border-radius: var(--radius-md); background: var(--color-primary-highlight); }
+.next-step-band.ns-empty { border-left-color: var(--color-orange); background: var(--color-orange-highlight); }
+.ns-main { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.ns-done-line { font-size: var(--text-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--space-1); }
+.ns-done-line i, .ns-done-line svg { width: 13px; height: 13px; color: var(--color-success); }
+.ns-step-line { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.ns-step-line i, .ns-step-line svg { width: 15px; height: 15px; color: var(--color-primary); }
+.ns-kicker { font-family: var(--font-display); font-weight: 700; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-primary); }
+.ns-empty .ns-kicker { color: var(--color-warning); }
+.ns-step-text { font-family: var(--font-display); font-weight: 700; font-size: var(--text-sm); color: var(--color-text); }
+.ns-chip { font-size: var(--text-xs); font-weight: 600; padding: 2px var(--space-2); border-radius: var(--radius-full); white-space: nowrap; }
+.ns-chip.ns-overdue { background: var(--color-error-highlight); color: var(--color-error); }
+.ns-chip.ns-today { background: var(--color-orange-highlight); color: var(--color-orange); }
+.ns-chip.ns-future { background: var(--color-surface-offset); color: var(--color-text-muted); }
+.ns-chip.ns-muted { background: var(--color-surface-offset); color: var(--color-text-faint); }
+.ns-actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.ns-empty-text { font-size: var(--text-sm); color: var(--color-text); }
 .crm-identity { display: flex; flex-direction: column; gap: var(--space-1); }
 .crm-identity .lead-name { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); }
 .crm-identity .contact-info { font-size: var(--text-xs); color: var(--color-text-muted); }
@@ -733,6 +751,7 @@ ul, ol { list-style: none; }
 .priority-item.overdue { border-left: 4px solid var(--color-error); }
 .priority-item.today { border-left: 4px solid var(--color-warning); }
 .priority-item.opportunity { border-left: 4px solid var(--color-primary); }
+.priority-item.deadend { border-left: 4px solid var(--color-orange); }
 .priority-item .pi-title { font-weight: 600; color: var(--color-text); }
 .priority-item .pi-meta { font-size: var(--text-xs); color: var(--color-text-muted); }
 .priority-item .pi-spacer { flex: 1; }
@@ -1608,6 +1627,12 @@ function logWhatsApp(id) {
   const lead = getLeadById(id);
   if (!lead) return;
   addActivity(lead, 'WhatsApp opened with template');
+  if (lead.crm) {
+    lead.crm.dateLastContact = todayISO;
+    if (!lead.crm.dateFirstContact) lead.crm.dateFirstContact = todayISO;
+    bumpStage(lead, 4);
+    setNextStep(lead, 'Chase for a reply', daysFromNow(3), 'Sent WhatsApp');
+  }
   saveState();
 }
 
@@ -1642,6 +1667,9 @@ function logEmailSend(id, kind, mode) {
   lead.crm.dateLastContact = todayISO;
   if (!lead.crm.dateFirstContact) lead.crm.dateFirstContact = todayISO;
   addActivity(lead, (mode === 'sent' ? 'Gmail email sent (' : 'Gmail compose opened (') + kind + ')');
+  // Emailing moves the ball: advance to Awaiting reply and queue the chase.
+  bumpStage(lead, 4);
+  setNextStep(lead, 'Chase for a reply', daysFromNow(3), 'Emailed');
   saveState();
 }
 
@@ -1760,6 +1788,24 @@ function logCall(id, outcome) {
   if (!lead.crm.dateFirstContact) lead.crm.dateFirstContact = todayISO;
   tagWorker(lead);
   addActivity(lead, 'logged call (' + callOutcomeLabel(outcome) + ')');
+  // Every call outcome sets the next move so the card never goes silent.
+  if (outcome === 'connected') {
+    bumpStage(lead, 3);
+    setNextStep(lead, 'Send the info / follow-up email', daysFromNow(2), 'Spoke to contact');
+  } else if (outcome === 'gatekeeper') {
+    bumpStage(lead, 3);
+    setNextStep(lead, 'Call back, ask for the owner', daysFromNow(2), 'Reached gatekeeper');
+  } else if (outcome === 'callback') {
+    bumpStage(lead, 3);
+    setNextStep(lead, 'Call back', daysFromNow(1), 'They asked to call back');
+  } else if (outcome === 'wrong_number') {
+    setNextStep(lead, 'Find a working number', daysFromNow(3), 'Wrong / dead number');
+  } else if (outcome === 'not_interested') {
+    setNextStep(lead, null, '', 'Not interested');
+  } else if (outcome === 'no_answer' || outcome === 'voicemail') {
+    // Keeps a retry queued — the No Answer backlog resurfaces it as overdue.
+    setNextStep(lead, 'Try again', daysFromNow(2), outcome === 'voicemail' ? 'Left voicemail' : 'Called, no answer');
+  }
   // A no-answer or voicemail call routes the lead into the Archive > No Answer backlog (out of active lists).
   if (outcome === 'no_answer' || outcome === 'voicemail') {
     lead.status = 'archive';
@@ -2041,6 +2087,10 @@ function normalizeLead(l) {
     if (l.crm.dealValue == null) l.crm.dealValue = 1200;
     if (l.crm.outcomeReason == null) l.crm.outcomeReason = '';
     if (typeof l.crm.stage !== 'number') l.crm.stage = Number(l.crm.stage) || 1;
+    if (l.crm.nextStep === undefined) l.crm.nextStep = null;
+    if (l.crm.lastAction === undefined) l.crm.lastAction = null;
+    // Legacy leads: a bare followUpDate becomes a real "Follow up" next step.
+    if (!l.crm.nextStep && l.crm.followUpDate) l.crm.nextStep = { label: 'Follow up', due: l.crm.followUpDate };
   }
   return l;
 }
@@ -2113,12 +2163,55 @@ const STAGES = [
   { num: 1, name: 'New', badge: 'badge-neutral' },
   { num: 2, name: 'Researched', badge: 'badge-blue' },
   { num: 3, name: 'Contacted', badge: 'badge-purple' },
-  { num: 4, name: 'Follow-up', badge: 'badge-orange' },
-  { num: 5, name: 'Replied', badge: 'badge-gold' },
+  { num: 4, name: 'Awaiting reply', badge: 'badge-orange' },
+  { num: 5, name: 'In discussion', badge: 'badge-gold' },
   { num: 6, name: 'Won', badge: 'badge-success' }
 ];
 function getStageName(num) { return STAGES.find(s => s.num === num)?.name || 'Unknown'; }
 function getStageBadge(num) { return STAGES.find(s => s.num === num)?.badge || 'badge-neutral'; }
+
+// ===== NEXT STEP ENGINE =====
+// Every active lead carries exactly one next step: { label, due }. The engine sets it
+// automatically the moment an action is logged (email, call, meeting) so no card is
+// ever a dead end. crm.followUpDate is ALWAYS kept equal to nextStep.due so all
+// existing due-today/overdue logic (home stats, filters, CLI today) works untouched.
+const NEXT_STEP_PICKS = [
+  'Chase for a reply',
+  'Send proposal / quote',
+  'Prep for the meeting',
+  'Send recap / proposal',
+  'Call again',
+  'Check in later'
+];
+function setNextStep(lead, label, dueISO, doneLabel) {
+  if (!lead.crm) return;
+  if (doneLabel) lead.crm.lastAction = { label: doneLabel, date: todayISO };
+  lead.crm.nextStep = label ? { label, due: dueISO || '' } : null;
+  lead.crm.followUpDate = (lead.crm.nextStep && lead.crm.nextStep.due) || '';
+}
+// Auto stage moves only ever move FORWARD — never demote a lead.
+function bumpStage(lead, num) {
+  if (!lead.crm || lead.crm.stage >= num) return;
+  lead.crm.stage = num;
+  addActivity(lead, 'auto-moved to ' + getStageName(num));
+}
+// Human date chip for the band: "3d overdue" / "Due today" / "Due Thu 17 Jul".
+function nextStepDueText(due) {
+  const d = daysUntil(due);
+  if (d === null) return { text: 'No date', cls: 'ns-muted' };
+  if (d < 0) return { text: Math.abs(d) + 'd overdue', cls: 'ns-overdue' };
+  if (d === 0) return { text: 'Due today', cls: 'ns-today' };
+  if (d === 1) return { text: 'Due tomorrow', cls: 'ns-future' };
+  return { text: 'Due ' + formatDate(due) + ' (in ' + d + 'd)', cls: 'ns-future' };
+}
+// A lead that should have a next step but doesn't = a dead end we surface on Home.
+function isDeadEnd(l) {
+  if (l.status !== 'crm' || !l.crm) return false;
+  if (l.crm.stage >= 6) return false;
+  const disp = l.crm.disposition || '';
+  if (disp === 'not_interested' || disp === 'archived') return false;
+  return !(l.crm.nextStep && l.crm.nextStep.label) && !l.crm.followUpDate && !l.crm.meetingBooked;
+}
 
 const DISPOSITIONS = [
   { value: '', label: 'None', badge: 'badge-neutral' },
@@ -2274,7 +2367,11 @@ function archiveLead(id, disposition) {
   const lead = getLeadById(id);
   if (!lead) return;
   lead.status = 'archive';
-  if (lead.crm) lead.crm.disposition = disposition;
+  if (lead.crm) {
+    lead.crm.disposition = disposition;
+    // Dead leads shouldn't nag. (No Answer leads keep their retry step — set in logCall.)
+    if (disposition === 'not_interested' || disposition === 'archived') setNextStep(lead, null, '');
+  }
   addActivity(lead, 'archived (' + disposition + ')');
   saveState();
 }
@@ -2285,6 +2382,7 @@ function reactivateLead(id) {
   if (lead.crm) {
     lead.crm.stage = 1;
     lead.crm.disposition = 'nurture';
+    setNextStep(lead, 'Get back in touch', todayISO);
   }
   addActivity(lead, 'reactivated');
   saveState();
@@ -2997,6 +3095,9 @@ function renderToday() {
       : `<span class="today-no-phone">No phone</span>`;
     const segBadge = l.segment ? `<span class="badge badge-neutral">${escapeHtml(l.segment)}</span>` : '';
     const stageBadge = l.crm ? `<span class="badge ${getStageBadge(l.crm.stage)}">${getStageName(l.crm.stage)}</span>` : '';
+    // Say WHAT is due, not just that something is.
+    const ns = l.crm && l.crm.nextStep;
+    const nsChip = ns && ns.label ? (() => { const d = nextStepDueText(ns.due); return `<span class="ns-chip ${d.cls}">${escapeHtml(ns.label)} &middot; ${d.text}</span>`; })() : '';
     const country = l.country ? `<span class="today-country">${escapeHtml(l.country)}</span>` : '';
     const waBtn = waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:4px;font-size:var(--text-xs);min-height:28px;padding:2px var(--space-2);" data-action="whatsapp-lead" data-id="${escapeHtml(l.id)}"><i data-lucide="message-circle" style="width:13px;height:13px;" aria-hidden="true"></i> WA</button>` : '';
     return `
@@ -3004,7 +3105,7 @@ function renderToday() {
         <div style="flex:1;min-width:0;">
           <button class="btn btn-ghost" style="font-weight:600;padding:0;text-align:left;font-size:var(--text-sm);" data-action="view-lead" data-id="${escapeHtml(l.id)}">${escapeHtml(l.businessName || 'Unnamed')}</button>
           <div style="display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-1);flex-wrap:wrap;">
-            ${segBadge}${stageBadge}${country}
+            ${segBadge}${stageBadge}${nsChip}${country}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;">
@@ -3092,10 +3193,16 @@ function renderHome() {
     .sort((a, b) => getOpportunityScore(b) - getOpportunityScore(a))
     .slice(0, 3);
 
+  // Leads with no next step at all — dead ends the system should never allow to sit.
+  const deadEnds = myLeads.filter(isDeadEnd);
+
+  // Show the ACTUAL next step ("Chase for a reply"), not a generic "follow-up".
+  const nsLabel = l => (l.crm && l.crm.nextStep && l.crm.nextStep.label) || 'Follow up';
   const priorities = [];
-  overdueFollowUps.slice(0, 5).forEach(l => priorities.push({ type: 'overdue', lead: l, label: 'Overdue follow-up', meta: `${Math.abs(daysUntil(l.crm.followUpDate))} days overdue` }));
-  followUpsToday.forEach(l => priorities.push({ type: 'today', lead: l, label: 'Follow-up today', meta: 'Due today' }));
+  overdueFollowUps.slice(0, 5).forEach(l => priorities.push({ type: 'overdue', lead: l, label: 'Next: ' + nsLabel(l), meta: `${Math.abs(daysUntil(l.crm.followUpDate))} days overdue` }));
+  followUpsToday.forEach(l => priorities.push({ type: 'today', lead: l, label: 'Next: ' + nsLabel(l), meta: 'Due today' }));
   meetingsToday.forEach(l => priorities.push({ type: 'today', lead: l, label: 'Meeting today', meta: formatDateTime(l.crm.meetingDate) }));
+  deadEnds.slice(0, 5).forEach(l => priorities.push({ type: 'deadend', lead: l, label: 'No next step set', meta: deadEnds.length > 5 ? `1 of ${deadEnds.length} leads with no next step` : 'Give this lead a next move' }));
   topOpps.forEach(l => priorities.push({ type: 'opportunity', lead: l, label: 'High-score opportunity', meta: `Score ${getOpportunityScore(l)} &middot; not contacted` }));
 
   // Recent activity relevant to user
@@ -3150,7 +3257,9 @@ function renderHome() {
                 <div class="pi-meta">${p.meta}</div>
               </div>
               <div class="pi-spacer"></div>
-              <button class="btn btn-primary btn-sm" data-action="home-contact-lead" data-id="${p.lead.id}">${p.type === 'today' && p.label === 'Meeting today' ? 'Open' : 'Contact Now'}</button>
+              ${p.type === 'deadend'
+                ? `<button class="btn btn-primary btn-sm" data-action="home-set-next" data-id="${p.lead.id}">Set next step</button>`
+                : `<button class="btn btn-primary btn-sm" data-action="home-contact-lead" data-id="${p.lead.id}">${p.type === 'today' && p.label === 'Meeting today' ? 'Open' : 'Contact Now'}</button>`}
             </div>
           `).join('')}
         </div>`}
@@ -3863,6 +3972,7 @@ function renderCRMList(leads) {
     const dealProminent = crm.stage === 5 || crm.stage === 6;
     html += `
       <div class="card crm-row${selected ? ' selected' : ''}" id="crm-row-${l.id}">
+        ${renderNextStepBand(l)}
         <div class="crm-identity">
           <div style="display:flex;align-items:center;gap:var(--space-2);">
             <input type="checkbox" class="bulk-check" data-action="bulk-toggle" data-scope="crm" data-id="${l.id}" ${selected ? 'checked' : ''} aria-label="Select lead">
@@ -3963,6 +4073,50 @@ function renderCRMList(leads) {
   return html;
 }
 
+// The Next Step band: what was just done, what's next, when — and one-tap controls.
+// Full-width strip at the top of every CRM card so no lead is ever a dead end.
+function renderNextStepBand(l) {
+  const crm = l.crm;
+  if (!crm) return '';
+  const ns = crm.nextStep;
+  const la = crm.lastAction;
+  const doneLine = la && la.label ? `
+    <div class="ns-done-line"><i data-lucide="check-circle-2" aria-hidden="true"></i> ${escapeHtml(la.label)} &middot; ${formatDate(la.date)}</div>` : '';
+  if (ns && ns.label) {
+    const due = nextStepDueText(ns.due);
+    return `
+      <div class="next-step-band">
+        <div class="ns-main">
+          ${doneLine}
+          <div class="ns-step-line">
+            <i data-lucide="arrow-right-circle" aria-hidden="true"></i>
+            <span class="ns-kicker">Next step</span>
+            <span class="ns-step-text">${escapeHtml(ns.label)}</span>
+            <span class="ns-chip ${due.cls}">${due.text}</span>
+          </div>
+        </div>
+        <div class="ns-actions">
+          <button class="btn btn-primary btn-sm" data-action="ns-done" data-id="${l.id}"><i data-lucide="check" aria-hidden="true"></i> Done</button>
+          <button class="btn btn-secondary btn-sm" data-action="ns-snooze" data-id="${l.id}">Snooze +3d</button>
+          <button class="btn btn-ghost btn-sm" data-action="ns-change" data-id="${l.id}">Change</button>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="next-step-band ns-empty">
+      <div class="ns-main">
+        ${doneLine}
+        <div class="ns-step-line">
+          <span class="ns-kicker">No next step</span>
+          <span class="ns-empty-text">This lead is a dead end right now.</span>
+        </div>
+      </div>
+      <div class="ns-actions">
+        <button class="btn btn-primary btn-sm" data-action="ns-change" data-id="${l.id}"><i data-lucide="plus" aria-hidden="true"></i> Set next step</button>
+      </div>
+    </div>`;
+}
+
 function renderCallLogger(lead) {
   const primaryPhone = (lead.phones && lead.phones[0] && lead.phones[0].number) || (lead.contacts && (lead.contacts.find(c => c.phone) || {}).phone) || '';
   return `
@@ -4022,7 +4176,7 @@ function renderCRMBoard(leads) {
                 <div class="card-meta">
                   <span class="badge ${priorityColors[crm.priority]}">${crm.priority}</span>
                   <span class="badge deal-badge" title="Deal value">${formatMoney(getDealValue(l))}</span>
-                  ${crm.followUpDate ? `<span style="font-size:0.65rem;color:${fuDays !== null && fuDays <= 0 ? 'var(--color-warning)' : 'var(--color-text-muted)'};">${fuDays !== null && fuDays <= 0 ? 'Overdue' : 'Follow up ' + formatDate(crm.followUpDate)}</span>` : ''}
+                  ${crm.followUpDate ? `<span style="font-size:0.65rem;color:${fuDays !== null && fuDays <= 0 ? 'var(--color-warning)' : 'var(--color-text-muted)'};">${escapeHtml((crm.nextStep && crm.nextStep.label) || 'Follow up')}${fuDays !== null && fuDays <= 0 ? ' &middot; Overdue' : ' &middot; ' + formatDate(crm.followUpDate)}</span>` : ''}
                   ${crm.meetingBooked ? `<span class="badge badge-purple">Meeting</span>` : ''}
                 </div>
                 <!-- Single-user mode: no assigned-badge -->
@@ -5059,6 +5213,7 @@ document.getElementById('section-home').addEventListener('click', e => {
   if (!target) return;
   const action = target.dataset.action;
   const id = target.dataset.id;
+  if (action === 'home-set-next') { openNextStepModal(id); return; }
   if (action === 'home-goto-lead' || action === 'home-contact-lead') {
     const lead = getLeadById(id);
     if (lead) {
@@ -5226,6 +5381,23 @@ document.getElementById('section-crm').addEventListener('click', e => {
   const id = target.dataset.id;
 
   if (action === 'call-lead') { openDialer(id, target.dataset.num); return; }
+  if (action === 'ns-done') { openNextStepModal(id, { markDone: true }); return; }
+  if (action === 'ns-change') { openNextStepModal(id); return; }
+  if (action === 'ns-snooze') {
+    const lead = getLeadById(id);
+    if (lead && lead.crm && lead.crm.nextStep) {
+      // Snooze from today (or from the due date if it's still in the future).
+      const base = daysUntil(lead.crm.nextStep.due) > 0 ? new Date(lead.crm.nextStep.due) : new Date();
+      base.setDate(base.getDate() + 3);
+      const due = base.toISOString().split('T')[0];
+      setNextStep(lead, lead.crm.nextStep.label, due);
+      addActivity(lead, 'snoozed next step to ' + due);
+      saveState();
+      showToast('Snoozed to ' + formatDate(due), 'info');
+      renderCRM();
+    }
+    return;
+  }
   if (action === 'generate-email') {
     const lead = getLeadById(id);
     if (lead) openModal('email', lead);
@@ -5245,7 +5417,8 @@ document.getElementById('section-crm').addEventListener('click', e => {
   } else if (action === 'follow-up-chip') {
     const lead = getLeadById(id);
     if (lead && lead.crm) {
-      lead.crm.followUpDate = daysFromNow(parseInt(target.dataset.days));
+      const due = daysFromNow(parseInt(target.dataset.days));
+      setNextStep(lead, (lead.crm.nextStep && lead.crm.nextStep.label) || 'Follow up', due);
       saveState();
       renderCRM();
     }
@@ -5257,6 +5430,12 @@ document.getElementById('section-crm').addEventListener('click', e => {
         lead.crm.meetingDate = dateTimeFromNow(7, 10, 0);
       }
       addActivity(lead, lead.crm.meetingBooked ? 'booked a meeting' : 'cancelled meeting');
+      if (lead.crm.meetingBooked) {
+        bumpStage(lead, 5);
+        setNextStep(lead, 'Prep for the meeting', String(lead.crm.meetingDate).slice(0, 10), 'Booked a meeting');
+      } else {
+        setNextStep(lead, 'Get the meeting rebooked', daysFromNow(2), 'Meeting cancelled');
+      }
       saveState();
       renderCRM();
       renderSidebarBadges();
@@ -5331,6 +5510,7 @@ document.getElementById('section-crm').addEventListener('change', e => {
         lead.crm.stage = 6;
         lead.crm.dateLastContact = todayISO;
         addActivity(lead, 'changed stage to Closed Won');
+        setNextStep(lead, null, '', 'Won the deal');
         saveState();
         openOutcomeReasonModal(id, 'won');
         renderCRM();
@@ -5363,10 +5543,21 @@ document.getElementById('section-crm').addEventListener('change', e => {
   } else if (action === 'change-last-contact') {
     updateCRM(id, { dateLastContact: e.target.value });
   } else if (action === 'change-follow-up') {
-    updateCRM(id, { followUpDate: e.target.value });
+    const fuLead = getLeadById(id);
+    if (fuLead && fuLead.crm) {
+      setNextStep(fuLead, (fuLead.crm.nextStep && fuLead.crm.nextStep.label) || 'Follow up', e.target.value);
+      saveState();
+    }
     renderCRM();
   } else if (action === 'change-meeting-date') {
     updateCRM(id, { meetingDate: e.target.value });
+    // The prep step follows the meeting when it moves.
+    const mLead = getLeadById(id);
+    if (mLead && mLead.crm && mLead.crm.nextStep && mLead.crm.nextStep.label === 'Prep for the meeting') {
+      setNextStep(mLead, 'Prep for the meeting', String(e.target.value).slice(0, 10));
+      saveState();
+      renderCRM();
+    }
   } else if (action === 'change-meeting-notes') {
     updateCRM(id, { meetingNotes: e.target.value });
   } else if (action === 'change-deal-value') {
@@ -5470,10 +5661,12 @@ document.getElementById('section-meetings').addEventListener('click', e => {
   } else if (action === 'mark-meeting-complete') {
     const lead = getLeadById(id);
     if (lead && lead.crm) {
-      lead.crm.stage = 4;
+      bumpStage(lead, 5);
       lead.crm.dateLastContact = todayISO;
+      addActivity(lead, 'meeting completed');
+      setNextStep(lead, 'Send recap / proposal', daysFromNow(2), 'Meeting done');
       saveState();
-      showToast('Meeting marked as completed', 'success');
+      showToast('Meeting done. Next: send the recap / proposal.', 'success');
       renderAll();
     }
   } else if (action === 'reschedule-meeting') {
@@ -6679,6 +6872,89 @@ function openOutcomeReasonModal(leadId, mode) {
       showToast('Lead moved to Archive', 'info');
     }
     closeModal();
+    renderAll();
+  });
+}
+
+// ========== NEXT STEP PICKER MODAL ==========
+// One tap to answer "what's next for this lead?". markDone mode first records the
+// current step as done (it becomes lastAction), then asks for the new one.
+function openNextStepModal(leadId, opts) {
+  const lead = getLeadById(leadId);
+  if (!lead || !lead.crm) return;
+  const markDone = !!(opts && opts.markDone);
+  const current = lead.crm.nextStep;
+  const title = markDone
+    ? `Done: ${escapeHtml((current && current.label) || 'step')}. What's next?`
+    : `Next step — ${escapeHtml(lead.businessName)}`;
+  const dateChips = [
+    { label: 'Today', days: 0 }, { label: 'Tomorrow', days: 1 }, { label: '+2 days', days: 2 },
+    { label: '+3 days', days: 3 }, { label: '+1 week', days: 7 }, { label: '+2 weeks', days: 14 }, { label: '+1 month', days: 30 }
+  ];
+  const html = `
+    <div class="modal-header">
+      <h2 id="modal-title">${title}</h2>
+      <button class="modal-close" data-action="close-modal" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="outcome-reasons" id="ns-picks">
+        ${NEXT_STEP_PICKS.map((p, i) => `<label class="outcome-reason"><input type="radio" name="ns-pick" value="${escapeHtml(p)}"${i===0?' checked':''}> <span>${escapeHtml(p)}</span></label>`).join('')}
+        <label class="outcome-reason"><input type="radio" name="ns-pick" value="__other"> <span>Something else…</span></label>
+      </div>
+      <div id="ns-other-wrap" style="display:none;margin-top:var(--space-2);">
+        <input type="text" class="form-input" id="ns-other-input" placeholder="What needs doing?">
+      </div>
+      <div style="margin-top:var(--space-4);">
+        <label class="form-label" style="display:block;margin-bottom:var(--space-1);">When?</label>
+        <div class="follow-up-chips" id="ns-date-chips" style="margin-bottom:var(--space-2);">
+          ${dateChips.map(c => `<button type="button" class="follow-up-chip" data-days="${c.days}">${c.label}</button>`).join('')}
+        </div>
+        <input type="date" class="form-input" id="ns-due-input" value="${daysFromNow(3)}" aria-label="Due date">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="ns-clear-btn">No next step needed</button>
+      <button class="btn btn-primary" id="ns-save-btn">Save next step</button>
+    </div>
+  `;
+  const content = document.getElementById('modal-content');
+  content.innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+  document.getElementById('modal-overlay').setAttribute('aria-hidden', 'false');
+  state.modalOpen = true;
+  lucide.createIcons({ nodes: [content] });
+
+  const picksEl = document.getElementById('ns-picks');
+  picksEl.addEventListener('change', () => {
+    const sel = picksEl.querySelector('input[name="ns-pick"]:checked');
+    const isOther = sel && sel.value === '__other';
+    document.getElementById('ns-other-wrap').style.display = isOther ? 'block' : 'none';
+    if (isOther) document.getElementById('ns-other-input').focus();
+  });
+  document.getElementById('ns-date-chips').addEventListener('click', e => {
+    const chip = e.target.closest('[data-days]');
+    if (chip) document.getElementById('ns-due-input').value = daysFromNow(parseInt(chip.dataset.days));
+  });
+  const doneLabel = markDone ? ((current && current.label) || 'Step done') : '';
+  document.getElementById('ns-save-btn').addEventListener('click', () => {
+    const sel = picksEl.querySelector('input[name="ns-pick"]:checked');
+    let label = sel ? sel.value : '';
+    if (label === '__other') label = document.getElementById('ns-other-input').value.trim();
+    if (!label) { showToast('Pick a next step, or tap "No next step needed"', 'warning'); return; }
+    const due = document.getElementById('ns-due-input').value || daysFromNow(3);
+    setNextStep(lead, label, due, doneLabel);
+    addActivity(lead, (markDone ? 'completed step, next: ' : 'set next step: ') + label + ' (due ' + due + ')');
+    saveState();
+    closeModal();
+    showToast('Next: ' + label + ' · ' + formatDate(due), 'success');
+    renderAll();
+  });
+  document.getElementById('ns-clear-btn').addEventListener('click', () => {
+    setNextStep(lead, null, '', doneLabel);
+    if (markDone) addActivity(lead, 'completed step: ' + doneLabel);
+    saveState();
+    closeModal();
+    showToast(markDone ? 'Step marked done' : 'Next step cleared', 'info');
     renderAll();
   });
 }

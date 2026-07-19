@@ -6134,7 +6134,10 @@ function hqDashboardHtml() {
           </div>
           <div class="text">${escapeHtml(((item.entries || [])[0] || {}).text || '').slice(0, 400)}…</div>
           <div class="hq-inbox-assign">
-            <input type="text" class="hq-ans hq-assign-input" style="margin-top:0;" data-doc="${escapeHtml(item.__docId)}" placeholder="Type the lodge name to attach this brief…" autocomplete="off">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" class="hq-ans hq-assign-input" style="margin-top:0;flex:1;" data-doc="${escapeHtml(item.__docId)}" placeholder="Type the lodge name to attach this brief…" autocomplete="off">
+              <button class="hq-btn ghost" data-action="hq-dismiss-brief" data-doc="${escapeHtml(item.__docId)}">Dismiss</button>
+            </div>
             <div class="hq-assign-results" data-results-for="${escapeHtml(item.__docId)}"></div>
           </div>
         </div>`).join('')}` : ''}
@@ -6248,6 +6251,18 @@ document.getElementById('section-hq').addEventListener('click', e => {
     return;
   }
   if (action === 'hq-assign-brief') { hqAssignBrief(target.dataset.doc, target.dataset.lead); return; }
+  if (action === 'hq-dismiss-brief') {
+    const docId = target.dataset.doc;
+    (async () => {
+      try {
+        if (LodgeHelmSync.__db) await window.__fb.deleteDoc(window.__fb.doc(LodgeHelmSync.__db, 'inbox', docId));
+      } catch (err) { console.warn('inbox dismiss failed', err); }
+      state.brainInbox = (state.brainInbox || []).filter(i => i.__docId !== docId);
+      showToast('Brief dismissed', 'info');
+      renderHQ();
+    })();
+    return;
+  }
 });
 
 document.getElementById('section-hq').addEventListener('change', e => {

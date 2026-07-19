@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LodgeHelm HQ</title>
+<title>LodgeHelm CRM (Classic)</title>
 <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <!-- Brand-sheet fonts for the HQ workspace (Space Grotesk / Inter / IBM Plex Mono). -->
@@ -48,25 +48,22 @@ input, button, textarea, select { font: inherit; color: inherit; }
 a { color: inherit; text-decoration: none; }
 ul, ol { list-style: none; }
 
-/* ========== DESIGN TOKENS — the green world (one look, everywhere) ==========
-   The brand-sheet world that used to live only inside #section-hq is now THE app:
-   deep safari green page, ink cards, ivory text, amber primary. Both data-theme
-   values map to the same tokens — there is one world, nothing to toggle. */
-:root, [data-theme="light"], [data-theme="dark"] {
-  --color-bg: #143b2e; --color-surface: #1c1c19; --color-surface-2: #201f1b;
-  --color-surface-offset: #262521; --color-surface-offset-2: #2b2a25;
-  --color-surface-dynamic: #33322c; --color-divider: rgba(245,239,230,0.10); --color-border: rgba(245,239,230,0.16);
-  --color-text: #f5efe6; --color-text-muted: #b9b3a6; --color-text-faint: #837e72;
-  --color-text-inverse: #161613;
-  --color-primary: #e0863a; --color-primary-hover: #c76e27; --color-primary-active: #b3601f;
-  --color-primary-highlight: rgba(224,134,58,0.16);
-  --color-warning: #bb653b; --color-warning-highlight: #564942;
-  --color-error: #d163a7; --color-error-highlight: #4c3d46;
-  --color-success: #6daa45; --color-success-highlight: #3a4435;
-  --color-blue: #5591c7; --color-blue-highlight: #3a4550;
-  --color-gold: #e8af34; --color-gold-highlight: #4d4332;
-  --color-orange: #fdab43; --color-orange-highlight: #564b3e;
-  --color-purple: #a86fdf; --color-purple-highlight: #4e4652;
+/* ========== DESIGN TOKENS ========== */
+:root, [data-theme="light"] {
+  --color-bg: #f6f4ee; --color-surface: #faf9f4; --color-surface-2: #fdfcf8;
+  --color-surface-offset: #f1efe8; --color-surface-offset-2: #e9e7df;
+  --color-surface-dynamic: #e3e1d8; --color-divider: #dad8d0; --color-border: #d1cfc6;
+  --color-text: #1c2b24; --color-text-muted: #6f7873; --color-text-faint: #b3bab5;
+  --color-text-inverse: #f7f5ef;
+  --color-primary: #0F5132; --color-primary-hover: #0C4429; --color-primary-active: #0A3A23;
+  --color-primary-highlight: #d7e8df;
+  --color-warning: #964219; --color-warning-highlight: #ddcfc6;
+  --color-error: #a12c7b; --color-error-highlight: #e0ced7;
+  --color-success: #437a22; --color-success-highlight: #d4dfcc;
+  --color-blue: #006494; --color-blue-highlight: #c6d8e4;
+  --color-gold: #d19900; --color-gold-highlight: #e9e0c6;
+  --color-orange: #da7101; --color-orange-highlight: #e7d7c4;
+  --color-purple: #7a39bb; --color-purple-highlight: #dacfde;
   --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
   --radius-xl: 1rem; --radius-full: 9999px;
   --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
@@ -77,15 +74,32 @@ ul, ol { list-style: none; }
   --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
   --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-  --font-display: 'Space Grotesk', 'Inter', sans-serif;
-  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
+  --font-body: 'Satoshi', 'Inter', sans-serif;
   --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.25);
-  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.35);
-  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.45);
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
   --content-narrow: 640px; --content-default: 960px; --content-wide: 1200px;
+}
+[data-theme="dark"] {
+  --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
+  --color-surface-offset: #1d1c1a; --color-surface-offset-2: #22211f;
+  --color-surface-dynamic: #2d2c2a; --color-divider: #262523; --color-border: #393836;
+  --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
+  --color-text-inverse: #2b2a28;
+  --color-primary: #2FA968; --color-primary-hover: #1A7A4C; --color-primary-active: #0F5132;
+  --color-primary-highlight: #16302a;
+  --color-warning: #bb653b; --color-warning-highlight: #564942;
+  --color-error: #d163a7; --color-error-highlight: #4c3d46;
+  --color-success: #6daa45; --color-success-highlight: #3a4435;
+  --color-blue: #5591c7; --color-blue-highlight: #3a4550;
+  --color-gold: #e8af34; --color-gold-highlight: #4d4332;
+  --color-orange: #fdab43; --color-orange-highlight: #564b3e;
+  --color-purple: #a86fdf; --color-purple-highlight: #4e4652;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
 }
 
 /* ========== ANIMATIONS ========== */
@@ -195,32 +209,13 @@ ul, ol { list-style: none; }
 .last-activity { font-size: 0.68rem; color: var(--color-text-faint); margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--color-divider); line-height: 1.4; }
 .theme-toggle { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--color-text-muted); border-radius: var(--radius-md); cursor: pointer; transition: background var(--transition-interactive); }
 .theme-toggle:hover { background: var(--color-surface-offset); color: var(--color-text); }
-/* Back office opener + return-to-HQ (the only two ways in and out of the old CRM) */
-.backoffice-btn { display: inline-flex; align-items: center; gap: var(--space-2); border: 1px solid var(--color-border); background: transparent; color: var(--color-text-muted); border-radius: var(--radius-full); padding: 6px 14px; min-height: 36px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color var(--transition-interactive), border-color var(--transition-interactive), transform 160ms var(--ease-out-strong); }
-.backoffice-btn:hover { color: var(--color-text); border-color: var(--color-primary); }
-.backoffice-btn:active { transform: scale(0.97); }
-.backoffice-btn i { width: 14px; height: 14px; }
-.hq-home-btn { display: inline-flex; align-items: center; gap: var(--space-1); border: none; background: var(--color-primary); color: var(--color-text-inverse); border-radius: var(--radius-full); padding: 6px 14px; min-height: 36px; font-family: 'Space Grotesk', sans-serif; font-size: var(--text-xs); font-weight: 600; cursor: pointer; white-space: nowrap; transition: background var(--transition-interactive), transform 160ms var(--ease-out-strong); }
-.hq-home-btn:hover { background: var(--color-primary-hover); }
-.hq-home-btn:active { transform: scale(0.97); }
-.hq-home-btn i { width: 14px; height: 14px; }
-.hq-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.14em; color: var(--color-primary); }
-@media (max-width: 768px) {
-  .backoffice-btn span { display: none; }
-  .backoffice-btn { padding: 6px 10px; }
-}
-@media (max-width: 480px) {
-  .top-bar-logo .wordmark { display: none; }
-}
+.hamburger { display: none; width: 44px; height: 44px; align-items: center; justify-content: center; border: none; background: transparent; color: var(--color-text); border-radius: var(--radius-md); cursor: pointer; }
 
-/* Back-office drawer (the old CRM sections live here, on every screen size).
-   Hidden by default; the top-bar Back office button slides it over the app. */
-.sidebar { width: 292px; min-width: 292px; background: var(--color-surface); border-right: 1px solid var(--color-divider); display: flex; flex-direction: column; height: 100dvh; position: fixed; top: 0; left: -304px; z-index: 90; overflow-y: auto; transition: left 250ms var(--ease-drawer); }
-.sidebar.open { left: 0; box-shadow: var(--shadow-lg); }
-.sidebar-header { padding: var(--space-5) var(--space-5) var(--space-4); display: flex; align-items: center; gap: var(--space-3); border-bottom: 1px solid oklch(from var(--color-text) l c h / 0.06); flex-wrap: wrap; }
-.sidebar-header svg { width: 24px; height: 24px; flex-shrink: 0; color: var(--color-primary); }
-.sidebar-header span { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); }
-.sidebar-caption { flex-basis: 100%; font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.45; margin-top: var(--space-1); }
+/* Sidebar */
+.sidebar { width: 240px; min-width: 240px; background: var(--color-surface); border-right: 1px solid oklch(from var(--color-text) l c h / 0.08); display: flex; flex-direction: column; height: 100dvh; position: sticky; top: 0; overflow-y: auto; }
+.sidebar-header { padding: var(--space-6) var(--space-5); display: flex; align-items: center; gap: var(--space-3); border-bottom: 1px solid oklch(from var(--color-text) l c h / 0.06); }
+.sidebar-header svg { width: 28px; height: 28px; flex-shrink: 0; color: var(--color-primary); }
+.sidebar-header span { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); }
 .sidebar-nav { flex: 1; padding: var(--space-4) var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
 .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; color: var(--color-text-muted); cursor: pointer; transition: background var(--transition-interactive), color var(--transition-interactive); min-height: 44px; position: relative; user-select: none; border: none; background: transparent; width: 100%; text-align: left; }
 .nav-item:hover { background: var(--color-surface-offset); color: var(--color-text); }
@@ -230,22 +225,16 @@ ul, ol { list-style: none; }
 .nav-badge-teal { background: var(--color-primary-highlight); color: var(--color-primary); }
 .nav-badge-warning { background: var(--color-warning-highlight); color: var(--color-warning); }
 .sidebar-footer { padding: var(--space-4) var(--space-5); border-top: 1px solid oklch(from var(--color-text) l c h / 0.06); font-size: var(--text-xs); color: var(--color-text-faint); }
-.nav-item-hq { color: var(--color-primary); font-weight: 600; margin-bottom: var(--space-2); border-bottom: 1px solid oklch(from var(--color-text) l c h / 0.06); border-radius: var(--radius-md) var(--radius-md) 0 0; }
-.nav-item-hq:hover { color: var(--color-primary); }
 
 /* Main content */
 .main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .main-content { flex: 1; padding: var(--space-8); overflow-y: auto; }
-/* Only the TOP-LEVEL app sections toggle — nested <section>s (e.g. the HQ desk regions)
-   must stay visible, hence the child combinator. */
-.main-content > section { display: none; }
-.main-content > section.active { display: block; }
+.main-content section { display: none; }
+.main-content section.active { display: block; }
 
 /* ========== BUTTONS ========== */
-.btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; font-family: var(--font-body); cursor: pointer; border: none; transition: background var(--transition-interactive), color var(--transition-interactive), box-shadow var(--transition-interactive), transform 160ms var(--ease-out-strong); min-height: 44px; white-space: nowrap; }
-.btn:active { transform: scale(0.97); }
-h1, h2, h3 { letter-spacing: -0.02em; }
-.btn-primary { background: var(--color-primary); color: var(--color-text-inverse); }
+.btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; font-family: var(--font-body); cursor: pointer; border: none; transition: background var(--transition-interactive), color var(--transition-interactive), box-shadow var(--transition-interactive); min-height: 44px; white-space: nowrap; }
+.btn-primary { background: var(--color-primary); color: white; }
 .btn-primary:hover { background: var(--color-primary-hover); }
 .btn-primary:active { background: var(--color-primary-active); }
 .btn-secondary { background: var(--color-surface-offset); color: var(--color-text); border: 1px solid oklch(from var(--color-text) l c h / 0.12); }
@@ -561,6 +550,10 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   .crm-row { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 768px) {
+  .sidebar { position: fixed; left: -260px; z-index: 90; transition: left 250ms cubic-bezier(0.16, 1, 0.3, 1); width: 260px; min-width: 260px; }
+  .sidebar.open { left: 0; }
+  .hamburger { display: flex; }
+  .top-bar-logo span { display: none; }
   .main-content { padding: var(--space-4); }
   .section-header { flex-direction: column; align-items: flex-start; }
   .filter-bar { flex-direction: column; align-items: stretch; }
@@ -598,7 +591,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .justify-between { justify-content: space-between; }
 
 /* ========== OPPORTUNITY SCORE BADGE ========== */
-.opp-score-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 0.7rem; font-weight: 700; color: var(--color-text-inverse); flex-shrink: 0; }
+.opp-score-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 0.7rem; font-weight: 700; color: white; flex-shrink: 0; }
 .opp-score-badge.score-high { background: var(--color-success); }
 .opp-score-badge.score-mid { background: var(--color-orange); }
 .opp-score-badge.score-low { background: var(--color-text-faint); }
@@ -612,13 +605,13 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 @media (hover: hover) and (pointer: fine) {
   .country-chip:not(.active):hover { border-color: var(--color-primary); color: var(--color-text); }
 }
-.country-chip.active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-inverse); }
+.country-chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
 .country-chip .chip-count { font-size: 0.65rem; line-height: 1.4; padding: 0 6px; border-radius: var(--radius-full); background: var(--color-surface-dynamic); }
 .country-chip.active .chip-count { background: rgba(255, 255, 255, 0.22); }
 .call-row { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); }
 .call-row.called { opacity: 0.6; }
 .call-rank { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-text-faint); min-width: 2.5ch; text-align: center; }
-.call-info-score { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; color: var(--color-text-inverse); flex-shrink: 0; line-height: 1; }
+.call-info-score { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; color: white; flex-shrink: 0; line-height: 1; }
 .call-info-score.score-high { background: var(--color-success); }
 .call-info-score.score-mid { background: var(--color-orange); }
 .call-info-score.score-low { background: var(--color-text-faint); }
@@ -837,8 +830,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .hq-lead-head .lodge { font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; line-height: 1.1; font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; }
 .hq-lead-sub { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; color: var(--hq-muted); font-size: 13.5px; }
 .hq-head-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
-.hq-btn { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13.5px; background: var(--hq-amber); color: var(--hq-ink-deep); border: none; border-radius: 999px; padding: 8px 16px; cursor: pointer; transition: background .15s ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); display: inline-flex; align-items: center; gap: 6px; }
-.hq-btn:active { transform: scale(0.97); }
+.hq-btn { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13.5px; background: var(--hq-amber); color: var(--hq-ink-deep); border: none; border-radius: 999px; padding: 8px 16px; cursor: pointer; transition: background .15s ease; display: inline-flex; align-items: center; gap: 6px; }
 .hq-btn:hover { background: var(--hq-amber-deep); }
 .hq-btn.ghost { background: none; border: 1px solid var(--hq-hairline); color: var(--hq-ivory); }
 .hq-btn.ghost:hover { border-color: var(--hq-amber); color: var(--hq-amber); background: none; }
@@ -847,7 +839,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .hq-stagepills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
 .hq-stagepill { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 5px 12px; cursor: pointer; transition: all .15s ease; }
 .hq-stagepill.active { background: var(--hq-ink); border-color: var(--hq-amber); color: var(--hq-amber); }
-.hq-tabs { position: sticky; top: 0; z-index: 5; background: var(--hq-green); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin: 6px 0 20px; }
+.hq-tabs { position: sticky; top: 0; z-index: 5; background: var(--hq-green); display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin: 6px 0 20px; }
 .hq-tab { background: none; border: 1px solid var(--hq-hairline); border-radius: 11px; padding: 8px 6px; text-align: center; cursor: pointer; color: var(--hq-ivory); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: -0.01em; transition: all .15s ease; }
 .hq-tab:hover { border-color: rgba(224,134,58,0.5); }
 .hq-tab.active { background: var(--hq-ink); border-color: var(--hq-amber); color: var(--hq-amber); }
@@ -963,59 +955,6 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 #section-hq .ns-actions .btn-secondary, #section-hq .ns-actions .btn-ghost { background: none; color: var(--hq-ivory); border: 1px solid var(--hq-hairline); }
 #section-hq .ns-actions .btn i, #section-hq .ns-actions .btn svg { width: 13px; height: 13px; }
 
-/* ---- guided day: morning screen, session band, coach strip ---- */
-#section-hq .hq-morning-kicker { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hq-amber); margin-bottom: 10px; }
-#section-hq .hq-greet { font-family: 'Space Grotesk', sans-serif; font-size: clamp(26px, 4vw, 34px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px; }
-#section-hq .hq-day-number { font-size: 17px; line-height: 1.5; color: var(--hq-muted); max-width: 46ch; margin-bottom: 6px; }
-#section-hq .hq-day-number b { color: var(--hq-ivory); font-weight: 600; }
-#section-hq .hq-day-number .amber { color: var(--hq-amber); font-weight: 600; }
-#section-hq .hq-daychips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 20px; }
-#section-hq .hq-start-btn { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16.5px; background: var(--hq-amber); color: var(--hq-ink-deep); border: none; border-radius: 999px; padding: 15px 30px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: background .15s ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); box-shadow: 0 12px 32px rgba(224,134,58,0.28); }
-#section-hq .hq-start-btn:hover { background: var(--hq-amber-deep); }
-#section-hq .hq-start-btn:active { transform: scale(0.97); }
-#section-hq .hq-start-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 0 8px; }
-#section-hq .hq-start-sub { color: var(--hq-faint); font-size: 12.5px; }
-#section-hq .hq-coach { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 14px; padding: 16px 18px 14px; margin: 22px 0 8px; }
-#section-hq .hq-coach-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-#section-hq .hq-coach ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: coach; }
-#section-hq .hq-coach li { counter-increment: coach; display: flex; gap: 11px; align-items: baseline; font-size: 14px; line-height: 1.5; color: rgba(245,239,230,0.88); }
-#section-hq .hq-coach li::before { content: counter(coach); font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--hq-ink-deep); background: var(--hq-amber); width: 19px; height: 19px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; transform: translateY(2px); }
-#section-hq .hq-coach li b { color: var(--hq-ivory); }
-#section-hq .hq-coach-dismiss { background: none; border: none; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--hq-muted); padding: 4px 2px; }
-#section-hq .hq-coach-dismiss:hover { color: var(--hq-ivory); }
-#section-hq .hq-session-band { display: flex; align-items: center; gap: 12px; background: var(--hq-ink-deep); border: 1px solid rgba(224,134,58,0.45); border-radius: 999px; padding: 7px 8px 7px 18px; margin-bottom: 16px; flex-wrap: wrap; }
-#section-hq .hq-session-band .hq-mono { color: var(--hq-amber); white-space: nowrap; }
-#section-hq .hq-progress { flex: 1; min-width: 60px; height: 4px; border-radius: 999px; background: rgba(245,239,230,0.12); overflow: hidden; }
-#section-hq .hq-progress-fill { height: 100%; background: var(--hq-amber); border-radius: 999px; transition: width 300ms cubic-bezier(0.23, 1, 0.32, 1); }
-#section-hq .hq-resume-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--hq-ink-deep); border: 1px solid var(--hq-hairline); border-radius: 999px; padding: 6px 8px 6px 16px; margin-bottom: 14px; flex-wrap: wrap; }
-#section-hq .hq-resume-bar .t { font-size: 13px; color: var(--hq-muted); }
-#section-hq .hq-eod-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 18px 0; }
-@media (prefers-reduced-motion: no-preference) {
-  #section-hq .hq-work-inner.hq-adv { animation: fadeSlideIn 220ms cubic-bezier(0.23, 1, 0.32, 1); }
-}
-#section-hq .hq-tab .cap { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hq-faint); margin-top: 3px; }
-#section-hq .hq-tab.active .cap { color: rgba(224,134,58,0.75); }
-
-/* ---- one-desk layout: script front-and-centre, the lodge beside it, nothing hidden ---- */
-#section-hq .hq-work-inner.hq-wide { max-width: 1280px; }
-#section-hq .hq-cols { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 22px; align-items: start; }
-#section-hq .hq-col-main { min-width: 0; }
-#section-hq .hq-col-side { position: sticky; top: 12px; max-height: calc(100dvh - 84px); overflow-y: auto; padding-bottom: 12px; min-width: 0; }
-#section-hq .hq-col-side::-webkit-scrollbar { width: 5px; }
-#section-hq .hq-desk-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; color: var(--hq-faint); margin: 26px 0 8px; padding-top: 14px; border-top: 1px solid var(--hq-hairline); }
-#section-hq .hq-jumpbar { display: none; }
-@media (max-width: 1150px) {
-  #section-hq .hq-cols { grid-template-columns: 1fr; }
-  #section-hq .hq-col-side { position: static; max-height: none; }
-  #section-hq .hq-jumpbar { display: flex; gap: 6px; flex-wrap: wrap; position: sticky; top: 0; z-index: 6; background: var(--hq-green); padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin-bottom: 16px; }
-}
-#section-hq .hq-details { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; margin-top: 12px; overflow: hidden; }
-#section-hq .hq-details summary { cursor: pointer; padding: 13px 18px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: var(--hq-ivory); list-style: none; display: flex; align-items: center; gap: 8px; }
-#section-hq .hq-details summary::-webkit-details-marker { display: none; }
-#section-hq .hq-details summary::before { content: '›'; color: var(--hq-amber); font-size: 16px; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
-#section-hq .hq-details[open] summary::before { transform: rotate(90deg); }
-#section-hq .hq-details .hq-details-body { padding: 0 18px 16px; }
-
 /* ---- auth overlay ---- */
 .hq-auth-overlay { position: fixed; inset: 0; z-index: 10000; background: #143b2e; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .hq-auth-card { width: 100%; max-width: 360px; background: #1a1a17; border: 1px solid rgba(245,239,230,0.1); border-radius: 18px; padding: 28px 26px; color: #f5efe6; font-family: 'Inter', sans-serif; }
@@ -1040,9 +979,8 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   .hq-rail { border-right: none; }
   .hq-back { display: inline-flex; margin-bottom: 12px; }
   .hq-work-inner { padding: 16px 14px 80px; }
-  .hq-tabs { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .hq-tabs { grid-template-columns: repeat(5, 1fr); gap: 4px; }
   .hq-tab { font-size: 11.5px; padding: 7px 2px; border-radius: 9px; }
-  #section-hq .hq-tab .cap { display: none; }
   .hq-tiers { grid-template-columns: 1fr; }
   .hq-dash-stats { grid-template-columns: 1fr; }
 }
@@ -1112,21 +1050,20 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 
 <!-- App Layout -->
 <div class="app-layout">
-  <!-- Back-office drawer — the old CRM, one tap away, never in the way -->
-  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Back office">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
     <div class="sidebar-header">
       <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LodgeHelm logo">
         <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
         <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
       </svg>
-      <span>Back office</span>
-      <div class="sidebar-caption">The old CRM lives here — lists, boards and reports. Your calling day stays on HQ.</div>
+      <span>LodgeHelm</span>
     </div>
     <nav class="sidebar-nav" aria-label="Sections">
-      <button class="nav-item nav-item-hq" data-section="hq" aria-current="false">
-        <i data-lucide="arrow-left" aria-hidden="true"></i>
-        Back to HQ
+      <button class="nav-item" data-section="hq" aria-current="false">
+        <i data-lucide="radio-tower" aria-hidden="true"></i>
+        HQ
         <span class="nav-badge nav-badge-teal" id="badge-hq" aria-live="polite" style="display:none;">0</span>
       </button>
       <button class="nav-item" data-section="today" aria-current="false">
@@ -1184,49 +1121,45 @@ h1, h2, h3 { letter-spacing: -0.02em; }
         <i data-lucide="activity" aria-hidden="true"></i>
         Activity Monitor
       </button>
-      <a class="nav-item" href="crm-classic.html" target="_blank" rel="noopener" style="margin-top:var(--space-2);border-top:1px solid oklch(from var(--color-text) l c h / 0.06);border-radius:0 0 var(--radius-md) var(--radius-md);">
-        <i data-lucide="external-link" aria-hidden="true"></i>
-        The old CRM — classic look
-      </a>
     </nav>
     <div class="sidebar-footer">
       <div id="sidebar-export-area"></div>
       <button class="sidebar-link" id="sidebar-signatures-btn">Email Signatures</button>
       <div id="sidebar-reset-area"></div>
-      LodgeHelm HQ v2.0
+      LodgeHelm CRM Classic (the original look, live data)
     </div>
   </aside>
 
   <!-- Main wrapper -->
   <div class="main-wrapper">
-    <!-- Top bar — HQ identity on the left, back office tucked on the right -->
+    <!-- Top bar -->
     <header class="top-bar">
-      <div class="top-bar-logo" id="topbar-home" role="button" tabindex="0" aria-label="Back to HQ" style="cursor:pointer;">
+      <button class="hamburger" id="hamburger-btn" aria-label="Open navigation menu">
+        <i data-lucide="menu" aria-hidden="true"></i>
+      </button>
+      <div class="top-bar-logo">
         <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
           <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
         </svg>
-        <span class="wordmark">LodgeHelm</span>
-        <span class="hq-tag">HQ</span>
+        <span>LodgeHelm</span>
       </div>
-      <button class="hq-home-btn" id="back-to-hq" style="display:none;">
-        <i data-lucide="arrow-left" aria-hidden="true"></i> HQ
-      </button>
       <div class="top-bar-search">
         <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
-        <input type="search" id="global-search" placeholder="Find any lodge…" aria-label="Search leads">
+        <input type="search" id="global-search" placeholder="Search leads..." aria-label="Search leads">
       </div>
-      <div class="top-bar-user" id="top-bar-user" style="display:none;">
+      <div class="top-bar-user" id="top-bar-user">
         Signed in as: <strong id="current-user-display"></strong>
+        <!-- Single-user mode: Switch button hidden -->
         <a id="switch-user-btn" role="button" tabindex="-1" style="display:none;" aria-hidden="true">Switch</a>
       </div>
       <div class="top-bar-actions">
         <button class="theme-toggle" id="refresh-cloud-btn" aria-label="Refresh leads from cloud" title="Refresh from cloud (leads load once per session)">
           <i data-lucide="refresh-cw" aria-hidden="true"></i>
         </button>
-        <button class="backoffice-btn" id="hamburger-btn" aria-label="Open the back office">
-          <i data-lucide="folder-open" aria-hidden="true"></i><span>Back office</span>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+          <i data-lucide="sun" aria-hidden="true"></i>
         </button>
       </div>
     </header>
@@ -1363,8 +1296,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 const state = {
   leads: [],
   activeSection: 'hq',
-  hq: { leadId: null, tab: 'crib', stageFilter: 'all', country: 'all', railCap: 40, search: '', track: 'owner', pane: 'work' },
-  hqSession: null,
+  hq: { leadId: null, tab: 'call', stageFilter: 'all', search: '', track: 'owner', pane: 'rail' },
   brainInbox: [],
   brainPatterns: null,
   crmView: 'list',
@@ -2893,9 +2825,6 @@ function resetAllData() {
   localStorage.removeItem('lodgehelm-view-prefs');
   localStorage.removeItem('lodgehelm-chat-history');
   localStorage.removeItem('lodgehelm-learnings');
-  // Guided-day state must not outlive the leads its ids point at.
-  localStorage.removeItem('lodgehelm-hq-session');
-  localStorage.removeItem('lodgehelm-hq-coach');
   location.reload();
 }
 
@@ -3053,10 +2982,7 @@ function showToast(message, type = 'success') {
 function showSection(sectionId) {
   state.activeSection = sectionId;
   document.getElementById('main-content').classList.toggle('hq-active', sectionId === 'hq');
-  // The top-bar "← HQ" button only exists while you're in the back office.
-  const backBtn = document.getElementById('back-to-hq');
-  if (backBtn) backBtn.style.display = sectionId === 'hq' ? 'none' : 'inline-flex';
-  document.querySelectorAll('.main-content > section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.main-content section').forEach(s => s.classList.remove('active'));
   const sec = document.getElementById('section-' + sectionId);
   if (sec) sec.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => {
@@ -3811,7 +3737,7 @@ function renderLeadBank() {
           ${renderLastActivity(l)}
           <div class="lead-card-actions">
             <button class="btn btn-ghost btn-sm" data-action="view-lead" data-id="${l.id}"><i data-lucide="eye" aria-hidden="true"></i> View</button>
-            ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:var(--color-text-inverse)" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
+            ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
             ${waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white" data-action="whatsapp-lead" data-id="${l.id}"><i data-lucide="message-circle" aria-hidden="true"></i> WhatsApp</button>` : ''}
             <button class="btn btn-ghost btn-sm" data-action="generate-email" data-id="${l.id}"><i data-lucide="mail" aria-hidden="true"></i> Draft</button>
             <button class="btn btn-primary btn-sm" data-action="qualify" data-id="${l.id}"><i data-lucide="check-circle" aria-hidden="true"></i> Force-qualify</button>
@@ -4067,7 +3993,7 @@ function renderQualifiedLeads() {
           ${renderClaimBadge(l)}
           ${renderLastActivity(l)}
           <div class="lead-card-actions">
-            ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:var(--color-text-inverse)" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
+            ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
             ${waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white" data-action="whatsapp-lead" data-id="${l.id}"><i data-lucide="message-circle" aria-hidden="true"></i> WhatsApp</button>` : ''}
             <button class="btn btn-ghost btn-sm" data-action="generate-email" data-id="${l.id}"><i data-lucide="mail" aria-hidden="true"></i> Draft</button>
             <button class="btn btn-ghost btn-sm" data-action="view-qual" data-id="${l.id}"><i data-lucide="eye" aria-hidden="true"></i> View Full</button>
@@ -4218,7 +4144,7 @@ function renderCallList() {
             ${renderLastActivity(l)}
           </div>
           <div class="call-actions">
-            <button class="btn btn-sm" style="background:var(--color-primary);color:var(--color-text-inverse)" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>
+            <button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>
             ${waLink(l) ? `<button class="btn btn-sm" style="background:#25D366;color:white" data-action="whatsapp-lead" data-id="${l.id}"><i data-lucide="message-circle" aria-hidden="true"></i> WhatsApp</button>` : ''}
             <select class="form-select call-outcome-select" data-action="log-call" data-id="${l.id}" aria-label="Log call outcome for ${escapeHtml(l.businessName)}" style="font-size:var(--text-xs);min-width:150px;">
               <option value="" selected>Log call…</option>
@@ -4451,7 +4377,7 @@ function renderCRMList(leads) {
         ${renderClaimBadge(l)}
         ${renderLastActivity(l)}
         <div class="crm-actions">
-          ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:var(--color-text-inverse)" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
+          ${(l.phones && l.phones.length) ? `<button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="call-lead" data-id="${l.id}"><i data-lucide="phone" aria-hidden="true"></i> Call</button>` : ''}
           <button class="btn btn-ghost btn-sm btn-generate-email" data-action="generate-email" data-id="${l.id}"><i data-lucide="mail" aria-hidden="true"></i> Generate Email</button>
           ${showBrief ? `<button class="btn btn-secondary btn-sm" data-action="generate-brief" data-id="${l.id}"><i data-lucide="clipboard-list" aria-hidden="true"></i> Generate Brief</button>` : ''}
           <button class="btn btn-ghost btn-sm" data-action="archive-lead" data-id="${l.id}" data-disposition="archived"><i data-lucide="archive" aria-hidden="true"></i> Archive</button>
@@ -4823,7 +4749,7 @@ function renderEmailModal(lead) {
           <button class="btn btn-sm" style="background:#1a73e8;color:white" data-action="send-gmail" data-id="${lead.id}"><i data-lucide="send" aria-hidden="true"></i> Send email</button>
           <button class="btn btn-primary btn-sm" data-action="copy-email"><i data-lucide="copy" aria-hidden="true"></i> Copy Email</button>
           <button class="btn btn-ghost btn-sm" data-action="copy-subject"><i data-lucide="copy" aria-hidden="true"></i> Copy Subject</button>
-          <button class="btn btn-sm" style="background:var(--color-primary);color:var(--color-text-inverse)" data-action="ai-draft" data-id="${lead.id}"><i data-lucide="sparkles" aria-hidden="true"></i> Write with AI</button>
+          <button class="btn btn-sm" style="background:var(--color-primary);color:white" data-action="ai-draft" data-id="${lead.id}"><i data-lucide="sparkles" aria-hidden="true"></i> Write with AI</button>
           <button class="btn btn-ghost btn-sm" data-action="standard-draft" data-id="${lead.id}"><i data-lucide="file-text" aria-hidden="true"></i> Standard</button>
         </div>
       </div>
@@ -5613,12 +5539,12 @@ const HQ_KICKOFF_QS = [
   { num: '08', q: 'Anything the AI must NEVER say or promise?', tag: 'Protects you', hint: 'e.g. guaranteed sightings, discounts. Every lodge has one landmine — find it before the AI does.', ansKey: 'k_never', ph: 'e.g. never guarantee sightings; no discount talk' }
 ];
 const HQ_COLD_PREP = [
-  { q: 'Their record open — description, nº of camps, FunnelLeak guess', hint: 'It\'s all in the lodge panel beside this script. You call AS someone who\'s done the research — this is the research.' },
+  { q: 'Their record open — description, nº of camps, FunnelLeak guess', hint: 'It\'s all on the Crib tab. You call AS someone who\'s done the research — this is the research.' },
   { q: 'Website or SafariBookings profile glanced', hint: '30 seconds: what channels they\'re on, what the lodge looks like, anything to mention by name.' },
-  { q: 'Crib line typed — the box beside this script', hint: 'Park · camps · channels · leak guess — so it\'s in front of you on every call.' }
+  { q: 'Crib line typed on the Crib tab', hint: 'Park · camps · channels · leak guess — so it\'s in front of you on every call.' }
 ];
 const HQ_CLOSE_PREP = [
-  { q: 'Their answers open', hint: 'Everything from discovery is in \u201cEverything they\u2019ve told you\u201d, beside this script.' },
+  { q: 'Their answers open — Answers tab', hint: 'Everything from discovery, one tab away.' },
   { q: 'Their leak answer, memorised verbatim', hint: 'You open with it: "<span class="hq-tok" data-ans="leak" data-ph="fill it in on Discovery"></span>"' },
   { q: 'Demo ready — their lodge name in the sample data', hint: 'e.g. quote header reads their lodge, not "Mara Plains Camp".' },
   { q: 'Know which tier fits + your setup fee number', hint: 'Decide BEFORE the call — never work out pricing live.' }
@@ -5678,7 +5604,7 @@ function hqObjectionsHtml(list) {
   return list.map(o => `<div class="hq-objection"><div class="oq">${o.q}</div><div class="oa">${o.a}</div></div>`).join('');
 }
 
-// ---- WhatsApp templates (Send section) ----
+// ---- WhatsApp templates (Send tab) ----
 const HQ_TEMPLATES = {
   first_owner: { label: 'First touch · owner-run lodge — after a cold call or voicemail (no link, no emojis)', text: 'Hi {name}, I came across {lodge} — really like what you’ve built.\nQuick question: when you’re out guiding or full-on with guests, who’s catching the booking enquiries that come in?\nI work on a tool that keeps every enquiry in one place and chases the quotes for you so none go cold.\nWould a short look be useful?\nMelusi, LodgeHelm' },
   first_gm: { label: 'First touch · scattered-channels angle (GM / reservations)', text: 'Hi {name}, when an enquiry comes to {lodge} — email, the website form, WhatsApp — does it all end up in one place, or in a few different inboxes?\nThe lodges I talk to lose the odd booking simply because it landed in a channel no one checked that day.\nI help pull every enquiry into one shared inbox and pipeline so nothing slips.\nWould a 2-minute demo be handy?\nMelusi, LodgeHelm' },
@@ -5755,7 +5681,6 @@ function hqQueueLeads() {
   const s = state.hq || {};
   let base = hqActiveLeads();
   if (s.stageFilter && s.stageFilter !== 'all') base = base.filter(l => hqStageOf(l) === s.stageFilter);
-  if (s.country && s.country !== 'all') base = base.filter(l => (l.country || 'Unknown') === s.country);
   const due = hqDueLeads(base);
   const dueIds = new Set(due.map(l => l.id));
   const rest = base.filter(l => !dueIds.has(l.id))
@@ -5773,120 +5698,23 @@ function hqSearchLeads(q) {
   }).slice(0, 30);
 }
 
-// ---- guided day session (Start calling → one lead at a time → end-of-day) ----
-// Persisted to its own localStorage key so a refresh mid-morning never loses the day.
-const HQ_SESSION_KEY = 'lodgehelm-hq-session';
-// Fresh date on every call — the module-level todayISO goes stale in a tab left open
-// past midnight, which would silently discard a small-hours session on the next load.
-function hqTodayISO() { return new Date().toISOString().split('T')[0]; }
-function hqLoadSession() {
-  try {
-    const s = JSON.parse(localStorage.getItem(HQ_SESSION_KEY) || 'null');
-    if (s && s.date === hqTodayISO() && Array.isArray(s.ids) && s.ids.length
-        && Number.isInteger(s.idx) && s.idx >= 0 && (s.finished || s.idx < s.ids.length)) return s;
-    if (s) localStorage.removeItem(HQ_SESSION_KEY);
-  } catch (_) {}
-  return null;
-}
-function hqSaveSession() {
-  try {
-    if (state.hqSession) localStorage.setItem(HQ_SESSION_KEY, JSON.stringify(state.hqSession));
-    else localStorage.removeItem(HQ_SESSION_KEY);
-  } catch (e) { console.warn('HQ session not persisted:', e); }
-}
-// A session lead can vanish mid-day (clone-collapse merge, tombstone, delete). Walk the
-// pointer past any dead ids so Resume/Next can never strand the day on a ghost.
-function hqSessionPruneDead() {
-  const ss = state.hqSession;
-  if (!ss || ss.finished) return;
-  const alive = id => { const l = getLeadById(id); return l && !l._deleted; };
-  while (ss.idx < ss.ids.length && !alive(ss.ids[ss.idx])) ss.idx += 1;
-  if (ss.idx >= ss.ids.length) { ss.finished = true; if (state.hq) state.hq.leadId = null; }
-  hqSaveSession();
-}
-// Fresh cold leads worth dialling: never contacted, callable, best data first.
-function hqFreshLeads(limit) {
-  const dueIds = new Set(hqDueLeads().map(l => l.id));
-  return hqActiveLeads()
-    .filter(l => !dueIds.has(l.id) && hqStageOf(l) === 'cold'
-      && !(l.crm && l.crm.dateLastContact)
-      && ((l.phones && l.phones[0] && l.phones[0].number) || hqWaNumber(l)))
-    .sort((a, b) => (((b.crm || {}).dataScore) || 0) - (((a.crm || {}).dataScore) || 0))
-    .slice(0, limit || 10);
-}
-function hqStartSession(source) {
-  const list = source === 'fresh' ? hqFreshLeads(10) : hqDueLeads();
-  if (!list.length) { showToast('Nothing to call right now', 'info'); return; }
-  state.hqSession = { date: hqTodayISO(), source: source || 'due', ids: list.map(l => l.id), idx: 0, outcomes: {} };
-  hqSaveSession();
-  state.hq.leadId = state.hqSession.ids[0];
-  state.hq.tab = 'crib';
-  state.hq.pane = 'work';
-  state.hq.__adv = true;
-  renderHQ();
-}
-function hqSessionCurrentId() {
-  hqSessionPruneDead();
-  const ss = state.hqSession;
-  return (ss && !ss.finished) ? ss.ids[ss.idx] : null;
-}
-function hqAdvanceSession() {
-  const ss = state.hqSession;
-  if (!ss || ss.finished) return;
-  ss.idx += 1;
-  hqSessionPruneDead();
-  if (ss.finished) {
-    state.hq.leadId = null;
-  } else {
-    state.hq.leadId = ss.ids[ss.idx];
-    state.hq.tab = 'crib';
-  }
-  hqSaveSession();
-  state.hq.pane = 'work';
-  state.hq.__adv = true;
-  renderHQ();
-}
-function hqEndSession() {
-  state.hqSession = null;
-  hqSaveSession();
-  state.hq.leadId = null;
-  state.hq.pane = 'work';
-  renderHQ();
-}
-
 // ---- render: shell ----
 function renderHQ() {
   const c = document.getElementById('hq-content');
   if (!c) return;
-  const s = state.hq || (state.hq = { leadId: null, tab: 'crib', stageFilter: 'all', country: 'all', railCap: 40, search: '', track: 'owner', pane: 'work' });
-  // Where in the world — chips mirror the old Call List's location filter.
-  const hqCountryChips = (() => {
-    let base = hqActiveLeads();
-    if (s.stageFilter && s.stageFilter !== 'all') base = base.filter(l => hqStageOf(l) === s.stageFilter);
-    const m = new Map();
-    base.forEach(l => { const c = l.country || 'Unknown'; m.set(c, (m.get(c) || 0) + 1); });
-    const top = Array.from(m.entries()).sort((a, b) => b[1] - a[1]).slice(0, 9);
-    if (s.country && s.country !== 'all' && !top.some(([c]) => c === s.country)) top.push([s.country, m.get(s.country) || 0]);
-    return top;
-  })();
+  const s = state.hq || (state.hq = { leadId: null, tab: 'call', stageFilter: 'all', search: '', track: 'owner', pane: 'rail' });
   const lead = s.leadId ? getLeadById(s.leadId) : null;
   if (s.leadId && !lead) { s.leadId = null; }
-  // The workspace (morning screen / current call) is the default view — the rail is the
-  // secondary pane on mobile, not the front door.
-  const paneCls = s.pane === 'rail' ? 'pane-rail' : 'pane-work';
+  const paneCls = (lead && s.pane === 'work') ? 'pane-work' : 'pane-rail';
   c.innerHTML = `
     <div class="hq-shell ${paneCls}">
       <aside class="hq-rail">
         <div class="hq-rail-head">
-          <div class="hq-rail-title"><span class="t">Call list</span><span class="hq-mono">HQ</span></div>
+          <div class="hq-rail-title"><span class="t">Pipeline</span><span class="hq-mono">HQ</span></div>
           <input type="search" class="hq-search" id="hq-search-input" placeholder="Search any lead…" value="${escapeHtml(s.search || '')}" autocomplete="off">
           <div class="hq-chips">
             <button class="hq-chip${s.stageFilter === 'all' ? ' active' : ''}" data-action="hq-stage-filter" data-stage="all">All</button>
             ${HQ_STAGES.map(st => `<button class="hq-chip${s.stageFilter === st.key ? ' active' : ''}" data-action="hq-stage-filter" data-stage="${st.key}">${st.name.split(' ')[0]}</button>`).join('')}
-          </div>
-          <div class="hq-chips" style="margin-top:6px;">
-            <button class="hq-chip${(!s.country || s.country === 'all') ? ' active' : ''}" data-action="hq-country-filter" data-country="all">Everywhere</button>
-            ${hqCountryChips.map(([c, n]) => `<button class="hq-chip${s.country === c ? ' active' : ''}" data-action="hq-country-filter" data-country="${escapeHtml(c)}">${escapeHtml(c)} · ${n}</button>`).join('')}
           </div>
         </div>
         <div class="hq-rail-list" id="hq-rail-list"></div>
@@ -5895,12 +5723,6 @@ function renderHQ() {
     </div>`;
   hqRenderRailList();
   hqRenderWorkspace();
-  // One-shot entrance animation when the guided day hands over the next call.
-  if (s.__adv) {
-    const inner = document.getElementById('hq-work-inner');
-    if (inner) inner.classList.add('hq-adv');
-    s.__adv = false;
-  }
   lucide.createIcons({ nodes: [c] });
 }
 
@@ -5911,21 +5733,11 @@ function hqLeadRow(l, opts) {
   const duePill = (due !== null && due <= 0)
     ? `<span class="hq-pill overdue">${due < 0 ? Math.abs(due) + 'd overdue' : 'due today'}</span>` : '';
   const nsLabel = (l.crm && l.crm.nextStep && l.crm.nextStep.label) ? `<span class="hq-pill">${escapeHtml(l.crm.nextStep.label.slice(0, 26))}</span>` : '';
-  // Guided-day markers: where this lodge sits in today's run.
-  let dayPill = '';
-  const ss = state.hqSession;
-  if (ss && !ss.finished) {
-    const pos = ss.ids.indexOf(l.id);
-    if (pos > -1 && pos < ss.idx) dayPill = '<span class="hq-pill" style="color:#9fca8a;border-color:rgba(140,190,110,0.45);">✓ done</span>';
-    else if (pos === ss.idx) dayPill = '<span class="hq-pill amber">up now</span>';
-  }
-  const score = (typeof getOpportunityScore === 'function') ? getOpportunityScore(l) : 0;
   return `
     <button class="hq-lead${s.leadId === l.id ? ' active' : ''}" data-action="hq-select-lead" data-id="${escapeHtml(l.id)}">
       <div class="nm">${escapeHtml(l.businessName || 'Unnamed')}</div>
       <div class="meta">
-        ${dayPill}<span class="hq-pill amber">${stage.name}</span>
-        ${score ? `<span class="hq-pill" title="Opportunity score">★ ${score}</span>` : ''}
+        <span class="hq-pill amber">${stage.name}</span>
         ${duePill}${nsLabel}
         ${l.country ? `<span class="hq-pill">${escapeHtml(l.country)}</span>` : ''}
       </div>
@@ -5943,13 +5755,13 @@ function hqRenderRailList() {
     return;
   }
   const { due, rest } = hqQueueLeads();
-  const restCapped = rest.slice(0, s.railCap || 40);
+  const restCapped = rest.slice(0, 40);
   el.innerHTML = `
-    <div class="hq-rail-group"><span class="hq-mono">Due today</span><span class="hq-mono n">${due.length}</span></div>
-    ${due.length ? due.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">Nothing due. Click anyone below to call them.</div>'}
-    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Everyone else</span><span class="hq-mono n">${rest.length}</span></div>
+    <div class="hq-rail-group"><span class="hq-mono">Today's queue</span><span class="hq-mono n">${due.length}</span></div>
+    ${due.length ? due.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">Nothing due. Pull from the pipeline below or search.</div>'}
+    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Pipeline</span><span class="hq-mono n">${rest.length}</span></div>
     ${restCapped.map(l => hqLeadRow(l)).join('')}
-    ${rest.length > restCapped.length ? `<button class="hq-chip" style="display:block;margin:10px auto 4px;" data-action="hq-rail-more">Show 100 more · ${rest.length - restCapped.length} to go</button>` : ''}`;
+    ${rest.length > restCapped.length ? `<div class="hq-empty-note">+${rest.length - restCapped.length} more — search to find anyone.</div>` : ''}`;
 }
 
 // ---- render: workspace ----
@@ -5957,43 +5769,14 @@ function hqRenderWorkspace() {
   const el = document.getElementById('hq-work-inner');
   if (!el) return;
   const s = state.hq;
-  const ss = state.hqSession;
   const lead = s.leadId ? getLeadById(s.leadId) : null;
-  el.classList.toggle('hq-wide', !!lead);
-  if (!lead) {
-    el.innerHTML = (ss && ss.finished) ? hqEndOfDayHtml() : hqMorningHtml();
-    return;
-  }
+  if (!lead) { el.innerHTML = hqDashboardHtml(); return; }
   const stageKey = hqStageOf(lead);
   const phone = (lead.phones && lead.phones[0] && lead.phones[0].number) || ((lead.contacts || []).find(c => c && c.phone) || {}).phone || '';
   const wa = hqWaNumber(lead);
   const who = [lead.ownerName, ((lead.contacts || [])[0] || {}).title].filter(Boolean).join(' · ');
-  // Guided-day chrome: the full band on the current call, a quiet resume bar if he
-  // wandered off to another lead mid-day.
-  const isCurrent = ss && !ss.finished && lead.id === ss.ids[ss.idx];
-  const logged = isCurrent && !!ss.outcomes[lead.id];
-  let sessionHtml = '';
-  if (isCurrent) {
-    const pct = Math.round(((ss.idx + (logged ? 1 : 0)) / ss.ids.length) * 100);
-    sessionHtml = `
-      <div class="hq-session-band">
-        <span class="hq-mono">Call ${ss.idx + 1} of ${ss.ids.length}</span>
-        <div class="hq-progress"><div class="hq-progress-fill" style="width:${pct}%"></div></div>
-        ${logged
-          ? `<button class="hq-btn" data-action="hq-session-next">${ss.idx + 1 >= ss.ids.length ? 'Finish the day' : 'Next call'} <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></button>`
-          : `<button class="hq-btn ghost" data-action="hq-session-next" title="Move on without logging">Skip</button>`}
-        <button class="hq-btn ghost" data-action="hq-session-end">End day</button>
-      </div>`;
-  } else if (ss && !ss.finished) {
-    sessionHtml = `
-      <div class="hq-resume-bar">
-        <span class="t">Your day is paused at call ${ss.idx + 1} of ${ss.ids.length}.</span>
-        <button class="hq-btn" data-action="hq-session-resume">Resume <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></button>
-      </div>`;
-  }
   el.innerHTML = `
-    <button class="hq-btn ghost hq-back" data-action="hq-back"><i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Today's list</button>
-    ${sessionHtml}
+    <button class="hq-btn ghost hq-back" data-action="hq-back"><i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Queue</button>
     <div class="hq-lead-head">
       <div class="lodge">${escapeHtml(lead.businessName || 'Unnamed')}</div>
       <div class="hq-lead-sub">
@@ -6014,23 +5797,20 @@ function hqRenderWorkspace() {
       </div>
       <div style="margin-top:12px;">${renderNextStepBand(lead)}</div>
     </div>
-    <div class="hq-jumpbar">
-      ${[['hq-sec-script', 'Script'], ['hq-sec-lodge', 'The lodge'], ['hq-sec-send', 'Send'], ['hq-sec-brain', 'Brain']].map(([t, label]) =>
-        `<button class="hq-chip" data-action="hq-jump" data-target="${t}">${label}</button>`).join('')}
+    <div class="hq-tabs">
+      ${[['crib', 'Crib'], ['call', 'Call'], ['answers', 'Answers'], ['brain', 'Brain'], ['send', 'Send']].map(([k, label]) =>
+        `<button class="hq-tab${s.tab === k ? ' active' : ''}" data-action="hq-tab" data-tab="${k}">${label}</button>`).join('')}
     </div>
-    <div class="hq-cols">
-      <div class="hq-col-main">
-        <section id="hq-sec-script">${hqCallTab(lead, stageKey)}</section>
-        <div class="hq-desk-label">After the call — send the follow-up</div>
-        <section id="hq-sec-send">${hqSendTab(lead)}</section>
-      </div>
-      <aside class="hq-col-side">
-        <section id="hq-sec-lodge">${hqCribTab(lead)}</section>
-        <div class="hq-desk-label">What Call Brain heard</div>
-        <section id="hq-sec-brain">${hqBrainTab(lead)}</section>
-      </aside>
-    </div>`;
+    <div id="hq-tab-body">${hqTabHtml(lead, s.tab, stageKey)}</div>`;
   hqUpdateTokens();
+}
+
+function hqTabHtml(lead, tab, stageKey) {
+  if (tab === 'crib') return hqCribTab(lead);
+  if (tab === 'answers') return hqAnswersTab(lead);
+  if (tab === 'brain') return hqBrainTab(lead);
+  if (tab === 'send') return hqSendTab(lead);
+  return hqCallTab(lead, stageKey);
 }
 
 // ---- tab: crib ----
@@ -6072,13 +5852,7 @@ function hqCribTab(l) {
     <div class="hq-card">
       ${activity.length ? activity.map(a => `<div class="hq-note"><div class="when">${escapeHtml(formatTimeAgo(a.date))}</div>${escapeHtml(a.action || '')}</div>`).join('')
         : '<div class="hq-empty-note">No activity yet.</div>'}
-    </div>
-
-    <div class="hq-seclabel"><span class="n">✓</span><span class="t">Everything they've told you</span></div>
-    <details class="hq-details">
-      <summary>All their answers — discovery and kickoff, tap to edit</summary>
-      <div class="hq-details-body">${hqAnswersFields(l)}</div>
-    </details>`;
+    </div>`;
 }
 
 // ---- tab: answers ----
@@ -6093,22 +5867,22 @@ function hqAnswerField(l, def) {
       </div>
     </div>`;
 }
-// The editable everything-they-told-you fields — now lives inside Prep (was its own tab).
-function hqAnswersFields(l) {
+function hqAnswersTab(l) {
   return `
-    <div class="hq-seclabel" style="margin-top:6px;"><span class="n">C</span><span class="t">Discovery — confirm, don't ask</span></div>
-    ${HQ_AUDIT_CONFIRM.map(d => hqAnswerField(l, d)).join('')}
+    <div class="hq-goalbar"><span class="hq-mono">Answers</span><p>Everything they've ever told you — editable, saved to the lead as you type, auto-filled into every script.</p></div>
+    <div class="hq-seclabel"><span class="n">C</span><span class="t">Discovery — confirm, don't ask</span></div>
+    <div class="hq-card">${HQ_AUDIT_CONFIRM.map(d => hqAnswerField(l, d)).join('')}</div>
     <div class="hq-seclabel"><span class="n">A</span><span class="t">Discovery — only they know this</span></div>
-    ${HQ_AUDIT_ASK.map(d => hqAnswerField(l, d)).join('')}
+    <div class="hq-card">${HQ_AUDIT_ASK.map(d => hqAnswerField(l, d)).join('')}</div>
     <div class="hq-seclabel"><span class="n">K</span><span class="t">Kickoff — the setup spec</span></div>
-    ${HQ_KICKOFF_QS.map(d => hqAnswerField(l, d)).join('')}`;
+    <div class="hq-card">${HQ_KICKOFF_QS.map(d => hqAnswerField(l, d)).join('')}</div>`;
 }
 
-// ---- brain panel (Call Brain's notes for this lead) ----
+// ---- tab: brain ----
 function hqBrainTab(l) {
   const entries = (l.brain || []).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
   return `
-    <div style="margin-bottom:10px;"><button class="hq-btn ghost" data-action="hq-open-callbrain" title="Start Call Brain first if it doesn't open: double-click 'Start Call Brain.command' on your Mac">Drop a recording → open Call Brain</button></div>
+    <div class="hq-goalbar"><span class="hq-mono">Brain</span><p>Call Brain's briefs & coaching for this lead. Drop the recording on Call Brain after you hang up — it lands here on the next refresh.</p></div>
     ${entries.length ? entries.map(e => `
       <div class="hq-brain-entry">
         <div class="head">
@@ -6145,7 +5919,7 @@ function hqSendTab(l) {
     ${hqSendTpl(l, 'audit')}
     ${hqSendTpl(l, 'kickoff')}
     ${hqSendTpl(l, 'segment')}
-    <p class="hq-meta" style="margin-top:14px;">Emails: Back office → CRM / Outreach → Draft on the lead, same as always. ≤15–20 new lodges a day on WhatsApp first-touches.</p>`;
+    <p class="hq-meta" style="margin-top:14px;">Emails live where they always did — the Draft button on the CRM section, or ask the Brain chat. ≤15–20 new lodges a day on WhatsApp first-touches.</p>`;
 }
 
 // ---- tab: call (per stage) ----
@@ -6193,7 +5967,7 @@ function hqColdCall(l) {
   const track = state.hq.track || 'owner';
   const voicemail = hqSec('VM', 'Voicemail — 20 seconds, then hang up')
     + hqSay(`Hi ${HQ_TOK_NAME}, this is Melusi from LodgeHelm — we help safari lodges stop losing bookings between enquiry and confirmation. No need to call back; I'll send a short note over WhatsApp so it's there when you've a minute. Thanks, and enjoy the rest of your day.`)
-    + `<div style="margin-top:12px;"><button class="hq-btn ghost" data-action="hq-goto-send">Then send the first-touch — it\u2019s written for you below</button></div>`;
+    + `<div style="margin-top:12px;"><button class="hq-btn ghost" data-action="hq-goto-send">Then send the first-touch → Send tab</button></div>`;
   const ownerTrack = `
     <p class="hq-meta">You're through to the person who <b>signs off spend</b>. Lead with ROI and the revenue leak, not the feature list.</p>
     ${hqSec('1', 'Opener — 10 seconds')}
@@ -6266,7 +6040,7 @@ function hqDiscoveryCall(l) {
     ${hqSay(`Here's what I'd suggest. Give me twenty minutes later this week — I'll put your answers against the actual workflow and show you exactly how ${HQ_TOK_LODGE}'s enquiries would run through it, with your numbers. If it doesn't obviously pay for itself, you tell me and that's the end of it. [Day] at [Time]?`, `If they're hot NOW — asking price with intent, "how do we start?" — don't make them wait. Switch to Close Meeting and finish it on this call.`)}
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
       <button class="hq-btn" data-action="hq-set-stage" data-id="${escapeHtml(l.id)}" data-stage="close">They're hot → open Close Meeting</button>
-      <button class="hq-btn ghost" data-action="hq-goto-send">Rather answer async? The audit message is written for you below</button>
+      <button class="hq-btn ghost" data-action="hq-goto-send">Rather answer async? Audit send → Send tab</button>
     </div>`;
 }
 
@@ -6298,8 +6072,8 @@ function hqCloseCall(l) {
 
 function hqKickoffCall(l) {
   return `
-    <p class="hq-meta">They've paid. This is <b>step 1 of the paid setup</b> — frame it that way. If you already ran the audit in discovery, confirm those answers rather than re-asking (open \u201cEverything they\u2019ve told you\u201d in the lodge panel).</p>
-    <div style="margin-bottom:14px;"><button class="hq-btn ghost" data-action="hq-goto-send">To book it: the kickoff WhatsApp is written for you below</button></div>
+    <p class="hq-meta">They've paid. This is <b>step 1 of the paid setup</b> — frame it that way. If you already ran the audit in discovery, confirm those answers rather than re-asking (they're on the Answers tab).</p>
+    <div style="margin-bottom:14px;"><button class="hq-btn ghost" data-action="hq-goto-send">To book it: kickoff WhatsApp → Send tab</button></div>
     ${hqSec('1', 'Open the call')}
     ${hqSay(`Welcome aboard properly, ${HQ_TOK_NAME}. From here your job is small: this call, then I disappear and build. I'm going to ask you about how ${HQ_TOK_LODGE} actually runs — fifteen minutes, you talk, I type. Nothing technical.`)}
     ${hqSec('2', 'Onboarding intake — tick as you go')}
@@ -6320,9 +6094,9 @@ function hqKickoffCall(l) {
 function hqClientView(l) {
   const spec = HQ_KICKOFF_QS.map(d => hqAns(l, d.ansKey) ? `<li><b>${d.q.replace(/\?$/, '')}:</b> ${escapeHtml(hqAns(l, d.ansKey))}</li>` : '').join('');
   return `
-    <p class="hq-meta">${escapeHtml(l.businessName || 'This lodge')} is live. Their setup spec is below; log calls as usual and Call Brain briefs keep landing in the Brain panel.</p>
+    <p class="hq-meta">${escapeHtml(l.businessName || 'This lodge')} is live. Their setup spec is below; log calls as usual and Call Brain briefs keep landing on the Brain tab.</p>
     ${hqSec('✓', 'Setup spec — from the kickoff')}
-    <div class="hq-card">${spec ? `<ul>${spec}</ul>` : '<div class="hq-empty-note">No kickoff answers on file — fill them in \u201cEverything they\u2019ve told you\u201d, in the lodge panel.</div>'}</div>
+    <div class="hq-card">${spec ? `<ul>${spec}</ul>` : '<div class="hq-empty-note">No kickoff answers on file — fill them on the Answers tab.</div>'}</div>
     ${hqSec('♥', 'Keep them winning')}
     <div class="hq-card"><ul>
       <li>Check in monthly — one WhatsApp: "how's the system treating you?"</li>
@@ -6331,73 +6105,20 @@ function hqClientView(l) {
     </ul></div>`;
 }
 
-// ---- morning screen (the front door: your day, one number, one button) ----
-function hqMorningHtml() {
+// ---- dashboard (no lead selected) ----
+function hqDashboardHtml() {
   const active = hqActiveLeads();
   const due = hqDueLeads(active);
-  const overdue = due.filter(l => daysUntil(l.crm.followUpDate) < 0).length;
-  const dueToday = due.length - overdue;
-  const fresh = hqFreshLeads(10);
   const inDisc = active.filter(l => l.crm && l.crm.stage === 5).length;
   const won = (state.leads || []).filter(l => l && l.crm && l.crm.stage === 6).length;
   const pat = state.brainPatterns;
   const inbox = state.brainInbox || [];
-  const ss = state.hqSession;
-  const hour = new Date().getHours();
-  const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-  const dateLine = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-  const coachDone = (function () { try { return localStorage.getItem('lodgehelm-hq-coach') === 'done'; } catch (_) { return false; } })();
-
-  let dayHtml;
-  if (ss && !ss.finished) {
-    dayHtml = `
-      <p class="hq-day-number">You're mid-day — <b>call ${ss.idx + 1} of ${ss.ids.length}</b> is up next.</p>
-      <div class="hq-start-row">
-        <button class="hq-start-btn" data-action="hq-session-resume">Resume your day <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
-        <button class="hq-btn ghost" data-action="hq-session-end">End the day early</button>
-      </div>`;
-  } else if (due.length) {
-    dayHtml = `
-      <p class="hq-day-number">You have <b>${due.length} call${due.length === 1 ? '' : 's'}</b> to make today.</p>
-      <div class="hq-daychips">
-        ${overdue ? `<span class="hq-pill overdue">${overdue} overdue</span>` : ''}
-        ${dueToday ? `<span class="hq-pill amber">${dueToday} due today</span>` : ''}
-      </div>
-      <div class="hq-start-row">
-        <button class="hq-start-btn" data-action="hq-start-day" data-source="due">Start calling <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
-        <span class="hq-start-sub">One lodge at a time — prep, call, log, next.</span>
-      </div>`;
-  } else if (fresh.length) {
-    dayHtml = `
-      <p class="hq-day-number">Nothing due today — clear runway. <b>${fresh.length} fresh lodge${fresh.length === 1 ? '' : 's'}</b> are ready for a first call.</p>
-      <div class="hq-start-row">
-        <button class="hq-start-btn" data-action="hq-start-day" data-source="fresh">Call fresh leads <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
-        <span class="hq-start-sub">Best-researched lodges first.</span>
-      </div>`;
-  } else {
-    dayHtml = `<p class="hq-day-number">Nothing due and nothing fresh to dial. Browse the pipeline on the left, or open the back office for the full lists.</p>`;
-  }
-
   return `
-    <button class="hq-btn ghost hq-back" data-action="hq-back" style="margin-bottom:14px;"><i data-lucide="list" style="width:14px;height:14px;"></i> See today's list</button>
-    <div class="hq-morning-kicker">${dateLine} · LodgeHelm HQ</div>
-    <div class="hq-greet">${greet}, Melusi.</div>
-    ${dayHtml}
-    ${coachDone ? '' : `
-      <div class="hq-coach">
-        <div class="hq-coach-head">
-          <span class="hq-mono" style="color:var(--hq-amber);">How your day works</span>
-          <button class="hq-coach-dismiss" data-action="hq-coach-dismiss">Got it — hide this</button>
-        </div>
-        <ol>
-          <li><b>Start calling</b> — HQ hands you the first lodge on today's list.</li>
-          <li><b>Prep</b> — a minute on who they are before you dial.</li>
-          <li><b>Call</b> — the right script is on screen; tick and type as you talk.</li>
-          <li><b>Log it</b> — pick how it went. HQ sets the next step and hands you the next lodge.</li>
-          <li><b>Tonight</b> — drop your recordings on Call Brain. Its notes land on each lodge's Brain panel by morning.</li>
-        </ol>
-      </div>`}
-    <div class="hq-dash-stats" style="margin-top:20px;">
+    <div class="hq-lead-head">
+      <div class="lodge">LodgeHelm HQ</div>
+      <div class="hq-lead-sub"><span>${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</span><span>Pick a lead on the left — everything for the call lives here.</span></div>
+    </div>
+    <div class="hq-dash-stats">
       <div class="hq-stat"><div class="v">${due.length}</div><div class="l">Calls due today</div></div>
       <div class="hq-stat"><div class="v">${inDisc}</div><div class="l">In discussion</div></div>
       <div class="hq-stat"><div class="v">${won}</div><div class="l">Won</div></div>
@@ -6424,39 +6145,6 @@ function hqMorningHtml() {
     ${pat && pat.text
       ? `<div class="hq-card"><div class="hq-pre">${escapeHtml(pat.text)}</div><div class="hq-mono" style="margin-top:10px;color:var(--hq-muted);">Updated ${escapeHtml((pat.updatedAt || '').slice(0, 10))}${pat.calls ? ' · ' + pat.calls + ' calls' : ''}</div></div>`
       : `<div class="hq-card"><div class="hq-empty-note" style="padding:4px 0;">Patterns build as Call Brain digests your calls — objections that repeat, lines that land, mistakes to never make twice. Drop recordings on Call Brain and refresh.</div></div>`}`;
-}
-
-// ---- end-of-day screen (the list is done) ----
-function hqEndOfDayHtml() {
-  const ss = state.hqSession || { ids: [], outcomes: {} };
-  const total = ss.ids.length;
-  const outcomes = ss.outcomes || {};
-  const logged = Object.keys(outcomes).length;
-  const skipped = Math.max(0, total - logged);
-  const counts = {};
-  Object.values(outcomes).forEach(v => { if (v) counts[v] = (counts[v] || 0) + 1; });
-  const dateLine = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-  return `
-    <div class="hq-morning-kicker">${dateLine} · Day complete</div>
-    <div class="hq-greet">That's the list. Well done.</div>
-    <div class="hq-eod-stats">
-      <div class="hq-stat"><div class="v">${total}</div><div class="l">Calls in the day</div></div>
-      <div class="hq-stat"><div class="v">${logged}</div><div class="l">Logged</div></div>
-      ${skipped ? `<div class="hq-stat"><div class="v">${skipped}</div><div class="l">Skipped</div></div>` : ''}
-    </div>
-    ${Object.keys(counts).length ? `
-      <div class="hq-card"><ul>
-        ${Object.entries(counts).map(([v, n]) => `<li><b>${n}×</b> ${escapeHtml(callOutcomeLabel(v))}</li>`).join('')}
-      </ul></div>` : ''}
-    <div class="hq-card" style="margin-top:12px;">
-      <b style="color:var(--hq-amber);">Tonight:</b> drop today's recordings on Call Brain on your Mac.
-      Its briefs and coaching land on each lodge's Brain panel, and tomorrow's list is already
-      building from the next steps you just set.
-      <div style="margin-top:10px;"><button class="hq-btn ghost" data-action="hq-open-callbrain">Open Call Brain now</button></div>
-    </div>
-    <div class="hq-start-row" style="margin-top:20px;">
-      <button class="hq-start-btn" data-action="hq-eod-close">Back to HQ <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
-    </div>`;
 }
 
 // ---- token substitution (live, no re-render) ----
@@ -6495,40 +6183,11 @@ document.getElementById('section-hq').addEventListener('click', e => {
   const action = target.dataset.action;
   const id = target.dataset.id;
   const s = state.hq;
-  if (action === 'hq-select-lead') { s.leadId = id; s.pane = 'work'; s.tab = 'crib'; renderHQ(); return; }
+  if (action === 'hq-select-lead') { s.leadId = id; s.pane = 'work'; renderHQ(); return; }
   if (action === 'hq-back') { s.pane = 'rail'; renderHQ(); return; }
-  if (action === 'hq-start-day') { hqStartSession(target.dataset.source); return; }
-  if (action === 'hq-session-next') { hqAdvanceSession(); return; }
-  if (action === 'hq-session-resume') {
-    const cur = hqSessionCurrentId();
-    if (cur) { s.leadId = cur; s.tab = 'crib'; s.pane = 'work'; s.__adv = true; }
-    // Even with no live current lead (pruning may have just finished the day),
-    // re-render so the end-of-day screen appears instead of a dead button.
-    renderHQ();
-    return;
-  }
-  if (action === 'hq-session-end') { hqEndSession(); return; }
-  if (action === 'hq-eod-close') { hqEndSession(); return; }
-  if (action === 'hq-coach-dismiss') {
-    try { localStorage.setItem('lodgehelm-hq-coach', 'done'); } catch (_) {}
-    renderHQ();
-    return;
-  }
-  if (action === 'hq-open-callbrain') {
-    // Call Brain's local dashboard (drag-drop a recording; it never leaves the Mac).
-    window.open('http://localhost:4317', '_blank');
-    showToast('If nothing opened: start Call Brain first (Start Call Brain.command)', 'info');
-    return;
-  }
-  if (action === 'hq-tab') { return; } // tabs retired — one desk, everything visible
-  if (action === 'hq-goto-send' || action === 'hq-jump') {
-    const t = document.getElementById(action === 'hq-jump' ? target.dataset.target : 'hq-sec-send');
-    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return;
-  }
-  if (action === 'hq-stage-filter') { s.stageFilter = target.dataset.stage; s.railCap = 40; renderHQ(); return; }
-  if (action === 'hq-country-filter') { s.country = target.dataset.country; s.railCap = 40; renderHQ(); return; }
-  if (action === 'hq-rail-more') { s.railCap = (s.railCap || 40) + 100; hqRenderRailList(); return; }
+  if (action === 'hq-tab') { s.tab = target.dataset.tab; renderHQ(); return; }
+  if (action === 'hq-goto-send') { s.tab = 'send'; renderHQ(); return; }
+  if (action === 'hq-stage-filter') { s.stageFilter = target.dataset.stage; renderHQ(); return; }
   if (action === 'hq-track') { s.track = target.dataset.track; renderHQ(); return; }
   if (action === 'hq-set-stage') {
     const lead = getLeadById(id);
@@ -6622,16 +6281,7 @@ document.getElementById('section-hq').addEventListener('change', e => {
   const sel = e.target.closest('[data-action="hq-log-call"]');
   if (sel && sel.value) {
     logCall(sel.dataset.id, sel.value);
-    // Guided day: logging the current call arms the "Next call →" button (never yanks
-    // the workspace away — he may still want to send the follow-up from here first).
-    const ss = state.hqSession;
-    if (ss && !ss.finished && sel.dataset.id === ss.ids[ss.idx]) {
-      ss.outcomes[sel.dataset.id] = sel.value;
-      hqSaveSession();
-      showToast('Logged — hit "Next call" when you\'re done here', 'success');
-    } else {
-      showToast('Call logged — next step set', 'success');
-    }
+    showToast('Call logged — next step set', 'success');
     renderHQ();
   }
 });
@@ -6655,11 +6305,6 @@ document.getElementById('section-hq').addEventListener('input', e => {
     const k = e.target.dataset.ansKey;
     if (e.target.value.trim()) lead.answers[k] = e.target.value;
     else delete lead.answers[k];
-    // One desk shows the same answer field in two places (the script and "everything
-    // they've told you") — mirror the twin without a re-render so typing never lags.
-    document.querySelectorAll(`.hq-ans[data-ans-key="${k}"]`).forEach(inp => {
-      if (inp !== e.target) inp.value = e.target.value;
-    });
     hqUpdateTokens();
     hqScheduleSave();
     return;
@@ -6687,7 +6332,7 @@ document.querySelector('.sidebar-nav').addEventListener('click', e => {
   if (nav) showSection(nav.dataset.section);
 });
 
-// Back-office drawer opener (all screen sizes)
+// Hamburger
 document.getElementById('hamburger-btn').addEventListener('click', () => {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('mobile-overlay').classList.toggle('active');
@@ -6696,42 +6341,32 @@ document.getElementById('mobile-overlay').addEventListener('click', () => {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('mobile-overlay').classList.remove('active');
 });
-// The wordmark is HOME — always the morning screen, not whatever lead was open.
-// "← HQ" (from the back office) returns to HQ exactly as you left it.
-function hqGoHome() {
-  state.hq.leadId = null;
-  state.hq.pane = 'work';
-  showSection('hq');
-}
-document.getElementById('topbar-home').addEventListener('click', hqGoHome);
-document.getElementById('topbar-home').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') hqGoHome(); });
-document.getElementById('back-to-hq').addEventListener('click', () => showSection('hq'));
 
 // Panel overlay
 document.getElementById('panel-overlay').addEventListener('click', closePanel);
 
-// Theme toggle retired — there is one green world now, nothing to switch.
+// Theme toggle
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  const btn = document.getElementById('theme-toggle');
+  btn.innerHTML = isDark ? '<i data-lucide="sun" aria-hidden="true"></i>' : '<i data-lucide="moon" aria-hidden="true"></i>';
+  lucide.createIcons({ nodes: [btn] });
+});
 
 // ESC key
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (state.modalOpen) closeModal();
     else if (state.panelOpen) closePanel();
-    else if (document.getElementById('sidebar').classList.contains('open')) {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('mobile-overlay').classList.remove('active');
-    }
   }
 });
 
-// Global search — in HQ it drives the lead rail; in the back office it filters the open section.
+// Global search
 document.getElementById('global-search').addEventListener('input', e => {
   const val = e.target.value.trim();
-  if (state.activeSection === 'hq') {
-    state.hq.search = e.target.value;
-    if (state.hq.pane !== 'rail') { state.hq.pane = 'rail'; renderHQ(); }
-    else hqRenderRailList();
-  } else if (state.activeSection === 'lead-bank') {
+  if (state.activeSection === 'lead-bank') {
     state.filters.leadBank.search = val;
     renderLeadBank();
   } else if (state.activeSection === 'crm') {
@@ -8794,18 +8429,8 @@ function init() {
   renderExportButton();
   applyConsultantDefaults();
   loadChatState();
-  // HQ is the front door — every session opens on the calling day.
-  state.activeSection = 'hq';
-  // Resume a mid-day guided session (same-day only) exactly where he left it.
-  state.hqSession = hqLoadSession();
-  if (state.hqSession && !state.hqSession.finished) {
-    const cur = hqSessionCurrentId(); // prunes ids whose leads no longer exist
-    if (cur) {
-      state.hq.leadId = cur;
-      state.hq.tab = 'crib';
-      state.hq.pane = 'work';
-    }
-  }
+  // Classic build: the old CRM front door — the Today worklist.
+  state.activeSection = 'today';
   // Reflect persisted activeSection into UI
   showSection(state.activeSection);
   lucide.createIcons();

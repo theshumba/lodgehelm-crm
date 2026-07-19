@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LodgeHelm CRM</title>
+<title>LodgeHelm HQ</title>
 <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<!-- Brand-sheet fonts for the HQ workspace (Space Grotesk / Inter / IBM Plex Mono). -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <!-- Google Identity Services: used to send outreach email straight from Melusi's Gmail (gmail.send). -->
 <script src="https://accounts.google.com/gsi/client" async></script>
@@ -17,9 +19,9 @@
 <!-- Firebase (shared backend for multi-device sync). See FIREBASE-SETUP.md. -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-  import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-  window.__fb = { initializeApp, getAuth, signInAnonymously, onAuthStateChanged, getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch, runTransaction };
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, writeBatch, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  window.__fb = { initializeApp, getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, writeBatch, runTransaction };
   window.dispatchEvent(new Event('fb-ready'));
 </script>
 <!--
@@ -777,10 +779,238 @@ ul, ol { list-style: none; }
 /* ========== EXPORT CSV BUTTON ========== */
 .export-csv-btn { width: 100%; padding: var(--space-2) var(--space-3); margin-bottom: var(--space-2); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: var(--radius-md); font-size: var(--text-xs); font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: var(--space-2); transition: all var(--transition-interactive); }
 .export-csv-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+/* ================= HQ — the call workspace (brand-sheet world) =================
+   Scoped to #section-hq + the auth overlay. Deep safari green #143b2e, ivory text,
+   ink cards, amber accent, Space Grotesk / Inter / IBM Plex Mono. No blue, no serif. */
+#section-hq {
+  --hq-green: #143b2e; --hq-green-deep: #0f2e24;
+  --hq-ink: #1a1a17; --hq-ink-deep: #121212;
+  --hq-ivory: #f5efe6; --hq-amber: #e0863a; --hq-amber-deep: #c76e27;
+  --hq-hairline: rgba(245,239,230,0.14); --hq-muted: rgba(245,239,230,0.62);
+  --hq-faint: rgba(245,239,230,0.35);
+  background: var(--hq-green); color: var(--hq-ivory);
+  font-family: 'Inter', -apple-system, sans-serif; letter-spacing: -0.01em;
+}
+#section-hq.active { display: block; }
+.main-content.hq-active { padding: 0; overflow: hidden; }
+.hq-shell { display: grid; grid-template-columns: 330px 1fr; height: calc(100dvh - 56px); min-height: 0; }
+.hq-mono { font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.13em; font-size: 10.5px; font-weight: 500; }
+#section-hq h1, #section-hq h2, #section-hq h3, .hq-display { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.03em; }
+
+/* ---- rail ---- */
+.hq-rail { border-right: 1px solid var(--hq-hairline); display: flex; flex-direction: column; min-height: 0; background: var(--hq-green); }
+.hq-rail-head { padding: 14px 14px 10px; border-bottom: 1px solid var(--hq-hairline); }
+.hq-rail-title { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.hq-rail-title .t { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 17px; }
+.hq-rail-title .hq-mono { color: var(--hq-amber); }
+.hq-search { width: 100%; background: var(--hq-ink-deep); border: 1px solid rgba(245,239,230,0.12); border-radius: 10px; color: var(--hq-ivory); font: 500 14px 'Inter', sans-serif; padding: 9px 12px; outline: none; transition: border-color .15s ease; }
+.hq-search:focus { border-color: var(--hq-amber); }
+.hq-search::placeholder { color: var(--hq-faint); }
+.hq-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.hq-chip { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 4px 10px; cursor: pointer; transition: all .15s ease; }
+.hq-chip:hover { border-color: rgba(224,134,58,0.55); color: var(--hq-ivory); }
+.hq-chip.active { background: var(--hq-amber); border-color: var(--hq-amber); color: var(--hq-ink-deep); }
+.hq-rail-list { flex: 1; overflow-y: auto; padding: 10px 10px 24px; min-height: 0; }
+.hq-rail-group { margin: 8px 4px 6px; color: var(--hq-amber); display: flex; align-items: center; gap: 8px; }
+.hq-rail-group .n { color: var(--hq-muted); }
+.hq-lead { width: 100%; text-align: left; background: none; border: 1px solid transparent; border-radius: 12px; padding: 10px 12px; cursor: pointer; color: var(--hq-ivory); transition: all .13s ease; display: block; }
+.hq-lead:hover { background: rgba(18,18,18,0.35); }
+.hq-lead.active { background: var(--hq-ink); border-color: rgba(224,134,58,0.6); }
+.hq-lead .nm { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14.5px; letter-spacing: -0.02em; line-height: 1.25; }
+.hq-lead .meta { display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+.hq-pill { font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.09em; border: 1px solid var(--hq-hairline); border-radius: 999px; padding: 2px 7px; color: var(--hq-muted); }
+.hq-pill.amber { color: var(--hq-amber); border-color: rgba(224,134,58,0.5); }
+.hq-pill.overdue { color: #e8a58a; border-color: rgba(232,120,90,0.55); }
+.hq-empty-note { color: var(--hq-faint); font-size: 12.5px; padding: 8px 6px; }
+
+/* ---- workspace ---- */
+.hq-work { min-height: 0; overflow-y: auto; background: var(--hq-green); }
+.hq-work-inner { max-width: 860px; margin: 0 auto; padding: 22px 26px 90px; }
+.hq-lead-head { margin-bottom: 14px; }
+.hq-lead-head .lodge { font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; line-height: 1.1; font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; }
+.hq-lead-sub { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; color: var(--hq-muted); font-size: 13.5px; }
+.hq-head-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+.hq-btn { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13.5px; background: var(--hq-amber); color: var(--hq-ink-deep); border: none; border-radius: 999px; padding: 8px 16px; cursor: pointer; transition: background .15s ease; display: inline-flex; align-items: center; gap: 6px; }
+.hq-btn:hover { background: var(--hq-amber-deep); }
+.hq-btn.ghost { background: none; border: 1px solid var(--hq-hairline); color: var(--hq-ivory); }
+.hq-btn.ghost:hover { border-color: var(--hq-amber); color: var(--hq-amber); background: none; }
+.hq-btn.copied { background: var(--hq-ivory); color: var(--hq-ink-deep); }
+.hq-outcome { background: var(--hq-ink-deep); border: 1px solid rgba(245,239,230,0.18); border-radius: 999px; color: var(--hq-ivory); font: 500 13px 'Inter', sans-serif; padding: 8px 12px; outline: none; }
+.hq-stagepills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.hq-stagepill { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 5px 12px; cursor: pointer; transition: all .15s ease; }
+.hq-stagepill.active { background: var(--hq-ink); border-color: var(--hq-amber); color: var(--hq-amber); }
+.hq-tabs { position: sticky; top: 0; z-index: 5; background: var(--hq-green); display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin: 6px 0 20px; }
+.hq-tab { background: none; border: 1px solid var(--hq-hairline); border-radius: 11px; padding: 8px 6px; text-align: center; cursor: pointer; color: var(--hq-ivory); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: -0.01em; transition: all .15s ease; }
+.hq-tab:hover { border-color: rgba(224,134,58,0.5); }
+.hq-tab.active { background: var(--hq-ink); border-color: var(--hq-amber); color: var(--hq-amber); }
+
+/* ---- content blocks (ported from the call-system page) ---- */
+.hq-goalbar { display: flex; gap: 12px; align-items: baseline; border: 1px solid var(--hq-hairline); border-left: 3px solid var(--hq-amber); border-radius: 12px; background: rgba(18,18,18,0.35); padding: 12px 16px; margin-bottom: 18px; }
+.hq-goalbar .hq-mono { color: var(--hq-amber); flex: 0 0 auto; }
+.hq-goalbar p { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 15px; line-height: 1.4; margin: 0; }
+.hq-meta { color: var(--hq-muted); font-size: 14px; margin-bottom: 16px; max-width: 64ch; line-height: 1.55; }
+.hq-meta b { color: var(--hq-ivory); font-weight: 600; }
+.hq-seclabel { display: flex; align-items: center; gap: 10px; margin: 24px 0 10px; }
+.hq-seclabel .n { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; color: var(--hq-ink-deep); background: var(--hq-amber); width: 21px; height: 21px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.hq-seclabel .t { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.13em; color: var(--hq-amber); }
+.hq-say { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-left: 3px solid var(--hq-amber); border-radius: 12px; padding: 14px 18px; font-size: 15.5px; line-height: 1.6; }
+.hq-say + .hq-say { margin-top: 10px; }
+.hq-say .note { display: block; margin-top: 9px; font-size: 13px; color: var(--hq-muted); font-style: italic; }
+.hq-tok { color: var(--hq-amber); font-weight: 600; }
+.hq-card { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; padding: 15px 18px; }
+.hq-card ol, .hq-card ul { padding-left: 20px; margin: 0; }
+.hq-card ol { list-style: decimal; } .hq-card ul { list-style: disc; }
+.hq-card li { margin-bottom: 8px; font-size: 14.5px; line-height: 1.5; }
+.hq-card .qs-note { font-size: 13px; color: var(--hq-muted); font-style: italic; margin-top: 6px; }
+.hq-objection { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-left: 3px solid rgba(224,134,58,0.55); border-radius: 12px; padding: 12px 16px; margin-bottom: 9px; }
+.hq-objection .oq { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14.5px; margin-bottom: 4px; }
+.hq-objection .oq::before { content: '\201C'; color: var(--hq-amber); }
+.hq-objection .oq::after { content: '\201D'; color: var(--hq-amber); }
+.hq-objection .oa { font-size: 14px; color: rgba(245,239,230,0.85); line-height: 1.55; }
+.hq-tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 6px; }
+.hq-tier { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 12px; padding: 11px 8px; text-align: center; }
+.hq-tier .tname { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; }
+.hq-tier .tprice { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14.5px; color: var(--hq-amber); margin: 2px 0; }
+.hq-tier .twho { font-size: 10.5px; color: var(--hq-muted); line-height: 1.3; }
+.hq-tiers-extra { text-align: center; font-size: 11.5px; color: var(--hq-muted); margin-bottom: 4px; }
+.hq-oneliners { background: var(--hq-ink-deep); border: 1px solid rgba(224,134,58,0.35); border-radius: 12px; padding: 14px 16px; margin-top: 12px; }
+.hq-oneliners .hq-mono { color: var(--hq-amber); display: block; margin-bottom: 8px; }
+.hq-oneliners ul { padding-left: 18px; list-style: disc; margin: 0; }
+.hq-oneliners li { margin-bottom: 6px; font-size: 14px; line-height: 1.5; }
+.hq-roletoggle { display: flex; gap: 8px; margin-bottom: 18px; }
+.hq-roletoggle button { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.11em; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--hq-hairline); background: none; color: var(--hq-muted); cursor: pointer; transition: all .15s ease; }
+.hq-roletoggle button.active { background: var(--hq-amber); border-color: var(--hq-amber); color: var(--hq-ink-deep); }
+.hq-qcard { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 14px; overflow: hidden; }
+.hq-q { display: flex; gap: 13px; align-items: flex-start; padding: 13px 16px; border-bottom: 1px solid rgba(245,239,230,0.07); cursor: pointer; transition: background .15s ease; }
+.hq-q:last-child { border-bottom: none; }
+.hq-q:hover { background: rgba(245,239,230,0.03); }
+.hq-q input[type="checkbox"] { appearance: none; -webkit-appearance: none; flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; border: 1.5px solid rgba(245,239,230,0.3); border-radius: 6px; cursor: pointer; position: relative; transition: all .15s ease; background: none; }
+.hq-q input[type="checkbox"]:checked { background: var(--hq-amber); border-color: var(--hq-amber); }
+.hq-q input[type="checkbox"]:checked::after { content: '\2713'; position: absolute; inset: 0; display: grid; place-items: center; color: var(--hq-ink-deep); font-size: 12px; font-weight: 700; }
+.hq-q .body { flex: 1; min-width: 0; }
+.hq-q.done .question, .hq-q.done .hint { opacity: 0.38; }
+.hq-q .num { color: var(--hq-amber); margin-right: 2px; font-size: 10px; }
+.hq-q .question { font-weight: 600; font-size: 14.5px; letter-spacing: -0.015em; line-height: 1.35; }
+.hq-q .hint { color: var(--hq-muted); font-size: 13px; margin-top: 2px; line-height: 1.45; }
+.hq-q .tag { display: inline-block; margin-left: 8px; vertical-align: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.09em; color: var(--hq-amber); border: 1px solid rgba(224,134,58,0.45); border-radius: 999px; padding: 1px 7px; }
+.hq-ans { width: 100%; margin-top: 8px; background: var(--hq-ink-deep); border: 1px solid rgba(245,239,230,0.12); border-radius: 8px; color: var(--hq-ivory); font-family: 'Inter', sans-serif; font-size: 13.5px; padding: 8px 11px; outline: none; transition: border-color .15s ease; display: block; }
+.hq-ans:focus { border-color: var(--hq-amber); }
+.hq-ans::placeholder { color: rgba(245,239,230,0.25); }
+.hq-reset-row { margin-top: 8px; text-align: right; }
+.hq-reset-row button { background: none; border: none; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--hq-muted); padding: 5px 2px; }
+.hq-reset-row button:hover { color: var(--hq-ivory); }
+.hq-dontleave { background: var(--hq-ink-deep); border: 1px solid rgba(224,134,58,0.4); border-radius: 13px; padding: 15px 18px; margin-top: 22px; }
+.hq-dontleave .hq-mono { color: var(--hq-amber); display: block; margin-bottom: 8px; }
+.hq-dontleave ul { padding-left: 18px; list-style: disc; margin: 0; }
+.hq-dontleave li { margin-bottom: 5px; font-size: 14.5px; font-weight: 500; }
+.hq-fee-card { background: var(--hq-ivory); color: var(--hq-ink); border-radius: 15px; padding: 20px 22px; margin-top: 20px; }
+.hq-fee-card .hq-mono { color: #5b5950; display: block; margin-bottom: 10px; }
+.hq-fee-card h3 { font-size: 17px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.02em; }
+.hq-fee-card p { font-size: 14.5px; line-height: 1.55; margin: 0; }
+.hq-fee-card .sayline { margin-top: 12px; background: rgba(224,134,58,0.12); border-left: 3px solid var(--hq-amber); border-radius: 8px; padding: 10px 14px; font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 14.5px; }
+.hq-tpl { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; padding: 15px 18px; margin-top: 12px; }
+.hq-tpl .hq-mono { color: var(--hq-muted); display: block; margin-bottom: 9px; }
+.hq-tpl .msg { font-size: 14.5px; line-height: 1.6; border-left: 2px solid rgba(245,239,230,0.15); padding-left: 14px; white-space: pre-line; }
+.hq-tpl .msg .var { color: var(--hq-amber); font-weight: 600; }
+.hq-tpl .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.hq-crib { width: 100%; min-height: 74px; background: var(--hq-ink-deep); border: 1px solid rgba(245,239,230,0.12); border-radius: 12px; color: var(--hq-ivory); font-family: 'Inter', sans-serif; font-size: 14.5px; line-height: 1.55; padding: 12px 14px; outline: none; resize: vertical; transition: border-color .15s ease; }
+.hq-crib:focus { border-color: var(--hq-amber); }
+.hq-crib::placeholder { color: rgba(245,239,230,0.25); }
+.hq-kv { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.hq-note { border-bottom: 1px solid rgba(245,239,230,0.08); padding: 9px 0; font-size: 14px; line-height: 1.5; }
+.hq-note .when { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hq-muted); margin-bottom: 2px; }
+.hq-note:last-child { border-bottom: none; }
+.hq-brain-entry { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; padding: 15px 18px; margin-bottom: 12px; }
+.hq-brain-entry .head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.hq-brain-entry .text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: rgba(245,239,230,0.9); }
+.hq-brain-entry .text strong { color: var(--hq-ivory); }
+.hq-pre { white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: rgba(245,239,230,0.9); }
+.hq-inbox-assign { margin-top: 10px; }
+.hq-assign-results { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.hq-assign-results button { text-align: left; background: var(--hq-ink-deep); border: 1px solid var(--hq-hairline); border-radius: 8px; color: var(--hq-ivory); font: 500 13px 'Inter', sans-serif; padding: 7px 10px; cursor: pointer; }
+.hq-assign-results button:hover { border-color: var(--hq-amber); }
+.hq-dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.hq-stat { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; padding: 14px 16px; }
+.hq-stat .v { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; color: var(--hq-amber); line-height: 1; }
+.hq-stat .l { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--hq-muted); margin-top: 6px; }
+.hq-back { display: none; }
+.hq-answer-group { margin-bottom: 6px; }
+#section-hq a { color: var(--hq-amber); }
+
+/* ---- CRM widgets restyled for the green world (next-step band etc.) ---- */
+#section-hq .next-step-band { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.1); border-radius: 13px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; flex-wrap: wrap; }
+#section-hq .ns-kicker { color: var(--hq-amber); font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; }
+#section-hq .ns-step-text { color: var(--hq-ivory); font-weight: 600; font-size: 14.5px; }
+#section-hq .ns-step-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#section-hq .ns-step-line i, #section-hq .ns-step-line svg { width: 15px; height: 15px; color: var(--hq-amber); }
+#section-hq .ns-chip { border: 1px solid var(--hq-hairline); border-radius: 999px; padding: 2px 9px; font-size: 11px; color: var(--hq-muted); background: none; }
+#section-hq .ns-chip.ns-overdue { color: #e8a58a; border-color: rgba(232,120,90,0.55); }
+#section-hq .ns-chip.ns-today { color: var(--hq-amber); border-color: rgba(224,134,58,0.5); }
+#section-hq .ns-done-line { color: var(--hq-muted); font-size: 12px; display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+#section-hq .ns-done-line i, #section-hq .ns-done-line svg { width: 13px; height: 13px; color: var(--hq-amber); }
+#section-hq .ns-empty-text { color: var(--hq-muted); font-size: 13px; }
+#section-hq .ns-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+#section-hq .ns-actions .btn { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; border-radius: 999px; padding: 6px 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; min-height: 0; }
+#section-hq .ns-actions .btn-primary { background: var(--hq-amber); color: var(--hq-ink-deep); border: none; }
+#section-hq .ns-actions .btn-secondary, #section-hq .ns-actions .btn-ghost { background: none; color: var(--hq-ivory); border: 1px solid var(--hq-hairline); }
+#section-hq .ns-actions .btn i, #section-hq .ns-actions .btn svg { width: 13px; height: 13px; }
+
+/* ---- auth overlay ---- */
+.hq-auth-overlay { position: fixed; inset: 0; z-index: 10000; background: #143b2e; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.hq-auth-card { width: 100%; max-width: 360px; background: #1a1a17; border: 1px solid rgba(245,239,230,0.1); border-radius: 18px; padding: 28px 26px; color: #f5efe6; font-family: 'Inter', sans-serif; }
+.hq-auth-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: #f5efe6; }
+.hq-auth-brand svg { width: 30px; height: 30px; color: #e0863a; }
+.hq-auth-wordmark { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.03em; }
+.hq-auth-syslabel { margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #e0863a; }
+.hq-auth-sub { font-size: 13.5px; color: rgba(245,239,230,0.62); line-height: 1.5; margin: 0 0 18px; }
+.hq-auth-label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,239,230,0.62); margin: 12px 0 5px; }
+.hq-auth-input { width: 100%; background: #121212; border: 1px solid rgba(245,239,230,0.14); border-radius: 10px; color: #f5efe6; font: 500 15px 'Inter', sans-serif; padding: 11px 13px; outline: none; transition: border-color .15s ease; }
+.hq-auth-input:focus { border-color: #e0863a; }
+.hq-auth-error { margin-top: 12px; font-size: 13px; color: #e8a58a; line-height: 1.4; }
+.hq-auth-btn { width: 100%; margin-top: 18px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; background: #e0863a; color: #121212; border: none; border-radius: 999px; padding: 12px 18px; cursor: pointer; transition: background .15s ease; }
+.hq-auth-btn:hover { background: #c76e27; }
+.hq-auth-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* ---- mobile ---- */
+@media (max-width: 900px) {
+  .hq-shell { grid-template-columns: 1fr; height: calc(100dvh - 56px); }
+  .hq-shell.pane-work .hq-rail { display: none; }
+  .hq-shell.pane-rail .hq-work { display: none; }
+  .hq-rail { border-right: none; }
+  .hq-back { display: inline-flex; margin-bottom: 12px; }
+  .hq-work-inner { padding: 16px 14px 80px; }
+  .hq-tabs { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .hq-tab { font-size: 11.5px; padding: 7px 2px; border-radius: 9px; }
+  .hq-tiers { grid-template-columns: 1fr; }
+  .hq-dash-stats { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 <!-- Login Overlay -->
+<!-- HQ owner sign-in (Firebase email/password). Shown until the owner session exists;
+     the session persists per browser profile so this is a once-per-device step. -->
+<div class="hq-auth-overlay" id="hq-auth-overlay" style="display:none;">
+  <div class="hq-auth-card">
+    <div class="hq-auth-brand">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
+        <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
+      </svg>
+      <span class="hq-auth-wordmark">LodgeHelm</span>
+      <span class="hq-auth-syslabel">HQ</span>
+    </div>
+    <p class="hq-auth-sub">Sign in once on this device. Your leads, scripts and call notes are locked to your account.</p>
+    <label class="hq-auth-label" for="hq-auth-email">Email</label>
+    <input type="email" id="hq-auth-email" class="hq-auth-input" autocomplete="username" placeholder="you@email.com">
+    <label class="hq-auth-label" for="hq-auth-pass">Password</label>
+    <input type="password" id="hq-auth-pass" class="hq-auth-input" autocomplete="current-password" placeholder="Your HQ password">
+    <div class="hq-auth-error" id="hq-auth-error" style="display:none;"></div>
+    <button class="hq-auth-btn" id="hq-auth-btn">Sign in</button>
+  </div>
+</div>
+
 <div class="login-overlay" id="login-overlay">
   <div class="login-card">
     <div class="login-logo">
@@ -831,6 +1061,11 @@ ul, ol { list-style: none; }
       <span>LodgeHelm</span>
     </div>
     <nav class="sidebar-nav" aria-label="Sections">
+      <button class="nav-item" data-section="hq" aria-current="false">
+        <i data-lucide="radio-tower" aria-hidden="true"></i>
+        HQ
+        <span class="nav-badge nav-badge-teal" id="badge-hq" aria-live="polite" style="display:none;">0</span>
+      </button>
       <button class="nav-item" data-section="today" aria-current="false">
         <i data-lucide="sun" aria-hidden="true"></i>
         Today
@@ -920,6 +1155,9 @@ ul, ol { list-style: none; }
         <a id="switch-user-btn" role="button" tabindex="-1" style="display:none;" aria-hidden="true">Switch</a>
       </div>
       <div class="top-bar-actions">
+        <button class="theme-toggle" id="refresh-cloud-btn" aria-label="Refresh leads from cloud" title="Refresh from cloud (leads load once per session)">
+          <i data-lucide="refresh-cw" aria-hidden="true"></i>
+        </button>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
           <i data-lucide="sun" aria-hidden="true"></i>
         </button>
@@ -928,6 +1166,11 @@ ul, ol { list-style: none; }
 
     <!-- Main content -->
     <main class="main-content" id="main-content">
+      <!-- HQ — the one-place call workspace (pipeline rail + lead workspace) -->
+      <section id="section-hq" aria-label="HQ">
+        <div id="hq-content"></div>
+      </section>
+
       <!-- Today / Daily Worklist -->
       <section id="section-today" aria-label="Today">
         <div id="today-content"></div>
@@ -1052,7 +1295,10 @@ ul, ol { list-style: none; }
 // ========== STATE ==========
 const state = {
   leads: [],
-  activeSection: 'today',
+  activeSection: 'hq',
+  hq: { leadId: null, tab: 'call', stageFilter: 'all', search: '', track: 'owner', pane: 'rail' },
+  brainInbox: [],
+  brainPatterns: null,
   crmView: 'list',
   meetingsView: 'list',
   calendarMonth: new Date().getMonth(),
@@ -1118,9 +1364,23 @@ const LodgeHelmSync = (function () {
       const app = window.__fb.initializeApp(window.LODGEHELM_FIREBASE_CONFIG);
       auth = window.__fb.getAuth(app);
       db = window.__fb.getFirestore(app);
-      await window.__fb.signInAnonymously(auth);
+      // Owner sign-in (email/password) — anonymous auth retired 2026-07-19. HQ holds private
+      // call notes, so Firestore rules now require the owner's UID. The auth session persists
+      // in this browser profile; the overlay only ever shows on a fresh device/profile.
+      await new Promise((resolve) => {
+        let settled = false;
+        window.__fb.onAuthStateChanged(auth, (user) => {
+          if (user) {
+            hideHQAuthOverlay();
+            if (!settled) { settled = true; resolve(user); }
+          } else {
+            showHQAuthOverlay();
+          }
+        });
+      });
       ready = true;
       LodgeHelmSync.__db = db; // expose for the L1 create-if-absent seed transaction
+      LodgeHelmSync.__auth = auth;
       console.info('[LodgeHelmSync] Connected. Data will sync across all devices.');
       showSyncStatus('connected');
       return true;
@@ -1131,46 +1391,92 @@ const LodgeHelmSync = (function () {
     }
   }
 
-  function subscribe(cb) {
-    if (!ready || !db) return;
-    onRemoteCb = cb;
-    const col = window.__fb.collection(db, 'leads');
-    if (unsubscribeLeads) unsubscribeLeads();
-    unsubscribeLeads = window.__fb.onSnapshot(col,
-      snap => {
-        const remoteLeads = [];
-        snap.forEach(d => {
-          const raw = d.data();
-          // Normalise the sync timestamp to an ISO string for merge comparison.
-          // _modAt may be a Firestore Timestamp (legacy serverTimestamp writes) or an ISO string (new writes).
-          let modAt = raw._modAt;
-          if (modAt && typeof modAt.toDate === 'function') { try { modAt = modAt.toDate().toISOString(); } catch (_) { modAt = ''; } }
-          const lead = { ...raw };
-          lead._modAt = (typeof modAt === 'string') ? modAt : '';
-          // Normalise the server timestamp (M1): _srvAt is written as serverTimestamp() and
-          // comes back as a Firestore Timestamp — convert to ISO so the merge can order by it.
-          let srvAt = raw._srvAt;
-          if (srvAt && typeof srvAt.toDate === 'function') { try { srvAt = srvAt.toDate().toISOString(); } catch (_) { srvAt = ''; } }
-          lead._srvAt = (typeof srvAt === 'string') ? srvAt : '';
-          // Keep _modAt/_modBy/_srvAt ON the lead so the app-level merge can compare versions.
-          remoteLeads.push(lead);
-          // lastPushed ledger stores the serialization we'd re-push, so identical remote
-          // echoes are skipped by pushLeads (prevents push/snapshot loops). _srvAt is volatile
-          // (sentinel on write, Timestamp on read) so it MUST be excluded from the echo key.
-          lastPushed.set(lead.id, JSON.stringify(_echoKey(lead)));
-        });
-        // Record cloud-empty state exactly once, on the very first snapshot.
-        if (!firstSnapshotSeen) { cloudWasEmpty = (remoteLeads.length === 0); }
-        applyingRemote = true;
-        try { onRemoteCb && onRemoteCb(remoteLeads, { firstSnapshot: !firstSnapshotSeen, cloudEmpty: cloudWasEmpty }); }
-        finally { applyingRemote = false; firstSnapshotSeen = true; }
-      },
-      err => {
-        console.warn('[LodgeHelmSync] Subscription error:', err);
-        showSyncStatus('error', err.message || 'Subscription error');
-      }
-    );
+  // ----- HQ owner sign-in overlay -----
+  function showHQAuthOverlay() {
+    const ov = document.getElementById('hq-auth-overlay');
+    if (!ov) return;
+    ov.style.display = 'flex';
+    if (!ov.__wired) {
+      ov.__wired = true;
+      const email = document.getElementById('hq-auth-email');
+      const pass = document.getElementById('hq-auth-pass');
+      const btn = document.getElementById('hq-auth-btn');
+      const err = document.getElementById('hq-auth-error');
+      const attempt = async () => {
+        const e = (email.value || '').trim();
+        const p = pass.value || '';
+        if (!e || !p) { err.textContent = 'Enter your email and password.'; err.style.display = 'block'; return; }
+        btn.disabled = true; btn.textContent = 'Signing in…'; err.style.display = 'none';
+        try {
+          await window.__fb.signInWithEmailAndPassword(auth, e, p);
+          // onAuthStateChanged hides the overlay + resolves init().
+        } catch (ex) {
+          const code = (ex && ex.code) || '';
+          err.textContent = (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login'))
+            ? 'Wrong email or password. Try again.'
+            : (code.includes('too-many-requests') ? 'Too many tries. Wait a minute, then try again.' : ('Sign-in failed: ' + (ex.message || code || 'unknown error')));
+          err.style.display = 'block';
+        } finally {
+          btn.disabled = false; btn.textContent = 'Sign in';
+        }
+      };
+      btn.addEventListener('click', attempt);
+      pass.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') attempt(); });
+      email.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') pass.focus(); });
+    }
+    setTimeout(() => { const el = document.getElementById('hq-auth-email'); if (el && !el.value) el.focus(); }, 50);
   }
+  function hideHQAuthOverlay() {
+    const ov = document.getElementById('hq-auth-overlay');
+    if (ov) ov.style.display = 'none';
+  }
+
+  // READ-LIGHT (2026-07-19): the live onSnapshot listener is gone — it re-synced ~1100 docs
+  // on every reconnect and burned the free-tier daily read quota by breakfast. HQ fetches the
+  // lead list ONCE per session (localStorage cache paints instantly before that) and refreshes
+  // only when the owner taps the Refresh button. Writes are unchanged (debounced, changed-docs-only).
+  async function fetchOnce(cb) {
+    if (!ready || !db) return false;
+    if (cb) onRemoteCb = cb;
+    if (!onRemoteCb) return false;
+    try {
+      const snap = await window.__fb.getDocs(window.__fb.collection(db, 'leads'));
+      const remoteLeads = [];
+      snap.forEach(d => {
+        const raw = d.data();
+        // Normalise the sync timestamp to an ISO string for merge comparison.
+        // _modAt may be a Firestore Timestamp (legacy serverTimestamp writes) or an ISO string (new writes).
+        let modAt = raw._modAt;
+        if (modAt && typeof modAt.toDate === 'function') { try { modAt = modAt.toDate().toISOString(); } catch (_) { modAt = ''; } }
+        const lead = { ...raw };
+        lead._modAt = (typeof modAt === 'string') ? modAt : '';
+        // _srvAt is written as serverTimestamp() and comes back as a Firestore Timestamp —
+        // convert to ISO so the merge can order by it.
+        let srvAt = raw._srvAt;
+        if (srvAt && typeof srvAt.toDate === 'function') { try { srvAt = srvAt.toDate().toISOString(); } catch (_) { srvAt = ''; } }
+        lead._srvAt = (typeof srvAt === 'string') ? srvAt : '';
+        remoteLeads.push(lead);
+        // lastPushed ledger stores the serialization we'd re-push, so identical remote
+        // echoes are skipped by pushLeads. _srvAt is volatile (sentinel on write, Timestamp
+        // on read) so it MUST be excluded from the echo key.
+        lastPushed.set(lead.id, JSON.stringify(_echoKey(lead)));
+      });
+      if (!firstSnapshotSeen) { cloudWasEmpty = (remoteLeads.length === 0); }
+      applyingRemote = true;
+      try { onRemoteCb(remoteLeads, { firstSnapshot: !firstSnapshotSeen, cloudEmpty: cloudWasEmpty }); }
+      finally { applyingRemote = false; firstSnapshotSeen = true; }
+      lastFetchAt = new Date();
+      showSyncStatus('connected');
+      return true;
+    } catch (err) {
+      console.warn('[LodgeHelmSync] Fetch error:', err);
+      const quota = /RESOURCE_EXHAUSTED|Quota exceeded/i.test(String(err && err.message));
+      showSyncStatus('error', quota ? 'Daily read limit hit — showing cached leads (writes still save)' : (err.message || 'Fetch error'));
+      return false;
+    }
+  }
+  let lastFetchAt = null;
+  function lastRefresh() { return lastFetchAt; }
 
   // Push changed leads to Firestore. Debounced to coalesce rapid edits.
   function pushLeads(leads) {
@@ -1323,7 +1629,7 @@ const LodgeHelmSync = (function () {
 
   // Mark a lead id for cloud deletion on the next push (explicit deletes only).
   function queueDelete(id) { if (id != null) pendingDeletes.add(String(id)); }
-  return { init, subscribe, pushLeads, flush, isConfigured, showSyncStatus, queueDelete };
+  return { init, fetchOnce, lastRefresh, pushLeads, flush, isConfigured, showSyncStatus, queueDelete };
 })();
 
 // ========== USER SESSION ==========
@@ -2675,6 +2981,7 @@ function showToast(message, type = 'success') {
 // ========== NAVIGATION ==========
 function showSection(sectionId) {
   state.activeSection = sectionId;
+  document.getElementById('main-content').classList.toggle('hq-active', sectionId === 'hq');
   document.querySelectorAll('.main-content section').forEach(s => s.classList.remove('active'));
   const sec = document.getElementById('section-' + sectionId);
   if (sec) sec.classList.add('active');
@@ -2695,6 +3002,7 @@ function showSection(sectionId) {
 }
 function renderActiveSection() {
   switch (state.activeSection) {
+    case 'hq': renderHQ(); break;
     case 'today': renderToday(); break;
     case 'home': renderHome(); break;
     case 'lead-bank': renderLeadBank(); break;
@@ -2970,6 +3278,15 @@ function renderSidebarBadges() {
   }
   document.getElementById('badge-meetings').textContent = meetCount;
   document.getElementById('badge-archive').textContent = archCount;
+  // HQ badge = today's call queue (next steps due today or overdue).
+  const hqBadge = document.getElementById('badge-hq');
+  if (hqBadge) {
+    const due = (typeof hqQueueLeads === 'function') ? hqQueueLeads().due.length : 0;
+    hqBadge.textContent = due;
+    hqBadge.style.display = due > 0 ? '' : 'none';
+    hqBadge.className = 'nav-badge nav-badge-warning';
+    hqBadge.title = due + ' call' + (due !== 1 ? 's' : '') + ' due';
+  }
 }
 
 // ========== PANEL & MODAL ==========
@@ -5159,6 +5476,842 @@ function renderPlaybooks() {
 // ========== EVENT DELEGATION ==========
 
 // Sidebar nav
+// ==================================================================================
+// HQ — THE CALL WORKSPACE (2026-07-19). One place for the whole sales session:
+// pipeline rail on the left, per-lead workspace on the right (Crib · Call · Answers ·
+// Brain · Send). All script content is ported verbatim from the Desktop call-system
+// page; answers/ticks/crib now live ON the lead doc so nothing is trapped in one
+// browser's localStorage anymore.
+// ==================================================================================
+
+const HQ_STAGES = [
+  { key: 'cold',      step: 'Call 01', name: 'Cold Call',     goal: 'Book the 15-min discovery call. Nothing else. Never pitch price on a cold call, "I\'ll give you the exact figure once I\'ve seen your setup."' },
+  { key: 'discovery', step: 'Call 02', name: 'Discovery',     goal: 'Run the Lodge Audit, you ask, you type. Leave with their leak in their own words, and the close meeting booked.' },
+  { key: 'close',     step: 'Call 03', name: 'Close Meeting', goal: 'Leave with a yes, the setup fee paid (or invoice sent within the hour), and the kickoff call booked.' },
+  { key: 'kickoff',   step: 'Call 04', name: 'Kickoff',       goal: 'Everything needed to build their system, concierge style. You talk, I type. Never homework.' },
+  { key: 'client',    step: 'Live',    name: 'Client',        goal: 'They\'re live. Keep response instant, keep the wins visible, never the same mistake twice.' }
+];
+function hqStageDef(key) { return HQ_STAGES.find(s => s.key === key) || HQ_STAGES[0]; }
+
+// Manual stage wins; otherwise derive a sensible starting point from the CRM stage.
+function hqStageOf(l) {
+  if (l && l.stage && HQ_STAGES.some(s => s.key === l.stage)) return l.stage;
+  const cs = (l && l.crm && l.crm.stage) || 1;
+  if (cs >= 6) return 'kickoff';
+  if (cs === 5) return 'discovery';
+  return 'cold';
+}
+function hqFirstName(l) {
+  const n = (l && (l.ownerName || ((l.contacts || []).find(c => c && c.name) || {}).name) || '').trim();
+  return n ? n.split(/\s+/)[0] : '';
+}
+function hqAns(l, k) { return (l && l.answers && l.answers[k]) || ''; }
+function hqWaNumber(l) {
+  const cand = hqAns(l, 'wa') || (l && l.whatsapp) || (l && l.phones && l.phones[0] && l.phones[0].number) || '';
+  const digits = String(cand).replace(/[^0-9]/g, '');
+  return digits.length >= 7 ? digits : '';
+}
+let hqSaveTimer = null;
+function hqScheduleSave() {
+  clearTimeout(hqSaveTimer);
+  hqSaveTimer = setTimeout(() => saveState(), 600);
+}
+
+// ---- answer definitions (keys are the shared contract with the old call-system page) ----
+const HQ_AUDIT_CONFIRM = [
+  { num: 'C1', q: 'Who they are — say it, let them correct you', hint: '"So you\'re <b>[lodge]</b>, up near [park], running [N] camps — have I got that right?" A small yes + proof you did the work. Pull it from the crib.', ansKey: 'c1', ph: 'Corrections — e.g. actually 4 camps, new one opened in May' },
+  { num: 'C2', q: 'Channels — name what you saw, ask what\'s real', hint: '"From the outside I can see you\'re on [SafariBookings / Booking.com] plus the website form — is that where most of it actually comes from, or is more of it direct and through agents?" Research-led: you show, they correct.', ansKey: 'c2', ph: 'Real mix — e.g. 60% SafariBookings, rest repeat + agents' }
+];
+const HQ_AUDIT_ASK = [
+  { num: '01', q: 'Roughly how many enquiries came in last month — and what happened to them?', hint: 'Almost nobody can answer precisely — that IS the gap. Whatever number they give auto-fills the maths in the close meeting.', ansKey: 'enq', ph: 'e.g. ~40 a month, no idea what happened to most' },
+  { num: '02', q: 'Who\'s catching enquiries day to day, and how fast do replies actually go out?', hint: 'Internal reality — invisible from outside. Auto-fills the close script.', ansKey: 'who', ph: 'e.g. Belinda herself, same day unless she\'s on a drive' },
+  { num: '03', q: 'What\'s the one thing you lose the most bookings to?', tag: 'Goldmine', hint: 'Type it VERBATIM — their words open your close meeting, automatically.', ansKey: 'leak', ph: 'VERBATIM — e.g. "the ones that come in overnight just sit there"' },
+  { num: '04', q: 'Best WhatsApp number to reach you on directly', hint: 'Sets up every send from here on.', ansKey: 'wa', ph: '+254 …' }
+];
+const HQ_KICKOFF_QS = [
+  { num: '01', q: 'How many people work at the lodge, and who touches guest messages?', hint: 'Names + roles of the 2–4 relevant people only — not a full staff list.', ansKey: 'k_team', ph: 'e.g. 6 staff; Belinda + Joseph handle messages' },
+  { num: '02', q: 'Which WhatsApp number do guest enquiries actually come in on?', hint: 'Often different from the owner\'s personal number.', ansKey: 'k_wa', ph: '+254 …' },
+  { num: '03', q: 'What systems do you use today?', hint: 'Channel manager / PMS / ResRequest / Excel / just email — no judgement.', ansKey: 'k_systems', ph: 'e.g. ResRequest + Gmail + a shared Excel' },
+  { num: '04', q: 'How many rooms/tents, and rough nightly rate range?', ansKey: 'k_rooms', ph: 'e.g. 8 tents · $350–520 a night' },
+  { num: '05', q: 'When is your high season and low season?', ansKey: 'k_seasons', ph: 'e.g. high Jul–Oct + Christmas · low Apr–May' },
+  { num: '06', q: 'How do guests pay a deposit today?', hint: 'Bank transfer / card link / agent handles it.', ansKey: 'k_deposit', ph: 'e.g. 30% by bank transfer' },
+  { num: '07', q: 'What languages do your guests speak?', hint: 'Drives auto-reply setup.', ansKey: 'k_lang', ph: 'e.g. English, German, French' },
+  { num: '08', q: 'Anything the AI must NEVER say or promise?', tag: 'Protects you', hint: 'e.g. guaranteed sightings, discounts. Every lodge has one landmine — find it before the AI does.', ansKey: 'k_never', ph: 'e.g. never guarantee sightings; no discount talk' }
+];
+const HQ_COLD_PREP = [
+  { q: 'Their record open — description, nº of camps, FunnelLeak guess', hint: 'It\'s all on the Crib tab. You call AS someone who\'s done the research — this is the research.' },
+  { q: 'Website or SafariBookings profile glanced', hint: '30 seconds: what channels they\'re on, what the lodge looks like, anything to mention by name.' },
+  { q: 'Crib line typed on the Crib tab', hint: 'Park · camps · channels · leak guess — so it\'s in front of you on every call.' }
+];
+const HQ_CLOSE_PREP = [
+  { q: 'Their answers open — Answers tab', hint: 'Everything from discovery, one tab away.' },
+  { q: 'Their leak answer, memorised verbatim', hint: 'You open with it: "<span class="hq-tok" data-ans="leak" data-ph="fill it in on Discovery"></span>"' },
+  { q: 'Demo ready — their lodge name in the sample data', hint: 'e.g. quote header reads their lodge, not "Mara Plains Camp".' },
+  { q: 'Know which tier fits + your setup fee number', hint: 'Decide BEFORE the call — never work out pricing live.' }
+];
+
+// ---- objections (verbatim from the call-system page) ----
+const HQ_OBJECTIONS = {
+  owner: [
+    { q: 'We manage fine.', a: 'Most owners say that — and most manage fine on the bookings they see. The number nobody can answer is the one that matters: how many enquiries got a reply within the hour last month, and how many never got followed up. I\'d rather show you that on your own numbers than argue about it.' },
+    { q: 'We already use [PMS / channel manager].', a: 'Good — we\'re not replacing that. LodgeHelm isn\'t a PMS or channel manager, it\'s the thin layer that handles enquiry-to-booking specifically. It sits alongside what you\'ve got.' },
+    { q: 'Send me something.', a: 'Happy to — so I send the right thing: is the bigger pain catching enquiries fast, or the follow-ups that go quiet after a quote? <em>(note the answer)</em> What\'s the best email for it?' }
+  ],
+  ownerPrice: [
+    { q: 'What does this cost? / Is it per lodge?', a: 'It\'s a monthly subscription per property. A single lodge starts around $149–249 a month. But honestly — one recovered booking pays for the whole year. The real question isn\'t the monthly figure, it\'s how many enquiries are quietly slipping through right now. I\'d rather show you that in a 15-minute pilot than talk pricing in the abstract.' },
+    { q: 'Isn\'t that expensive? / No budget.', a: 'Fair — and I\'d rather you never pay for something that doesn\'t earn its keep. A single safari party is worth three to fifteen thousand dollars. Stop losing just ONE of those a year and it\'s paid for itself several times over. Try it free for 14 days and judge it on your own numbers.' },
+    { q: 'Just give me a number.', a: 'I\'ll give you the exact figure once I\'ve seen your setup — I don\'t want to quote you a tier you don\'t need. <em>(Saying this is stronger, not weaker.)</em>' }
+  ],
+  gm: [
+    { q: 'I don\'t have time to roll out new software.', a: 'Totally get it — this isn\'t a project for your team. Setup takes a day, not a quarter, and we do the onboarding call with you, not the other way round.' },
+    { q: 'My team won\'t adopt another tool.', a: 'It actually removes tools rather than adding one — instead of checking email, WhatsApp and a form inbox separately, it\'s one place. Less to juggle, not more. Worth seeing the actual workflow before judging that.' },
+    { q: 'That\'s not my call — I\'d need the owner\'s sign-off.', a: 'Makes sense. Two ways to play it: I show you first so you can bring the owner a working demo (or better, your own numbers) already proven — or I\'m happy to jump on a call with both of you together, whichever\'s easier for you.' },
+    { q: 'Will this replace my job / change my role?', a: 'Opposite, actually — it\'s the visibility you and the owner have never had, and it makes your part of the operation look sharp, not replaceable. It\'s built to make the GM\'s life easier, not to cut the GM out.' }
+  ],
+  gmPrice: [
+    { q: 'How much is this going to cost — I\'ll need to tell the owner.', a: 'It\'s a monthly subscription per property — from around $149 a month for a single lodge; larger multi-property groups are custom-priced. But the number that actually matters to the owner is this: one recovered booking pays for the whole year. That\'s the line to lead with, not the monthly figure.' },
+    { q: 'I don\'t know our budget for something like this.', a: 'You don\'t need to know it upfront — that\'s what the 14-day pilot is for. You try it free, see what it recovers on your own numbers, and then it\'s an easy budget conversation because you\'re showing a return, not asking for a leap of faith.' },
+    { q: 'The owner\'s going to ask me if it\'s worth it — what do I say?', a: 'Tell them: a single safari party is worth three to fifteen thousand dollars, and you only have to stop losing ONE of those a year for it to pay for itself. That\'s the whole case — you\'re not asking them to buy software, you\'re showing them a leak.' }
+  ],
+  close: [
+    { q: 'I need to think about it.', a: 'Completely fair. In my experience that usually means one of two things — the money, or whether it\'ll actually work at your lodge. Which one is it for you? <em>(If money → the maths again. If doubt → "that\'s exactly what the 14-day pilot is for — judge it on your own enquiries, not my word.")</em>' },
+    { q: 'I need to talk to my partner / the owner.', a: 'Of course. Two options: I\'ll jump on a ten-minute call with both of you — easier than you re-explaining it — or I\'ll send you a one-page summary with your own numbers in it so the conversation takes five minutes. Which works? <em>(Then book the follow-up date before hanging up.)</em>' },
+    { q: 'Can we start next season instead?', a: 'You can — but the quiet season is exactly the right time to set up. It means the system is tested and boring by the time enquiries flood in. Setting up mid-high-season is how it never happens. And every month waited is another month of the leak we just priced.' },
+    { q: 'Can you drop the setup fee?', a: 'The setup fee is the part where I do everything — configure it to your lodge, test it on your real enquiries, train your people. Your side is a five-minute call; everything that looks like work is mine. It\'s also why this actually goes live instead of becoming another tool nobody rolled out. What I can do is [annual prepay ≈ 2 months free / fold it into the first invoice] — but the setup itself is the value.' }
+  ]
+};
+const HQ_ONELINERS = [
+  '"A single safari party is worth three to fifteen grand. You only have to stop losing ONE of those a year, and it\'s paid for itself."',
+  '"One recovered booking covers the whole year — everything after that is revenue you were leaking."',
+  '"You\'re not buying software — you\'re plugging a leak that\'s already costing you bookings."'
+];
+function hqTiersHtml() {
+  return `
+    <div class="hq-tiers">
+      <div class="hq-tier"><div class="tname">Starter</div><div class="tprice">$149–249/mo</div><div class="twho">Single owner-run lodge</div></div>
+      <div class="hq-tier"><div class="tname">Pro</div><div class="tprice">$349–599/mo</div><div class="twho">Reservation-heavy lodge</div></div>
+      <div class="hq-tier"><div class="tname">Enterprise</div><div class="tprice">Let's talk</div><div class="twho">Multi-property / DMC</div></div>
+    </div>
+    <div class="hq-tiers-extra">Plus one-off setup $500–3,000 · 14-day pilot · annual prepay ≈ 2 months free</div>`;
+}
+function hqOnelinersHtml(label) {
+  return `
+    <div class="hq-oneliners"><span class="hq-mono">${label}</span><ul>
+      ${HQ_ONELINERS.map(x => `<li>${x}</li>`).join('')}
+    </ul></div>`;
+}
+function hqObjectionsHtml(list) {
+  return list.map(o => `<div class="hq-objection"><div class="oq">${o.q}</div><div class="oa">${o.a}</div></div>`).join('');
+}
+
+// ---- WhatsApp templates (Send tab) ----
+const HQ_TEMPLATES = {
+  first_owner: { label: 'First touch · owner-run lodge — after a cold call or voicemail (no link, no emojis)', text: 'Hi {name}, I came across {lodge} — really like what you’ve built.\nQuick question: when you’re out guiding or full-on with guests, who’s catching the booking enquiries that come in?\nI work on a tool that keeps every enquiry in one place and chases the quotes for you so none go cold.\nWould a short look be useful?\nMelusi, LodgeHelm' },
+  first_gm: { label: 'First touch · scattered-channels angle (GM / reservations)', text: 'Hi {name}, when an enquiry comes to {lodge} — email, the website form, WhatsApp — does it all end up in one place, or in a few different inboxes?\nThe lodges I talk to lose the odd booking simply because it landed in a channel no one checked that day.\nI help pull every enquiry into one shared inbox and pipeline so nothing slips.\nWould a 2-minute demo be handy?\nMelusi, LodgeHelm' },
+  audit: { label: 'Audit send · if they\'d rather answer the discovery questions async', text: 'Great speaking just now, {name}. As promised — four quick questions so I can look at where {lodge} might be leaking bookings before we talk again. Takes 2 minutes on your phone.' },
+  kickoff: { label: 'Kickoff booking · new client', text: 'Welcome aboard, {name} 🎉 First step of your setup is a 15-minute call where I take down how {lodge} runs — you talk, I type. When suits you this week?' },
+  segment: { label: 'Segment opener · the CRM\'s per-segment first message', text: '' }
+};
+function hqTplText(key, l) {
+  if (key === 'segment') return waMessageFor(l);
+  const name = hqFirstName(l) || 'there';
+  const lodge = (l && l.businessName) || 'your lodge';
+  const t = (HQ_TEMPLATES[key] ? HQ_TEMPLATES[key].text : '').split('{name}').join(name).split('{lodge}').join(lodge);
+  return stripEmDashes(t);
+}
+function hqTplPreview(key, l) {
+  const text = hqTplText(key, l);
+  const name = hqFirstName(l) || 'there';
+  const lodge = (l && l.businessName) || 'your lodge';
+  let html = escapeHtml(text);
+  [name, lodge].forEach(v => {
+    if (v && v !== 'there' && v !== 'your lodge') html = html.split(escapeHtml(v)).join(`<span class="var">${escapeHtml(v)}</span>`);
+  });
+  return html;
+}
+function hqCopy(text, btn) {
+  const done = () => {
+    if (!btn) return;
+    const old = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, () => { hqFallbackCopy(text); done(); });
+  } else { hqFallbackCopy(text); done(); }
+}
+function hqFallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (_) {}
+  document.body.removeChild(ta);
+}
+function hqEnsureCrm(lead) {
+  if (!lead.crm) lead.crm = { stage: 1, disposition: 'nurture', priority: 'medium', notes: [], dealValue: 1200, outcomeReason: '' };
+}
+function hqLogSend(lead, label) {
+  hqEnsureCrm(lead);
+  addActivity(lead, 'WhatsApp sent (' + label + ')');
+  lead.crm.dateLastContact = todayISO;
+  if (!lead.crm.dateFirstContact) lead.crm.dateFirstContact = todayISO;
+  bumpStage(lead, 4);
+  setNextStep(lead, 'Chase for a reply', daysFromNow(3), 'Sent WhatsApp');
+  saveState();
+  showToast('Logged — next step: chase in 3 days', 'success');
+}
+
+// ---- queue ----
+function hqActiveLeads() {
+  return (state.leads || []).filter(l => {
+    if (!l || l._deleted || l.source === 'sample') return false;
+    if (l.status === 'archive') return false;
+    const disp = (l.crm && l.crm.disposition) || '';
+    if (disp === 'not_interested' || disp === 'archived') return false;
+    return l.status === 'crm' || l.status === 'qualified';
+  });
+}
+function hqDueLeads(list) {
+  return (list || hqActiveLeads())
+    .filter(l => l.crm && l.crm.followUpDate && daysUntil(l.crm.followUpDate) !== null && daysUntil(l.crm.followUpDate) <= 0)
+    .sort((a, b) => daysUntil(a.crm.followUpDate) - daysUntil(b.crm.followUpDate));
+}
+function hqQueueLeads() {
+  const s = state.hq || {};
+  let base = hqActiveLeads();
+  if (s.stageFilter && s.stageFilter !== 'all') base = base.filter(l => hqStageOf(l) === s.stageFilter);
+  const due = hqDueLeads(base);
+  const dueIds = new Set(due.map(l => l.id));
+  const rest = base.filter(l => !dueIds.has(l.id))
+    .sort((a, b) => (((b.crm && b.crm.stage) || 0) - ((a.crm && a.crm.stage) || 0)) || String(a.businessName || '').localeCompare(String(b.businessName || '')));
+  return { due, rest };
+}
+function hqSearchLeads(q) {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return [];
+  return (state.leads || []).filter(l => {
+    if (!l || l._deleted || l.source === 'sample') return false;
+    return String(l.businessName || '').toLowerCase().includes(needle)
+      || String(l.ownerName || '').toLowerCase().includes(needle)
+      || String(l.country || '').toLowerCase().includes(needle);
+  }).slice(0, 30);
+}
+
+// ---- render: shell ----
+function renderHQ() {
+  const c = document.getElementById('hq-content');
+  if (!c) return;
+  const s = state.hq || (state.hq = { leadId: null, tab: 'call', stageFilter: 'all', search: '', track: 'owner', pane: 'rail' });
+  const lead = s.leadId ? getLeadById(s.leadId) : null;
+  if (s.leadId && !lead) { s.leadId = null; }
+  const paneCls = (lead && s.pane === 'work') ? 'pane-work' : 'pane-rail';
+  c.innerHTML = `
+    <div class="hq-shell ${paneCls}">
+      <aside class="hq-rail">
+        <div class="hq-rail-head">
+          <div class="hq-rail-title"><span class="t">Pipeline</span><span class="hq-mono">HQ</span></div>
+          <input type="search" class="hq-search" id="hq-search-input" placeholder="Search any lead…" value="${escapeHtml(s.search || '')}" autocomplete="off">
+          <div class="hq-chips">
+            <button class="hq-chip${s.stageFilter === 'all' ? ' active' : ''}" data-action="hq-stage-filter" data-stage="all">All</button>
+            ${HQ_STAGES.map(st => `<button class="hq-chip${s.stageFilter === st.key ? ' active' : ''}" data-action="hq-stage-filter" data-stage="${st.key}">${st.name.split(' ')[0]}</button>`).join('')}
+          </div>
+        </div>
+        <div class="hq-rail-list" id="hq-rail-list"></div>
+      </aside>
+      <div class="hq-work"><div class="hq-work-inner" id="hq-work-inner"></div></div>
+    </div>`;
+  hqRenderRailList();
+  hqRenderWorkspace();
+  lucide.createIcons({ nodes: [c] });
+}
+
+function hqLeadRow(l, opts) {
+  const s = state.hq;
+  const stage = hqStageDef(hqStageOf(l));
+  const due = l.crm && l.crm.followUpDate ? daysUntil(l.crm.followUpDate) : null;
+  const duePill = (due !== null && due <= 0)
+    ? `<span class="hq-pill overdue">${due < 0 ? Math.abs(due) + 'd overdue' : 'due today'}</span>` : '';
+  const nsLabel = (l.crm && l.crm.nextStep && l.crm.nextStep.label) ? `<span class="hq-pill">${escapeHtml(l.crm.nextStep.label.slice(0, 26))}</span>` : '';
+  return `
+    <button class="hq-lead${s.leadId === l.id ? ' active' : ''}" data-action="hq-select-lead" data-id="${escapeHtml(l.id)}">
+      <div class="nm">${escapeHtml(l.businessName || 'Unnamed')}</div>
+      <div class="meta">
+        <span class="hq-pill amber">${stage.name}</span>
+        ${duePill}${nsLabel}
+        ${l.country ? `<span class="hq-pill">${escapeHtml(l.country)}</span>` : ''}
+      </div>
+    </button>`;
+}
+function hqRenderRailList() {
+  const el = document.getElementById('hq-rail-list');
+  if (!el) return;
+  const s = state.hq;
+  if (s.search && s.search.trim()) {
+    const hits = hqSearchLeads(s.search);
+    el.innerHTML = `
+      <div class="hq-rail-group"><span class="hq-mono">Search</span><span class="hq-mono n">${hits.length}</span></div>
+      ${hits.length ? hits.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">No lead matches that.</div>'}`;
+    return;
+  }
+  const { due, rest } = hqQueueLeads();
+  const restCapped = rest.slice(0, 40);
+  el.innerHTML = `
+    <div class="hq-rail-group"><span class="hq-mono">Today's queue</span><span class="hq-mono n">${due.length}</span></div>
+    ${due.length ? due.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">Nothing due. Pull from the pipeline below or search.</div>'}
+    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Pipeline</span><span class="hq-mono n">${rest.length}</span></div>
+    ${restCapped.map(l => hqLeadRow(l)).join('')}
+    ${rest.length > restCapped.length ? `<div class="hq-empty-note">+${rest.length - restCapped.length} more — search to find anyone.</div>` : ''}`;
+}
+
+// ---- render: workspace ----
+function hqRenderWorkspace() {
+  const el = document.getElementById('hq-work-inner');
+  if (!el) return;
+  const s = state.hq;
+  const lead = s.leadId ? getLeadById(s.leadId) : null;
+  if (!lead) { el.innerHTML = hqDashboardHtml(); return; }
+  const stageKey = hqStageOf(lead);
+  const phone = (lead.phones && lead.phones[0] && lead.phones[0].number) || ((lead.contacts || []).find(c => c && c.phone) || {}).phone || '';
+  const wa = hqWaNumber(lead);
+  const who = [lead.ownerName, ((lead.contacts || [])[0] || {}).title].filter(Boolean).join(' · ');
+  el.innerHTML = `
+    <button class="hq-btn ghost hq-back" data-action="hq-back"><i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Queue</button>
+    <div class="hq-lead-head">
+      <div class="lodge">${escapeHtml(lead.businessName || 'Unnamed')}</div>
+      <div class="hq-lead-sub">
+        ${who ? `<span>${escapeHtml(who)}</span>` : ''}
+        ${lead.country ? `<span>${escapeHtml(lead.country)}</span>` : ''}
+        ${lead.segment ? `<span class="hq-pill">${escapeHtml(lead.segment.replace(/_/g, ' '))}</span>` : ''}
+      </div>
+      <div class="hq-head-actions">
+        ${phone ? `<button class="hq-btn" data-action="hq-call" data-id="${escapeHtml(lead.id)}"><i data-lucide="phone" style="width:14px;height:14px;"></i> ${escapeHtml(phone)}</button>` : ''}
+        ${wa ? `<button class="hq-btn ghost" data-action="hq-goto-send"><i data-lucide="message-circle" style="width:14px;height:14px;"></i> WhatsApp</button>` : ''}
+        <select class="hq-outcome" data-action="hq-log-call" data-id="${escapeHtml(lead.id)}" aria-label="Log call outcome">
+          <option value="" selected>Log call outcome…</option>
+          ${CALL_OUTCOMES.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="hq-stagepills">
+        ${HQ_STAGES.map(st => `<button class="hq-stagepill${stageKey === st.key ? ' active' : ''}" data-action="hq-set-stage" data-id="${escapeHtml(lead.id)}" data-stage="${st.key}">${st.step} · ${st.name}</button>`).join('')}
+      </div>
+      <div style="margin-top:12px;">${renderNextStepBand(lead)}</div>
+    </div>
+    <div class="hq-tabs">
+      ${[['crib', 'Crib'], ['call', 'Call'], ['answers', 'Answers'], ['brain', 'Brain'], ['send', 'Send']].map(([k, label]) =>
+        `<button class="hq-tab${s.tab === k ? ' active' : ''}" data-action="hq-tab" data-tab="${k}">${label}</button>`).join('')}
+    </div>
+    <div id="hq-tab-body">${hqTabHtml(lead, s.tab, stageKey)}</div>`;
+  hqUpdateTokens();
+}
+
+function hqTabHtml(lead, tab, stageKey) {
+  if (tab === 'crib') return hqCribTab(lead);
+  if (tab === 'answers') return hqAnswersTab(lead);
+  if (tab === 'brain') return hqBrainTab(lead);
+  if (tab === 'send') return hqSendTab(lead);
+  return hqCallTab(lead, stageKey);
+}
+
+// ---- tab: crib ----
+function hqCribTab(l) {
+  const crm = l.crm || {};
+  const notes = (crm.notes || []);
+  const activity = (l.activity || []).slice(0, 8);
+  const emails = allLeadEmails(l);
+  const phones = (l.phones || []).map(p => p && p.number).filter(Boolean);
+  return `
+    <div class="hq-seclabel"><span class="n">✎</span><span class="t">Research crib — park · camps · channels · leak guess</span></div>
+    <textarea class="hq-crib" id="hq-crib-input" placeholder="e.g. Maasai Mara · 3 camps · SafariBookings + direct · after-hours enquiries slip">${escapeHtml(l.crib || '')}</textarea>
+
+    <div class="hq-seclabel"><span class="n">i</span><span class="t">The record</span></div>
+    <div class="hq-card">
+      ${l.description ? `<p style="font-size:14px;line-height:1.55;color:rgba(245,239,230,0.85);margin:0 0 10px;">${escapeHtml(l.description)}</p>` : ''}
+      <div class="hq-kv">
+        ${l.website ? `<a class="hq-pill" href="${escapeHtml(l.website)}" target="_blank" rel="noopener">Website ↗</a>` : ''}
+        ${phones.map(p => `<span class="hq-pill">${escapeHtml(p)}</span>`).join('')}
+        ${emails.map(e => `<span class="hq-pill">${escapeHtml(e)}</span>`).join('')}
+        ${l.funnelLeak ? `<span class="hq-pill amber">leak guess: ${escapeHtml(l.funnelLeak)}</span>` : ''}
+      </div>
+      <div style="margin-top:8px;"><button class="hq-btn ghost" data-action="hq-open-record" data-id="${escapeHtml(l.id)}">Open full record</button></div>
+    </div>
+
+    <div class="hq-seclabel"><span class="n">✍</span><span class="t">Notes</span></div>
+    <div class="hq-card">
+      <div style="display:flex;gap:8px;">
+        <input type="text" class="hq-ans" style="margin-top:0;flex:1;" id="hq-note-input" placeholder="Add a note — saves to the lead">
+        <button class="hq-btn" data-action="hq-log-note" data-id="${escapeHtml(l.id)}">Add</button>
+      </div>
+      <div style="margin-top:10px;">
+        ${notes.length ? notes.map(n => `<div class="hq-note"><div class="when">${escapeHtml(formatDate((n.date || '').split('T')[0]) || n.date || '')}</div>${escapeHtml(n.text || '')}</div>`).join('')
+          : '<div class="hq-empty-note">No notes yet.</div>'}
+      </div>
+    </div>
+
+    <div class="hq-seclabel"><span class="n">⌚</span><span class="t">History</span></div>
+    <div class="hq-card">
+      ${activity.length ? activity.map(a => `<div class="hq-note"><div class="when">${escapeHtml(formatTimeAgo(a.date))}</div>${escapeHtml(a.action || '')}</div>`).join('')
+        : '<div class="hq-empty-note">No activity yet.</div>'}
+    </div>`;
+}
+
+// ---- tab: answers ----
+function hqAnswerField(l, def) {
+  return `
+    <div class="hq-answer-group">
+      <div class="hq-q" style="cursor:default;border-bottom:none;padding:10px 0 0;">
+        <div class="body">
+          <div class="question"><span class="hq-mono num">${def.num || ''}</span> ${def.q}${def.tag ? `<span class="tag">${def.tag}</span>` : ''}</div>
+          <input type="text" class="hq-ans" data-ans-key="${def.ansKey}" value="${escapeHtml(hqAns(l, def.ansKey))}" placeholder="${escapeHtml(def.ph || '')}" autocomplete="off">
+        </div>
+      </div>
+    </div>`;
+}
+function hqAnswersTab(l) {
+  return `
+    <div class="hq-goalbar"><span class="hq-mono">Answers</span><p>Everything they've ever told you — editable, saved to the lead as you type, auto-filled into every script.</p></div>
+    <div class="hq-seclabel"><span class="n">C</span><span class="t">Discovery — confirm, don't ask</span></div>
+    <div class="hq-card">${HQ_AUDIT_CONFIRM.map(d => hqAnswerField(l, d)).join('')}</div>
+    <div class="hq-seclabel"><span class="n">A</span><span class="t">Discovery — only they know this</span></div>
+    <div class="hq-card">${HQ_AUDIT_ASK.map(d => hqAnswerField(l, d)).join('')}</div>
+    <div class="hq-seclabel"><span class="n">K</span><span class="t">Kickoff — the setup spec</span></div>
+    <div class="hq-card">${HQ_KICKOFF_QS.map(d => hqAnswerField(l, d)).join('')}</div>`;
+}
+
+// ---- tab: brain ----
+function hqBrainTab(l) {
+  const entries = (l.brain || []).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  return `
+    <div class="hq-goalbar"><span class="hq-mono">Brain</span><p>Call Brain's briefs & coaching for this lead. Drop the recording on Call Brain after you hang up — it lands here on the next refresh.</p></div>
+    ${entries.length ? entries.map(e => `
+      <div class="hq-brain-entry">
+        <div class="head">
+          <span class="hq-pill ${e.type === 'coaching' ? '' : 'amber'}">${escapeHtml(e.type || 'brief')}</span>
+          <span class="hq-mono" style="color:var(--hq-muted);">${escapeHtml(e.date || '')}</span>
+        </div>
+        <div class="text">${escapeHtml(e.text || '')}</div>
+      </div>`).join('')
+      : `<div class="hq-card"><div class="hq-empty-note" style="padding:4px 0;">No briefs yet for this lead. After a call: drop the recording onto Call Brain on your Mac, then hit the refresh arrow up top — the brief and coaching appear here. Recordings never leave your Mac; only the text lands in HQ.</div></div>`}`;
+}
+
+// ---- tab: send ----
+function hqSendTpl(l, key) {
+  const t = HQ_TEMPLATES[key];
+  const wa = hqWaNumber(l);
+  const label = key === 'segment' ? (HQ_TEMPLATES.segment.label + ' (' + String(l.segment || 'small lodge').replace(/_/g, ' ') + ')') : t.label;
+  return `
+    <div class="hq-tpl">
+      <span class="hq-mono">${escapeHtml(label)}</span>
+      <p class="msg">${hqTplPreview(key, l)}</p>
+      <div class="actions">
+        <button class="hq-btn" data-action="hq-copy" data-tpl="${key}" data-id="${escapeHtml(l.id)}">Copy</button>
+        ${wa ? `<button class="hq-btn ghost" data-action="hq-wa" data-tpl="${key}" data-id="${escapeHtml(l.id)}">Open WhatsApp + log</button>` : ''}
+        <button class="hq-btn ghost" data-action="hq-copy-log" data-tpl="${key}" data-id="${escapeHtml(l.id)}">Copy + log sent</button>
+      </div>
+    </div>`;
+}
+function hqSendTab(l) {
+  const wa = hqWaNumber(l);
+  return `
+    <div class="hq-goalbar"><span class="hq-mono">Send</span><p>WhatsApp messages personalised from this lead — copy, or open WhatsApp with the text ready. ${wa ? 'Sending to <b>+' + escapeHtml(wa) + '</b>.' : 'No WhatsApp number on file yet — get it in discovery (question 04).'}</p></div>
+    ${hqSendTpl(l, 'first_owner')}
+    ${hqSendTpl(l, 'first_gm')}
+    ${hqSendTpl(l, 'audit')}
+    ${hqSendTpl(l, 'kickoff')}
+    ${hqSendTpl(l, 'segment')}
+    <p class="hq-meta" style="margin-top:14px;">Emails live where they always did — the Draft button on the CRM section, or ask the Brain chat. ≤15–20 new lodges a day on WhatsApp first-touches.</p>`;
+}
+
+// ---- tab: call (per stage) ----
+function hqQcardHtml(l, cardId, items) {
+  return `
+    <div class="hq-qcard" id="hq-card-${cardId}">
+      ${items.map((it, i) => {
+        const key = cardId + ':' + i;
+        const ticked = !!(l.ticks && l.ticks[key]);
+        return `
+          <label class="hq-q${ticked ? ' done' : ''}">
+            <input type="checkbox" data-tick="${key}"${ticked ? ' checked' : ''}>
+            <span class="body">
+              <span class="question">${it.num ? `<span class="hq-mono num">${it.num}</span> ` : ''}${it.q}${it.tag ? `<span class="tag">${it.tag}</span>` : ''}</span>
+              ${it.hint ? `<span class="hint">${it.hint}</span>` : ''}
+              ${it.ansKey ? `<input type="text" class="hq-ans" data-ans-key="${it.ansKey}" value="${escapeHtml(hqAns(l, it.ansKey))}" placeholder="${escapeHtml(it.ph || '')}" autocomplete="off">` : ''}
+            </span>
+          </label>`;
+      }).join('')}
+    </div>`;
+}
+function hqResetRow(cards, label) {
+  return `<div class="hq-reset-row"><button type="button" data-action="hq-reset-ticks" data-cards="${cards}">${label || 'Reset ticks'}</button></div>`;
+}
+function hqSay(html, note) {
+  return `<div class="hq-say">${html}${note ? `<span class="note">${note}</span>` : ''}</div>`;
+}
+function hqSec(n, t) {
+  return `<div class="hq-seclabel"><span class="n">${n}</span><span class="t">${t}</span></div>`;
+}
+const HQ_TOK_NAME = '<span class="hq-tok" data-tok="name">[name]</span>';
+const HQ_TOK_LODGE = '<span class="hq-tok" data-tok="lodge">[lodge]</span>';
+
+function hqCallTab(l, stageKey) {
+  const st = hqStageDef(stageKey);
+  const goalbar = `<div class="hq-goalbar"><span class="hq-mono">${st.step} · Goal</span><p>${st.goal}</p></div>`;
+  if (stageKey === 'cold') return goalbar + hqColdCall(l);
+  if (stageKey === 'discovery') return goalbar + hqDiscoveryCall(l);
+  if (stageKey === 'close') return goalbar + hqCloseCall(l);
+  if (stageKey === 'kickoff') return goalbar + hqKickoffCall(l);
+  return goalbar + hqClientView(l);
+}
+
+function hqColdCall(l) {
+  const track = state.hq.track || 'owner';
+  const voicemail = hqSec('VM', 'Voicemail — 20 seconds, then hang up')
+    + hqSay(`Hi ${HQ_TOK_NAME}, this is Melusi from LodgeHelm — we help safari lodges stop losing bookings between enquiry and confirmation. No need to call back; I'll send a short note over WhatsApp so it's there when you've a minute. Thanks, and enjoy the rest of your day.`)
+    + `<div style="margin-top:12px;"><button class="hq-btn ghost" data-action="hq-goto-send">Then send the first-touch → Send tab</button></div>`;
+  const ownerTrack = `
+    <p class="hq-meta">You're through to the person who <b>signs off spend</b>. Lead with ROI and the revenue leak, not the feature list.</p>
+    ${hqSec('1', 'Opener — 10 seconds')}
+    ${hqSay(`Hi, is that ${HQ_TOK_NAME}? — Hi ${HQ_TOK_NAME}, I'm Melusi, I run LodgeHelm. Thirty seconds, then you tell me if it's worth more of your time.<br><br>I work with lodge owners on the enquiry-to-booking part of the business — usually the part that's quietly costing more than people realise. Is now alright, or have I caught you mid-drive?`, `If "I'm busy" → "When's a better window — later today or tomorrow around this time?" Book it, hang up.`)}
+    ${hqSec('2', 'Value prop — ROI-led')}
+    ${hqSay(`Short version: LodgeHelm gets every enquiry into one place, a branded quote goes out in minutes instead of hours, and nothing goes quiet without an automatic follow-up.<br><br>A single safari party is worth three to fifteen thousand dollars. Most lodges are losing a few of those a year to silence, not price. Stop losing just one, and it's paid for itself.`)}
+    ${hqSec('3', 'Qualifying questions — pick 3, revenue-angled')}
+    <div class="hq-card"><ol>
+      <li>Roughly how many enquiries did you get last month — and honestly, could you tell me what happened to all of them?</li>
+      <li>If I asked your enquiry-to-booking conversion rate right now, could you answer on the spot?</li>
+      <li>When a guest goes quiet after a quote, does anything chase them automatically, or does that one just drift?</li>
+      <li>What would one extra recovered booking a month actually be worth to you?</li>
+    </ol><div class="qs-note">Owners almost never can answer Q1/Q2 precisely — that's the gap you're pointing at.</div></div>
+    ${hqSec('4', 'Objections')}
+    ${hqObjectionsHtml(HQ_OBJECTIONS.owner)}
+    ${hqSec('£', 'Price objections — anchor ROI → range → pilot')}
+    ${hqTiersHtml()}
+    ${hqObjectionsHtml(HQ_OBJECTIONS.ownerPrice)}
+    ${hqOnelinersHtml('Pocket one-liners')}
+    ${hqSec('5', 'The close → books the discovery call')}
+    ${hqSay(`This is more a business decision than a product one. Fifteen minutes, I'll run it against your own numbers, and you decide if it's worth rolling out. [Day] at [Time] work?`, `Fallback: send the 2-minute demo video, log the follow-up. Always end with a time booked — never "I'll be in touch."`)}
+    ${voicemail}`;
+  const gmTrack = `
+    <p class="hq-meta">You're through to the person <b>living in the enquiry inbox</b>, who may need to sell this upward. Lead with workload relief and visibility, not P&amp;L.</p>
+    ${hqSec('1', 'Opener — 10 seconds')}
+    ${hqSay(`Hi, is that ${HQ_TOK_NAME}? — Hi ${HQ_TOK_NAME}, I'm Melusi, I work with lodge GMs on the enquiry side — specifically the juggling act of web forms, email and WhatsApp, trying to get quotes out and follow-ups chased. Thirty seconds — is now alright, or mid-shift?`)}
+    ${hqSec('2', 'Value prop — workload-led')}
+    ${hqSay(`Short version: LodgeHelm pulls every enquiry, whatever channel it lands on, into one inbox with an owner and a clock on it. Quotes go out from a template in about five minutes instead of rebuilt by hand. Follow-ups chase themselves until there's a decision, so nothing relies on someone remembering.<br><br>Less for you and the team to juggle — and you can finally show the owner exactly what's happening to enquiries, instead of guessing.`)}
+    ${hqSec('3', 'Qualifying questions — pick 3, workflow-angled')}
+    <div class="hq-card"><ol>
+      <li>Walk me through what happens right now when an enquiry comes in — whose inbox does it land in, and who covers it when they're off?</li>
+      <li>How long does it usually take your team to turn an enquiry into a sent quote?</li>
+      <li>When you're slammed with guests, does anything chase a quote gone quiet, or does someone have to remember?</li>
+      <li>If the owner asked you right now how many enquiries came in last month and what happened to them, could you answer on the spot?</li>
+    </ol><div class="qs-note">The last one usually lands it — GMs feel that gap even more than owners do.</div></div>
+    ${hqSec('4', 'Objections')}
+    ${hqObjectionsHtml(HQ_OBJECTIONS.gm)}
+    ${hqSec('£', 'Price objections — arm them to relay upward')}
+    ${hqTiersHtml()}
+    ${hqObjectionsHtml(HQ_OBJECTIONS.gmPrice)}
+    ${hqOnelinersHtml('Pocket one-liners — hand these to the GM to relay upward')}
+    ${hqSec('5', 'The close → books the discovery call')}
+    ${hqSay(`Let me show you the actual workflow — fifteen minutes, mapped against your own enquiry mess. If it's useful, you decide whether to loop the owner in after, or I'm happy to be on with both of you from the start. [Day] at [Time]?`, `Fallback: send the 2-minute demo video so they can pitch it upward.`)}
+    ${voicemail}`;
+  return `
+    <p class="hq-meta">Voice: calm, specific, no hype, no pressure — <b>a peer flagging something, not a pitch</b>. Never lead with the voice agent. Call windows (local): ~10:00–12:30 and ~13:00–15:00 — lodges are on game drives outside those.</p>
+    ${hqSec('✓', 'Before dialling — 60 seconds')}
+    ${hqQcardHtml(l, 'coldprep', HQ_COLD_PREP)}
+    ${hqResetRow('coldprep', 'Reset · new attempt')}
+    <div class="hq-roletoggle">
+      <button class="${track === 'owner' ? 'active' : ''}" data-action="hq-track" data-track="owner">Owner / MD</button>
+      <button class="${track === 'gm' ? 'active' : ''}" data-action="hq-track" data-track="gm">GM / Reservations</button>
+    </div>
+    ${track === 'gm' ? gmTrack : ownerTrack}`;
+}
+
+function hqDiscoveryCall(l) {
+  return `
+    <p class="hq-meta">They said yes to 15 minutes. <b>Their answers here are your ammunition for the close</b> — especially the leak question. You've done the research, so sound like it: <b>never ask anything their website already answers</b> — it burns the researched-peer posture. Everything you type saves to the lead as you go.</p>
+    ${hqSec('1', 'Open the call')}
+    ${hqSay(`Thanks for the time, ${HQ_TOK_NAME}. I did my homework on ${HQ_TOK_LODGE} before this, so I won't waste your time on things I can read on your website. I'll check my picture's right, ask a few things only you'd know, then show you where the leak usually is — and you tell me if it's worth going further. Sound fair?`)}
+    ${hqSec('2', 'Confirm, don\'t ask — show the homework')}
+    ${hqQcardHtml(l, 'auditconfirm', HQ_AUDIT_CONFIRM)}
+    ${hqSec('3', 'Ask — only they know this')}
+    ${hqQcardHtml(l, 'audit', HQ_AUDIT_ASK)}
+    ${hqResetRow('auditconfirm,audit', 'Reset · new call')}
+    ${hqSec('4', 'Mirror the leak back')}
+    ${hqSay(`So if I've heard that right: "<span class="hq-tok" data-ans="leak" data-ph="[their leak, verbatim]"></span>". That's exactly the bit LodgeHelm handles — and it's usually worth more than people think. A single party is three to fifteen grand; if even one a quarter is going quiet, that's serious money leaking at ${HQ_TOK_LODGE}.`)}
+    ${hqSec('5', 'Close of discovery → books the close meeting')}
+    ${hqSay(`Here's what I'd suggest. Give me twenty minutes later this week — I'll put your answers against the actual workflow and show you exactly how ${HQ_TOK_LODGE}'s enquiries would run through it, with your numbers. If it doesn't obviously pay for itself, you tell me and that's the end of it. [Day] at [Time]?`, `If they're hot NOW — asking price with intent, "how do we start?" — don't make them wait. Switch to Close Meeting and finish it on this call.`)}
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="hq-btn" data-action="hq-set-stage" data-id="${escapeHtml(l.id)}" data-stage="close">They're hot → open Close Meeting</button>
+      <button class="hq-btn ghost" data-action="hq-goto-send">Rather answer async? Audit send → Send tab</button>
+    </div>`;
+}
+
+function hqCloseCall(l) {
+  return `
+    <p class="hq-meta">They're properly interested — this is the demo-and-decide meeting, ~20 minutes. <b>This is where the money happens, not the kickoff</b> — the kickoff is after they've paid.</p>
+    ${hqSec('✓', 'Before the meeting — prep checklist')}
+    ${hqQcardHtml(l, 'prep', HQ_CLOSE_PREP)}
+    ${hqResetRow('prep', 'Reset · new meeting')}
+    ${hqSec('1', 'Open with their leak')}
+    ${hqSay(`Last time you told me "<span class="hq-tok" data-ans="leak" data-ph="[their leak answer, verbatim]"></span>". I've built this twenty minutes around exactly that — I'll show you how it stops happening, what it costs, and you decide. Fair?`)}
+    ${hqSec('2', 'Demo the fix — 8 minutes max')}
+    ${hqSay(`Walk one enquiry through the workflow, start to finish, using their scenario: enquiry lands → one inbox with a clock on it → branded quote out in minutes → follow-up chases itself.`, `Show, don't tour. One journey through, not a feature list. Stop the moment they lean in.`)}
+    ${hqSec('3', 'The maths — their numbers')}
+    ${hqSay(`You said you get roughly <span class="hq-tok" data-ans="enq" data-ph="[X] enquiries a month"></span>, and <span class="hq-tok" data-ans="who" data-ph="[who they told you]"></span> is catching them. A single party is worth three to fifteen thousand dollars. If even one a quarter is slipping through — and from what you've told me it's more — that's [4 × their party value] a year going quiet at ${HQ_TOK_LODGE}. That's the number we're actually talking about today.`)}
+    ${hqSec('4', 'Price — ROI first, then two numbers')}
+    ${hqSay(`So the cost. Two numbers, both smaller than that one. The monthly is [tier] — that's the system running, every enquiry, every follow-up. And there's a one-off setup of [fee] — that's me configuring it to ${HQ_TOK_LODGE}, testing it on your real enquiries, and getting your people live. You do a five-minute call; I do everything that looks like work. One recovered booking covers the whole year.`)}
+    <div style="margin-top:12px;">${hqTiersHtml()}</div>
+    ${hqSec('5', 'The ask — then stop talking')}
+    ${hqSay(`Shall we get ${HQ_TOK_LODGE} live? Two things happen today: I'll send the setup invoice, and we book your kickoff call — fifteen minutes where you talk and I type, then I disappear and build. What day suits you this week?`, `Ask it, then silence. The first person to speak after the ask loses.`)}
+    ${hqSec('6', 'Close-meeting objections')}
+    ${hqObjectionsHtml(HQ_OBJECTIONS.close)}
+    <div class="hq-dontleave"><span class="hq-mono">Don't leave without</span><ul>
+      <li>A yes — or a real no (a "maybe" gets a booked follow-up date)</li>
+      <li>Setup fee paid, or invoice sent within the hour</li>
+      <li>Kickoff call booked, day and time</li>
+    </ul></div>`;
+}
+
+function hqKickoffCall(l) {
+  return `
+    <p class="hq-meta">They've paid. This is <b>step 1 of the paid setup</b> — frame it that way. If you already ran the audit in discovery, confirm those answers rather than re-asking (they're on the Answers tab).</p>
+    <div style="margin-bottom:14px;"><button class="hq-btn ghost" data-action="hq-goto-send">To book it: kickoff WhatsApp → Send tab</button></div>
+    ${hqSec('1', 'Open the call')}
+    ${hqSay(`Welcome aboard properly, ${HQ_TOK_NAME}. From here your job is small: this call, then I disappear and build. I'm going to ask you about how ${HQ_TOK_LODGE} actually runs — fifteen minutes, you talk, I type. Nothing technical.`)}
+    ${hqSec('2', 'Onboarding intake — tick as you go')}
+    <p class="hq-meta" style="margin-bottom:10px;">Covers everything from the audit (confirm, don't re-ask), plus:</p>
+    ${hqQcardHtml(l, 'kickoff', HQ_KICKOFF_QS)}
+    ${hqResetRow('kickoff', 'Reset · new kickoff')}
+    ${hqSec('3', 'End the call')}
+    ${hqSay(`That's everything I need. Next thing you'll hear from me is when it's running on ${HQ_TOK_LODGE}'s real enquiries — I'll message you on WhatsApp by [day]. After that we do one short walkthrough with whoever handles the inbox, and you're live.`)}
+    ${hqSec('£', 'If the setup fee ever comes up')}
+    <div class="hq-fee-card">
+      <span class="hq-mono">Fee framing</span>
+      <h3>The intake is step 1 of the paid setup — never a substitute for it.</h3>
+      <p>The fee pays for the outcome: the system configured to their lodge, tested on their real enquiries, staff shown how it works, and live. The questions just make sure it's built right first time.</p>
+      <div class="sayline">"The questions are so we build it right first time — the setup work is everything that happens after."</div>
+    </div>`;
+}
+
+function hqClientView(l) {
+  const spec = HQ_KICKOFF_QS.map(d => hqAns(l, d.ansKey) ? `<li><b>${d.q.replace(/\?$/, '')}:</b> ${escapeHtml(hqAns(l, d.ansKey))}</li>` : '').join('');
+  return `
+    <p class="hq-meta">${escapeHtml(l.businessName || 'This lodge')} is live. Their setup spec is below; log calls as usual and Call Brain briefs keep landing on the Brain tab.</p>
+    ${hqSec('✓', 'Setup spec — from the kickoff')}
+    <div class="hq-card">${spec ? `<ul>${spec}</ul>` : '<div class="hq-empty-note">No kickoff answers on file — fill them on the Answers tab.</div>'}</div>
+    ${hqSec('♥', 'Keep them winning')}
+    <div class="hq-card"><ul>
+      <li>Check in monthly — one WhatsApp: "how's the system treating you?"</li>
+      <li>Ask for the win story once they recover a booking — that's your next case study.</li>
+      <li>Referrals: "which lodge owner do you rate that I should talk to?"</li>
+    </ul></div>`;
+}
+
+// ---- dashboard (no lead selected) ----
+function hqDashboardHtml() {
+  const active = hqActiveLeads();
+  const due = hqDueLeads(active);
+  const inDisc = active.filter(l => l.crm && l.crm.stage === 5).length;
+  const won = (state.leads || []).filter(l => l && l.crm && l.crm.stage === 6).length;
+  const pat = state.brainPatterns;
+  const inbox = state.brainInbox || [];
+  return `
+    <div class="hq-lead-head">
+      <div class="lodge">LodgeHelm HQ</div>
+      <div class="hq-lead-sub"><span>${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</span><span>Pick a lead on the left — everything for the call lives here.</span></div>
+    </div>
+    <div class="hq-dash-stats">
+      <div class="hq-stat"><div class="v">${due.length}</div><div class="l">Calls due today</div></div>
+      <div class="hq-stat"><div class="v">${inDisc}</div><div class="l">In discussion</div></div>
+      <div class="hq-stat"><div class="v">${won}</div><div class="l">Won</div></div>
+    </div>
+    ${inbox.length ? `
+      ${hqSec('!', 'Call Brain inbox — briefs waiting for a lead')}
+      ${inbox.map(item => `
+        <div class="hq-brain-entry">
+          <div class="head">
+            <span class="hq-pill amber">${escapeHtml(item.company || 'Unknown lodge')}</span>
+            ${item.contact ? `<span class="hq-pill">${escapeHtml(item.contact)}</span>` : ''}
+            <span class="hq-mono" style="color:var(--hq-muted);">${escapeHtml(item.date || '')}</span>
+          </div>
+          <div class="text">${escapeHtml(((item.entries || [])[0] || {}).text || '').slice(0, 400)}…</div>
+          <div class="hq-inbox-assign">
+            <input type="text" class="hq-ans hq-assign-input" style="margin-top:0;" data-doc="${escapeHtml(item.__docId)}" placeholder="Type the lodge name to attach this brief…" autocomplete="off">
+            <div class="hq-assign-results" data-results-for="${escapeHtml(item.__docId)}"></div>
+          </div>
+        </div>`).join('')}` : ''}
+    ${hqSec('◎', 'Patterns — what Call Brain has learned across your calls')}
+    ${pat && pat.text
+      ? `<div class="hq-card"><div class="hq-pre">${escapeHtml(pat.text)}</div><div class="hq-mono" style="margin-top:10px;color:var(--hq-muted);">Updated ${escapeHtml((pat.updatedAt || '').slice(0, 10))}${pat.calls ? ' · ' + pat.calls + ' calls' : ''}</div></div>`
+      : `<div class="hq-card"><div class="hq-empty-note" style="padding:4px 0;">Patterns build as Call Brain digests your calls — objections that repeat, lines that land, mistakes to never make twice. Drop recordings on Call Brain and refresh.</div></div>`}`;
+}
+
+// ---- token substitution (live, no re-render) ----
+function hqUpdateTokens() {
+  const l = state.hq.leadId ? getLeadById(state.hq.leadId) : null;
+  const root = document.getElementById('hq-work-inner');
+  if (!l || !root) return;
+  root.querySelectorAll('.hq-tok[data-tok]').forEach(el => {
+    el.textContent = el.dataset.tok === 'name' ? (hqFirstName(l) || '[name]') : (l.businessName || '[lodge]');
+  });
+  root.querySelectorAll('.hq-tok[data-ans]').forEach(el => {
+    el.textContent = hqAns(l, el.dataset.ans) || el.dataset.ph || '';
+  });
+}
+
+// ---- assign a Call Brain inbox brief onto a lead ----
+async function hqAssignBrief(docId, leadId) {
+  const item = (state.brainInbox || []).find(i => i.__docId === docId);
+  const lead = getLeadById(leadId);
+  if (!item || !lead) return;
+  lead.brain = (lead.brain || []).concat(item.entries || []);
+  addActivity(lead, 'Call Brain brief attached');
+  saveState();
+  try {
+    if (LodgeHelmSync.__db) await window.__fb.deleteDoc(window.__fb.doc(LodgeHelmSync.__db, 'inbox', docId));
+  } catch (e) { console.warn('inbox delete failed', e); }
+  state.brainInbox = (state.brainInbox || []).filter(i => i.__docId !== docId);
+  showToast('Brief attached to ' + (lead.businessName || 'lead'), 'success');
+  renderHQ();
+}
+
+// ---- HQ events ----
+document.getElementById('section-hq').addEventListener('click', e => {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+  const id = target.dataset.id;
+  const s = state.hq;
+  if (action === 'hq-select-lead') { s.leadId = id; s.pane = 'work'; renderHQ(); return; }
+  if (action === 'hq-back') { s.pane = 'rail'; renderHQ(); return; }
+  if (action === 'hq-tab') { s.tab = target.dataset.tab; renderHQ(); return; }
+  if (action === 'hq-goto-send') { s.tab = 'send'; renderHQ(); return; }
+  if (action === 'hq-stage-filter') { s.stageFilter = target.dataset.stage; renderHQ(); return; }
+  if (action === 'hq-track') { s.track = target.dataset.track; renderHQ(); return; }
+  if (action === 'hq-set-stage') {
+    const lead = getLeadById(id);
+    if (lead) {
+      lead.stage = target.dataset.stage;
+      addActivity(lead, 'HQ stage set to ' + hqStageDef(lead.stage).name);
+      if (s.tab !== 'call') s.tab = 'call';
+      saveState();
+      renderHQ();
+    }
+    return;
+  }
+  if (action === 'hq-call') { openDialer(id); return; }
+  if (action === 'hq-open-record') { const lead = getLeadById(id); if (lead) openPanel('view-lead', lead); return; }
+  if (action === 'hq-log-note') {
+    const input = document.getElementById('hq-note-input');
+    const text = input && input.value.trim();
+    if (text) { addNote(id, text); showToast('Note saved', 'success'); renderHQ(); }
+    return;
+  }
+  if (action === 'hq-reset-ticks') {
+    const lead = s.leadId ? getLeadById(s.leadId) : null;
+    if (lead && lead.ticks) {
+      const prefixes = String(target.dataset.cards || '').split(',');
+      Object.keys(lead.ticks).forEach(k => { if (prefixes.some(p => k.startsWith(p + ':'))) delete lead.ticks[k]; });
+      saveState();
+      renderHQ();
+    }
+    return;
+  }
+  if (action === 'hq-copy' || action === 'hq-copy-log' || action === 'hq-wa') {
+    const lead = getLeadById(id);
+    if (!lead) return;
+    const text = hqTplText(target.dataset.tpl, lead);
+    const tplName = String(target.dataset.tpl || 'template').replace(/_/g, ' ');
+    if (action === 'hq-wa') {
+      const num = hqWaNumber(lead);
+      if (num) window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(text), '_blank');
+      hqLogSend(lead, tplName);
+      renderHQ();
+    } else {
+      hqCopy(text, target);
+      if (action === 'hq-copy-log') { hqLogSend(lead, tplName); setTimeout(renderHQ, 300); }
+    }
+    return;
+  }
+  if (action === 'ns-done') { openNextStepModal(id, { markDone: true }); return; }
+  if (action === 'ns-change') { openNextStepModal(id); return; }
+  if (action === 'ns-snooze') {
+    const lead = getLeadById(id);
+    if (lead && lead.crm && lead.crm.nextStep) {
+      const base = daysUntil(lead.crm.nextStep.due) > 0 ? new Date(lead.crm.nextStep.due) : new Date();
+      base.setDate(base.getDate() + 3);
+      const due = base.toISOString().split('T')[0];
+      setNextStep(lead, lead.crm.nextStep.label, due);
+      addActivity(lead, 'snoozed next step to ' + due);
+      saveState();
+      showToast('Snoozed to ' + formatDate(due), 'info');
+      renderHQ();
+    }
+    return;
+  }
+  if (action === 'hq-assign-brief') { hqAssignBrief(target.dataset.doc, target.dataset.lead); return; }
+});
+
+document.getElementById('section-hq').addEventListener('change', e => {
+  const s = state.hq;
+  if (e.target.matches('input[type="checkbox"][data-tick]')) {
+    const lead = s.leadId ? getLeadById(s.leadId) : null;
+    if (!lead) return;
+    if (!lead.ticks) lead.ticks = {};
+    if (e.target.checked) lead.ticks[e.target.dataset.tick] = 1;
+    else delete lead.ticks[e.target.dataset.tick];
+    const q = e.target.closest('.hq-q');
+    if (q) q.classList.toggle('done', e.target.checked);
+    hqScheduleSave();
+    return;
+  }
+  const sel = e.target.closest('[data-action="hq-log-call"]');
+  if (sel && sel.value) {
+    logCall(sel.dataset.id, sel.value);
+    showToast('Call logged — next step set', 'success');
+    renderHQ();
+  }
+});
+
+document.getElementById('section-hq').addEventListener('input', e => {
+  const s = state.hq;
+  if (e.target.id === 'hq-search-input') {
+    s.search = e.target.value;
+    hqRenderRailList();
+    return;
+  }
+  if (e.target.id === 'hq-crib-input') {
+    const lead = s.leadId ? getLeadById(s.leadId) : null;
+    if (lead) { lead.crib = e.target.value; hqScheduleSave(); }
+    return;
+  }
+  if (e.target.matches('.hq-ans[data-ans-key]')) {
+    const lead = s.leadId ? getLeadById(s.leadId) : null;
+    if (!lead) return;
+    if (!lead.answers) lead.answers = {};
+    const k = e.target.dataset.ansKey;
+    if (e.target.value.trim()) lead.answers[k] = e.target.value;
+    else delete lead.answers[k];
+    hqUpdateTokens();
+    hqScheduleSave();
+    return;
+  }
+  if (e.target.matches('.hq-assign-input')) {
+    const docId = e.target.dataset.doc;
+    const box = document.querySelector(`[data-results-for="${docId}"]`);
+    if (!box) return;
+    const q = e.target.value.trim();
+    const hits = q ? hqSearchLeads(q).slice(0, 5) : [];
+    box.innerHTML = hits.map(l =>
+      `<button data-action="hq-assign-brief" data-doc="${escapeHtml(docId)}" data-lead="${escapeHtml(l.id)}">${escapeHtml(l.businessName || 'Unnamed')}${l.country ? ' · ' + escapeHtml(l.country) : ''}</button>`
+    ).join('');
+  }
+});
+
+// Top-bar cloud refresh (function declaration hoists; wired once here).
+(function () {
+  const btn = document.getElementById('refresh-cloud-btn');
+  if (btn) btn.addEventListener('click', () => refreshFromCloud());
+})();
+
 document.querySelector('.sidebar-nav').addEventListener('click', e => {
   const nav = e.target.closest('[data-section]');
   if (nav) showSection(nav.dataset.section);
@@ -7261,8 +8414,8 @@ function init() {
   renderExportButton();
   applyConsultantDefaults();
   loadChatState();
-  // Ensure Today is the default section on first login unless user has a saved pref
-  if (!state.activeSection) state.activeSection = 'today';
+  // HQ is the front door — every session opens on the call workspace.
+  state.activeSection = 'hq';
   // Reflect persisted activeSection into UI
   showSection(state.activeSection);
   lucide.createIcons();
@@ -7270,7 +8423,8 @@ function init() {
   startSharedSync();
 }
 
-// Initialize Firestore sync + merge remote leads into local state, live.
+// Initialize Firestore sync + merge remote leads into local state.
+// READ-LIGHT: one fetch per session; the Refresh button re-runs it on demand.
 async function startSharedSync() {
   try {
     const ok = await LodgeHelmSync.init();
@@ -7278,7 +8432,7 @@ async function startSharedSync() {
       LodgeHelmSync.showSyncStatus('offline');
       return;
     }
-    LodgeHelmSync.subscribe((remoteLeads, meta) => {
+    await LodgeHelmSync.fetchOnce((remoteLeads, meta) => {
       meta = meta || {};
       // SAFE PER-LEAD MERGE: union of local + remote by id, keeping whichever copy has
       // the newer _modAt (ISO string compare; missing/empty _modAt is treated as oldest).
@@ -7365,9 +8519,42 @@ async function startSharedSync() {
         LodgeHelmSync.pushLeads(state.leads.filter(l => l && l.source !== 'sample'));
       }
     }, 1500);
+    // Call Brain data (inbox briefs + cross-call patterns) rides the same session fetch.
+    loadBrainData();
   } catch (e) {
     console.warn('startSharedSync failed', e);
   }
+}
+
+// ===== Call Brain data (Firestore `inbox` collection + `hq/patterns` doc) =====
+// Call Brain (the local Mac tool) writes each call's brief/coaching onto the matching lead's
+// `brain` array; briefs it can't match land in `inbox`, and its cross-call synthesis lands in
+// the single `hq/patterns` doc. Both are tiny reads, refreshed with the lead fetch.
+async function loadBrainData() {
+  const db = LodgeHelmSync.__db;
+  if (!db || !window.__fb) return;
+  try {
+    const snap = await window.__fb.getDocs(window.__fb.collection(db, 'inbox'));
+    const items = [];
+    snap.forEach(d => items.push({ __docId: d.id, ...d.data() }));
+    items.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+    state.brainInbox = items;
+  } catch (e) { console.warn('inbox load failed', e); }
+  try {
+    const pat = await window.__fb.getDoc(window.__fb.doc(db, 'hq', 'patterns'));
+    state.brainPatterns = pat.exists() ? pat.data() : null;
+  } catch (e) { console.warn('patterns load failed', e); }
+  if (state.activeSection === 'hq' && typeof renderHQ === 'function') renderHQ();
+}
+
+// Manual refresh — the only way leads re-fetch after the initial session load (read-light).
+async function refreshFromCloud() {
+  showToast('Refreshing from cloud…', 'info');
+  const ok = await LodgeHelmSync.fetchOnce(null);
+  await loadBrainData();
+  if (ok) showToast('Up to date — ' + (state.leads || []).length + ' leads', 'success');
+  else showToast('Could not refresh — showing cached data', 'warning');
+  renderAll();
 }
 document.addEventListener('DOMContentLoaded', init);
 </script>

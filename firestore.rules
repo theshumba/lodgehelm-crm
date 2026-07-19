@@ -1,12 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Single-user LodgeHelm CRM. Anonymous-auth user gets full CRUD on leads.
-    // NOTE (Phase 2 hardening): anonymous auth means anyone who signs in anonymously
-    // could access this data — lock this to a specific owner UID or require real auth
-    // before this holds anything sensitive.
-    match /leads/{leadId} {
-      allow read, write: if request.auth != null;
+    // LodgeHelm HQ — single-owner lockdown (2026-07-19). Every read and write requires
+    // the owner's UID; anonymous auth is retired. The page stays publicly hosted —
+    // these rules are the lock. Call Brain and the CRM CLI use the service-account
+    // (admin SDK), which bypasses rules by design.
+    function isOwner() {
+      return request.auth != null && request.auth.uid == 'W86SC8wFMZdH59PYPVPhIIMSEoj1';
+    }
+    match /{document=**} {
+      allow read, write: if isOwner();
     }
   }
 }

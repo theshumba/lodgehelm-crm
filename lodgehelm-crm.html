@@ -236,8 +236,10 @@ ul, ol { list-style: none; }
 /* Main content */
 .main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .main-content { flex: 1; padding: var(--space-8); overflow-y: auto; }
-.main-content section { display: none; }
-.main-content section.active { display: block; }
+/* Only the TOP-LEVEL app sections toggle — nested <section>s (e.g. the HQ desk regions)
+   must stay visible, hence the child combinator. */
+.main-content > section { display: none; }
+.main-content > section.active { display: block; }
 
 /* ========== BUTTONS ========== */
 .btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; font-family: var(--font-body); cursor: pointer; border: none; transition: background var(--transition-interactive), color var(--transition-interactive), box-shadow var(--transition-interactive), transform 160ms var(--ease-out-strong); min-height: 44px; white-space: nowrap; }
@@ -993,6 +995,20 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 }
 #section-hq .hq-tab .cap { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hq-faint); margin-top: 3px; }
 #section-hq .hq-tab.active .cap { color: rgba(224,134,58,0.75); }
+
+/* ---- one-desk layout: script front-and-centre, the lodge beside it, nothing hidden ---- */
+#section-hq .hq-work-inner.hq-wide { max-width: 1280px; }
+#section-hq .hq-cols { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 22px; align-items: start; }
+#section-hq .hq-col-main { min-width: 0; }
+#section-hq .hq-col-side { position: sticky; top: 12px; max-height: calc(100dvh - 84px); overflow-y: auto; padding-bottom: 12px; min-width: 0; }
+#section-hq .hq-col-side::-webkit-scrollbar { width: 5px; }
+#section-hq .hq-desk-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; color: var(--hq-faint); margin: 26px 0 8px; padding-top: 14px; border-top: 1px solid var(--hq-hairline); }
+#section-hq .hq-jumpbar { display: none; }
+@media (max-width: 1150px) {
+  #section-hq .hq-cols { grid-template-columns: 1fr; }
+  #section-hq .hq-col-side { position: static; max-height: none; }
+  #section-hq .hq-jumpbar { display: flex; gap: 6px; flex-wrap: wrap; position: sticky; top: 0; z-index: 6; background: var(--hq-green); padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin-bottom: 16px; }
+}
 #section-hq .hq-details { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; margin-top: 12px; overflow: hidden; }
 #section-hq .hq-details summary { cursor: pointer; padding: 13px 18px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: var(--hq-ivory); list-style: none; display: flex; align-items: center; gap: 8px; }
 #section-hq .hq-details summary::-webkit-details-marker { display: none; }
@@ -3036,7 +3052,7 @@ function showSection(sectionId) {
   // The top-bar "← HQ" button only exists while you're in the back office.
   const backBtn = document.getElementById('back-to-hq');
   if (backBtn) backBtn.style.display = sectionId === 'hq' ? 'none' : 'inline-flex';
-  document.querySelectorAll('.main-content section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.main-content > section').forEach(s => s.classList.remove('active'));
   const sec = document.getElementById('section-' + sectionId);
   if (sec) sec.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => {
@@ -5593,12 +5609,12 @@ const HQ_KICKOFF_QS = [
   { num: '08', q: 'Anything the AI must NEVER say or promise?', tag: 'Protects you', hint: 'e.g. guaranteed sightings, discounts. Every lodge has one landmine — find it before the AI does.', ansKey: 'k_never', ph: 'e.g. never guarantee sightings; no discount talk' }
 ];
 const HQ_COLD_PREP = [
-  { q: 'Their record open — description, nº of camps, FunnelLeak guess', hint: 'It\'s all on the Crib tab. You call AS someone who\'s done the research — this is the research.' },
+  { q: 'Their record open — description, nº of camps, FunnelLeak guess', hint: 'It\'s all in the lodge panel beside this script. You call AS someone who\'s done the research — this is the research.' },
   { q: 'Website or SafariBookings profile glanced', hint: '30 seconds: what channels they\'re on, what the lodge looks like, anything to mention by name.' },
-  { q: 'Crib line typed on the Crib tab', hint: 'Park · camps · channels · leak guess — so it\'s in front of you on every call.' }
+  { q: 'Crib line typed — the box beside this script', hint: 'Park · camps · channels · leak guess — so it\'s in front of you on every call.' }
 ];
 const HQ_CLOSE_PREP = [
-  { q: 'Their answers open — Answers tab', hint: 'Everything from discovery, one tab away.' },
+  { q: 'Their answers open', hint: 'Everything from discovery is in \u201cEverything they\u2019ve told you\u201d, beside this script.' },
   { q: 'Their leak answer, memorised verbatim', hint: 'You open with it: "<span class="hq-tok" data-ans="leak" data-ph="fill it in on Discovery"></span>"' },
   { q: 'Demo ready — their lodge name in the sample data', hint: 'e.g. quote header reads their lodge, not "Mara Plains Camp".' },
   { q: 'Know which tier fits + your setup fee number', hint: 'Decide BEFORE the call — never work out pricing live.' }
@@ -5658,7 +5674,7 @@ function hqObjectionsHtml(list) {
   return list.map(o => `<div class="hq-objection"><div class="oq">${o.q}</div><div class="oa">${o.a}</div></div>`).join('');
 }
 
-// ---- WhatsApp templates (Send tab) ----
+// ---- WhatsApp templates (Send section) ----
 const HQ_TEMPLATES = {
   first_owner: { label: 'First touch · owner-run lodge — after a cold call or voicemail (no link, no emojis)', text: 'Hi {name}, I came across {lodge} — really like what you’ve built.\nQuick question: when you’re out guiding or full-on with guests, who’s catching the booking enquiries that come in?\nI work on a tool that keeps every enquiry in one place and chases the quotes for you so none go cold.\nWould a short look be useful?\nMelusi, LodgeHelm' },
   first_gm: { label: 'First touch · scattered-channels angle (GM / reservations)', text: 'Hi {name}, when an enquiry comes to {lodge} — email, the website form, WhatsApp — does it all end up in one place, or in a few different inboxes?\nThe lodges I talk to lose the odd booking simply because it landed in a channel no one checked that day.\nI help pull every enquiry into one shared inbox and pipeline so nothing slips.\nWould a 2-minute demo be handy?\nMelusi, LodgeHelm' },
@@ -5847,7 +5863,7 @@ function renderHQ() {
     <div class="hq-shell ${paneCls}">
       <aside class="hq-rail">
         <div class="hq-rail-head">
-          <div class="hq-rail-title"><span class="t">Pipeline</span><span class="hq-mono">HQ</span></div>
+          <div class="hq-rail-title"><span class="t">Call list</span><span class="hq-mono">HQ</span></div>
           <input type="search" class="hq-search" id="hq-search-input" placeholder="Search any lead…" value="${escapeHtml(s.search || '')}" autocomplete="off">
           <div class="hq-chips">
             <button class="hq-chip${s.stageFilter === 'all' ? ' active' : ''}" data-action="hq-stage-filter" data-stage="all">All</button>
@@ -5884,11 +5900,13 @@ function hqLeadRow(l, opts) {
     if (pos > -1 && pos < ss.idx) dayPill = '<span class="hq-pill" style="color:#9fca8a;border-color:rgba(140,190,110,0.45);">✓ done</span>';
     else if (pos === ss.idx) dayPill = '<span class="hq-pill amber">up now</span>';
   }
+  const score = (typeof getOpportunityScore === 'function') ? getOpportunityScore(l) : 0;
   return `
     <button class="hq-lead${s.leadId === l.id ? ' active' : ''}" data-action="hq-select-lead" data-id="${escapeHtml(l.id)}">
       <div class="nm">${escapeHtml(l.businessName || 'Unnamed')}</div>
       <div class="meta">
         ${dayPill}<span class="hq-pill amber">${stage.name}</span>
+        ${score ? `<span class="hq-pill" title="Opportunity score">★ ${score}</span>` : ''}
         ${duePill}${nsLabel}
         ${l.country ? `<span class="hq-pill">${escapeHtml(l.country)}</span>` : ''}
       </div>
@@ -5908,11 +5926,11 @@ function hqRenderRailList() {
   const { due, rest } = hqQueueLeads();
   const restCapped = rest.slice(0, 40);
   el.innerHTML = `
-    <div class="hq-rail-group"><span class="hq-mono">Today's queue</span><span class="hq-mono n">${due.length}</span></div>
-    ${due.length ? due.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">Nothing due. Pull from the pipeline below or search.</div>'}
-    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Pipeline</span><span class="hq-mono n">${rest.length}</span></div>
+    <div class="hq-rail-group"><span class="hq-mono">Due today</span><span class="hq-mono n">${due.length}</span></div>
+    ${due.length ? due.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">Nothing due. Click anyone below to call them.</div>'}
+    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Everyone else</span><span class="hq-mono n">${rest.length}</span></div>
     ${restCapped.map(l => hqLeadRow(l)).join('')}
-    ${rest.length > restCapped.length ? `<div class="hq-empty-note">+${rest.length - restCapped.length} more — search to find anyone.</div>` : ''}`;
+    ${rest.length > restCapped.length ? `<div class="hq-empty-note">+${rest.length - restCapped.length} more — type a name up top to find them.</div>` : ''}`;
 }
 
 // ---- render: workspace ----
@@ -5922,6 +5940,7 @@ function hqRenderWorkspace() {
   const s = state.hq;
   const ss = state.hqSession;
   const lead = s.leadId ? getLeadById(s.leadId) : null;
+  el.classList.toggle('hq-wide', !!lead);
   if (!lead) {
     el.innerHTML = (ss && ss.finished) ? hqEndOfDayHtml() : hqMorningHtml();
     return;
@@ -5976,20 +5995,23 @@ function hqRenderWorkspace() {
       </div>
       <div style="margin-top:12px;">${renderNextStepBand(lead)}</div>
     </div>
-    <div class="hq-tabs">
-      ${[['crib', 'Prep', 'before the call'], ['call', 'Call', 'the script'], ['send', 'Send', 'whatsapp after'], ['brain', 'Brain', 'call brain notes']].map(([k, label, cap]) =>
-        `<button class="hq-tab${s.tab === k ? ' active' : ''}" data-action="hq-tab" data-tab="${k}">${label}<span class="cap">${cap}</span></button>`).join('')}
+    <div class="hq-jumpbar">
+      ${[['hq-sec-script', 'Script'], ['hq-sec-lodge', 'The lodge'], ['hq-sec-send', 'Send'], ['hq-sec-brain', 'Brain']].map(([t, label]) =>
+        `<button class="hq-chip" data-action="hq-jump" data-target="${t}">${label}</button>`).join('')}
     </div>
-    <div id="hq-tab-body">${hqTabHtml(lead, s.tab, stageKey)}</div>`;
+    <div class="hq-cols">
+      <div class="hq-col-main">
+        <section id="hq-sec-script">${hqCallTab(lead, stageKey)}</section>
+        <div class="hq-desk-label">After the call — send the follow-up</div>
+        <section id="hq-sec-send">${hqSendTab(lead)}</section>
+      </div>
+      <aside class="hq-col-side">
+        <section id="hq-sec-lodge">${hqCribTab(lead)}</section>
+        <div class="hq-desk-label">What Call Brain heard</div>
+        <section id="hq-sec-brain">${hqBrainTab(lead)}</section>
+      </aside>
+    </div>`;
   hqUpdateTokens();
-}
-
-function hqTabHtml(lead, tab, stageKey) {
-  // 'answers' folded into Prep (kept as a route for any stale state).
-  if (tab === 'crib' || tab === 'answers') return hqCribTab(lead);
-  if (tab === 'brain') return hqBrainTab(lead);
-  if (tab === 'send') return hqSendTab(lead);
-  return hqCallTab(lead, stageKey);
 }
 
 // ---- tab: crib ----
@@ -6063,11 +6085,11 @@ function hqAnswersFields(l) {
     ${HQ_KICKOFF_QS.map(d => hqAnswerField(l, d)).join('')}`;
 }
 
-// ---- tab: brain ----
+// ---- brain panel (Call Brain's notes for this lead) ----
 function hqBrainTab(l) {
   const entries = (l.brain || []).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
   return `
-    <div class="hq-goalbar"><span class="hq-mono">Brain</span><p>Call Brain's briefs & coaching for this lead. Drop the recording on Call Brain after you hang up — it lands here on the next refresh.</p></div>
+    <div style="margin-bottom:10px;"><button class="hq-btn ghost" data-action="hq-open-callbrain" title="Start Call Brain first if it doesn't open: double-click 'Start Call Brain.command' on your Mac">Drop a recording → open Call Brain</button></div>
     ${entries.length ? entries.map(e => `
       <div class="hq-brain-entry">
         <div class="head">
@@ -6104,7 +6126,7 @@ function hqSendTab(l) {
     ${hqSendTpl(l, 'audit')}
     ${hqSendTpl(l, 'kickoff')}
     ${hqSendTpl(l, 'segment')}
-    <p class="hq-meta" style="margin-top:14px;">Emails live where they always did — the Draft button on the CRM section, or ask the Brain chat. ≤15–20 new lodges a day on WhatsApp first-touches.</p>`;
+    <p class="hq-meta" style="margin-top:14px;">Emails: Back office → CRM / Outreach → Draft on the lead, same as always. ≤15–20 new lodges a day on WhatsApp first-touches.</p>`;
 }
 
 // ---- tab: call (per stage) ----
@@ -6152,7 +6174,7 @@ function hqColdCall(l) {
   const track = state.hq.track || 'owner';
   const voicemail = hqSec('VM', 'Voicemail — 20 seconds, then hang up')
     + hqSay(`Hi ${HQ_TOK_NAME}, this is Melusi from LodgeHelm — we help safari lodges stop losing bookings between enquiry and confirmation. No need to call back; I'll send a short note over WhatsApp so it's there when you've a minute. Thanks, and enjoy the rest of your day.`)
-    + `<div style="margin-top:12px;"><button class="hq-btn ghost" data-action="hq-goto-send">Then send the first-touch → Send tab</button></div>`;
+    + `<div style="margin-top:12px;"><button class="hq-btn ghost" data-action="hq-goto-send">Then send the first-touch — it\u2019s written for you below</button></div>`;
   const ownerTrack = `
     <p class="hq-meta">You're through to the person who <b>signs off spend</b>. Lead with ROI and the revenue leak, not the feature list.</p>
     ${hqSec('1', 'Opener — 10 seconds')}
@@ -6225,7 +6247,7 @@ function hqDiscoveryCall(l) {
     ${hqSay(`Here's what I'd suggest. Give me twenty minutes later this week — I'll put your answers against the actual workflow and show you exactly how ${HQ_TOK_LODGE}'s enquiries would run through it, with your numbers. If it doesn't obviously pay for itself, you tell me and that's the end of it. [Day] at [Time]?`, `If they're hot NOW — asking price with intent, "how do we start?" — don't make them wait. Switch to Close Meeting and finish it on this call.`)}
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
       <button class="hq-btn" data-action="hq-set-stage" data-id="${escapeHtml(l.id)}" data-stage="close">They're hot → open Close Meeting</button>
-      <button class="hq-btn ghost" data-action="hq-goto-send">Rather answer async? Audit send → Send tab</button>
+      <button class="hq-btn ghost" data-action="hq-goto-send">Rather answer async? The audit message is written for you below</button>
     </div>`;
 }
 
@@ -6257,8 +6279,8 @@ function hqCloseCall(l) {
 
 function hqKickoffCall(l) {
   return `
-    <p class="hq-meta">They've paid. This is <b>step 1 of the paid setup</b> — frame it that way. If you already ran the audit in discovery, confirm those answers rather than re-asking (they're on the Answers tab).</p>
-    <div style="margin-bottom:14px;"><button class="hq-btn ghost" data-action="hq-goto-send">To book it: kickoff WhatsApp → Send tab</button></div>
+    <p class="hq-meta">They've paid. This is <b>step 1 of the paid setup</b> — frame it that way. If you already ran the audit in discovery, confirm those answers rather than re-asking (open \u201cEverything they\u2019ve told you\u201d in the lodge panel).</p>
+    <div style="margin-bottom:14px;"><button class="hq-btn ghost" data-action="hq-goto-send">To book it: the kickoff WhatsApp is written for you below</button></div>
     ${hqSec('1', 'Open the call')}
     ${hqSay(`Welcome aboard properly, ${HQ_TOK_NAME}. From here your job is small: this call, then I disappear and build. I'm going to ask you about how ${HQ_TOK_LODGE} actually runs — fifteen minutes, you talk, I type. Nothing technical.`)}
     ${hqSec('2', 'Onboarding intake — tick as you go')}
@@ -6279,9 +6301,9 @@ function hqKickoffCall(l) {
 function hqClientView(l) {
   const spec = HQ_KICKOFF_QS.map(d => hqAns(l, d.ansKey) ? `<li><b>${d.q.replace(/\?$/, '')}:</b> ${escapeHtml(hqAns(l, d.ansKey))}</li>` : '').join('');
   return `
-    <p class="hq-meta">${escapeHtml(l.businessName || 'This lodge')} is live. Their setup spec is below; log calls as usual and Call Brain briefs keep landing on the Brain tab.</p>
+    <p class="hq-meta">${escapeHtml(l.businessName || 'This lodge')} is live. Their setup spec is below; log calls as usual and Call Brain briefs keep landing in the Brain panel.</p>
     ${hqSec('✓', 'Setup spec — from the kickoff')}
-    <div class="hq-card">${spec ? `<ul>${spec}</ul>` : '<div class="hq-empty-note">No kickoff answers on file — fill them on the Answers tab.</div>'}</div>
+    <div class="hq-card">${spec ? `<ul>${spec}</ul>` : '<div class="hq-empty-note">No kickoff answers on file — fill them in \u201cEverything they\u2019ve told you\u201d, in the lodge panel.</div>'}</div>
     ${hqSec('♥', 'Keep them winning')}
     <div class="hq-card"><ul>
       <li>Check in monthly — one WhatsApp: "how's the system treating you?"</li>
@@ -6353,7 +6375,7 @@ function hqMorningHtml() {
           <li><b>Prep</b> — a minute on who they are before you dial.</li>
           <li><b>Call</b> — the right script is on screen; tick and type as you talk.</li>
           <li><b>Log it</b> — pick how it went. HQ sets the next step and hands you the next lodge.</li>
-          <li><b>Tonight</b> — drop your recordings on Call Brain. Its notes land on each lodge's Brain tab by morning.</li>
+          <li><b>Tonight</b> — drop your recordings on Call Brain. Its notes land on each lodge's Brain panel by morning.</li>
         </ol>
       </div>`}
     <div class="hq-dash-stats" style="margin-top:20px;">
@@ -6409,8 +6431,9 @@ function hqEndOfDayHtml() {
       </ul></div>` : ''}
     <div class="hq-card" style="margin-top:12px;">
       <b style="color:var(--hq-amber);">Tonight:</b> drop today's recordings on Call Brain on your Mac.
-      Its briefs and coaching land on each lodge's Brain tab, and tomorrow's list is already
+      Its briefs and coaching land on each lodge's Brain panel, and tomorrow's list is already
       building from the next steps you just set.
+      <div style="margin-top:10px;"><button class="hq-btn ghost" data-action="hq-open-callbrain">Open Call Brain now</button></div>
     </div>
     <div class="hq-start-row" style="margin-top:20px;">
       <button class="hq-start-btn" data-action="hq-eod-close">Back to HQ <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
@@ -6472,8 +6495,18 @@ document.getElementById('section-hq').addEventListener('click', e => {
     renderHQ();
     return;
   }
-  if (action === 'hq-tab') { s.tab = target.dataset.tab; renderHQ(); return; }
-  if (action === 'hq-goto-send') { s.tab = 'send'; renderHQ(); return; }
+  if (action === 'hq-open-callbrain') {
+    // Call Brain's local dashboard (drag-drop a recording; it never leaves the Mac).
+    window.open('http://localhost:4317', '_blank');
+    showToast('If nothing opened: start Call Brain first (Start Call Brain.command)', 'info');
+    return;
+  }
+  if (action === 'hq-tab') { return; } // tabs retired — one desk, everything visible
+  if (action === 'hq-goto-send' || action === 'hq-jump') {
+    const t = document.getElementById(action === 'hq-jump' ? target.dataset.target : 'hq-sec-send');
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
   if (action === 'hq-stage-filter') { s.stageFilter = target.dataset.stage; renderHQ(); return; }
   if (action === 'hq-track') { s.track = target.dataset.track; renderHQ(); return; }
   if (action === 'hq-set-stage') {
@@ -6601,6 +6634,11 @@ document.getElementById('section-hq').addEventListener('input', e => {
     const k = e.target.dataset.ansKey;
     if (e.target.value.trim()) lead.answers[k] = e.target.value;
     else delete lead.answers[k];
+    // One desk shows the same answer field in two places (the script and "everything
+    // they've told you") — mirror the twin without a re-render so typing never lags.
+    document.querySelectorAll(`.hq-ans[data-ans-key="${k}"]`).forEach(inp => {
+      if (inp !== e.target) inp.value = e.target.value;
+    });
     hqUpdateTokens();
     hqScheduleSave();
     return;

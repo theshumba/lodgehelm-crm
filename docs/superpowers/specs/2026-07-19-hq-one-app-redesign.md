@@ -82,6 +82,24 @@ back-office drawer. UI layer only. **No data-shape, rules, CLI, or Call Brain ch
 - Old sections all remain reachable and functional from the drawer.
 - Firestore rules and data: untouched.
 
+## Addendum — same evening, owner round 2 (one desk)
+
+Owner feedback on v2: tabs still felt like hiding; "everything nicely laid out all together
+all at once", and "I go through my call list and click a lead" (no search-first). Changes
+shipped (commit a892c35): tabs retired — the lead workspace is now **one desk**: the stage
+script front-and-centre with the Send section under it, and a sticky **lodge panel** beside
+it (crib, record + website link, notes, "everything they've told you", Brain notes + an
+"open Call Brain" button → http://localhost:4317). On narrow screens the columns stack with
+sticky jump chips (Script · The lodge · Send · Brain). The rail is retitled **Call list**
+("Due today" / "Everyone else") with opportunity-score pills. All script copy that said
+"Crib/Answers/Send tab" now points at the desk. Root-cause fix worth remembering:
+`.main-content section { display:none }` hid any nested `<section>` — now scoped to
+`.main-content > section`.
+
+Parked (owner decisions/research needed, NO spend without confirming): Zadarma integration,
+in-call phone recording capture, speaker diarization for Call Brain, deeper guided
+next-step engine.
+
 ## Out of scope
 
 Old-section redesigns beyond token inheritance · email flows · Blaze upgrade ·

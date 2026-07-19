@@ -195,13 +195,32 @@ ul, ol { list-style: none; }
 .last-activity { font-size: 0.68rem; color: var(--color-text-faint); margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--color-divider); line-height: 1.4; }
 .theme-toggle { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--color-text-muted); border-radius: var(--radius-md); cursor: pointer; transition: background var(--transition-interactive); }
 .theme-toggle:hover { background: var(--color-surface-offset); color: var(--color-text); }
-.hamburger { display: none; width: 44px; height: 44px; align-items: center; justify-content: center; border: none; background: transparent; color: var(--color-text); border-radius: var(--radius-md); cursor: pointer; }
+/* Back office opener + return-to-HQ (the only two ways in and out of the old CRM) */
+.backoffice-btn { display: inline-flex; align-items: center; gap: var(--space-2); border: 1px solid var(--color-border); background: transparent; color: var(--color-text-muted); border-radius: var(--radius-full); padding: 6px 14px; min-height: 36px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color var(--transition-interactive), border-color var(--transition-interactive), transform 160ms var(--ease-out-strong); }
+.backoffice-btn:hover { color: var(--color-text); border-color: var(--color-primary); }
+.backoffice-btn:active { transform: scale(0.97); }
+.backoffice-btn i { width: 14px; height: 14px; }
+.hq-home-btn { display: inline-flex; align-items: center; gap: var(--space-1); border: none; background: var(--color-primary); color: var(--color-text-inverse); border-radius: var(--radius-full); padding: 6px 14px; min-height: 36px; font-family: 'Space Grotesk', sans-serif; font-size: var(--text-xs); font-weight: 600; cursor: pointer; white-space: nowrap; transition: background var(--transition-interactive), transform 160ms var(--ease-out-strong); }
+.hq-home-btn:hover { background: var(--color-primary-hover); }
+.hq-home-btn:active { transform: scale(0.97); }
+.hq-home-btn i { width: 14px; height: 14px; }
+.hq-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.14em; color: var(--color-primary); }
+@media (max-width: 768px) {
+  .backoffice-btn span { display: none; }
+  .backoffice-btn { padding: 6px 10px; }
+}
+@media (max-width: 480px) {
+  .top-bar-logo .wordmark { display: none; }
+}
 
-/* Sidebar */
-.sidebar { width: 240px; min-width: 240px; background: var(--color-surface); border-right: 1px solid oklch(from var(--color-text) l c h / 0.08); display: flex; flex-direction: column; height: 100dvh; position: sticky; top: 0; overflow-y: auto; }
-.sidebar-header { padding: var(--space-6) var(--space-5); display: flex; align-items: center; gap: var(--space-3); border-bottom: 1px solid oklch(from var(--color-text) l c h / 0.06); }
-.sidebar-header svg { width: 28px; height: 28px; flex-shrink: 0; color: var(--color-primary); }
-.sidebar-header span { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); }
+/* Back-office drawer (the old CRM sections live here, on every screen size).
+   Hidden by default; the top-bar Back office button slides it over the app. */
+.sidebar { width: 292px; min-width: 292px; background: var(--color-surface); border-right: 1px solid var(--color-divider); display: flex; flex-direction: column; height: 100dvh; position: fixed; top: 0; left: -304px; z-index: 90; overflow-y: auto; transition: left 250ms var(--ease-drawer); }
+.sidebar.open { left: 0; box-shadow: var(--shadow-lg); }
+.sidebar-header { padding: var(--space-5) var(--space-5) var(--space-4); display: flex; align-items: center; gap: var(--space-3); border-bottom: 1px solid oklch(from var(--color-text) l c h / 0.06); flex-wrap: wrap; }
+.sidebar-header svg { width: 24px; height: 24px; flex-shrink: 0; color: var(--color-primary); }
+.sidebar-header span { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); }
+.sidebar-caption { flex-basis: 100%; font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.45; margin-top: var(--space-1); }
 .sidebar-nav { flex: 1; padding: var(--space-4) var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
 .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; color: var(--color-text-muted); cursor: pointer; transition: background var(--transition-interactive), color var(--transition-interactive); min-height: 44px; position: relative; user-select: none; border: none; background: transparent; width: 100%; text-align: left; }
 .nav-item:hover { background: var(--color-surface-offset); color: var(--color-text); }
@@ -211,6 +230,8 @@ ul, ol { list-style: none; }
 .nav-badge-teal { background: var(--color-primary-highlight); color: var(--color-primary); }
 .nav-badge-warning { background: var(--color-warning-highlight); color: var(--color-warning); }
 .sidebar-footer { padding: var(--space-4) var(--space-5); border-top: 1px solid oklch(from var(--color-text) l c h / 0.06); font-size: var(--text-xs); color: var(--color-text-faint); }
+.nav-item-hq { color: var(--color-primary); font-weight: 600; margin-bottom: var(--space-2); border-bottom: 1px solid oklch(from var(--color-text) l c h / 0.06); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.nav-item-hq:hover { color: var(--color-primary); }
 
 /* Main content */
 .main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -538,10 +559,6 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   .crm-row { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 768px) {
-  .sidebar { position: fixed; left: -260px; z-index: 90; transition: left 250ms cubic-bezier(0.16, 1, 0.3, 1); width: 260px; min-width: 260px; }
-  .sidebar.open { left: 0; }
-  .hamburger { display: flex; }
-  .top-bar-logo span { display: none; }
   .main-content { padding: var(--space-4); }
   .section-header { flex-direction: column; align-items: flex-start; }
   .filter-bar { flex-direction: column; align-items: stretch; }
@@ -1039,20 +1056,21 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 
 <!-- App Layout -->
 <div class="app-layout">
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+  <!-- Back-office drawer — the old CRM, one tap away, never in the way -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Back office">
     <div class="sidebar-header">
       <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LodgeHelm logo">
         <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
         <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
       </svg>
-      <span>LodgeHelm</span>
+      <span>Back office</span>
+      <div class="sidebar-caption">The old CRM lives here — lists, boards and reports. Your calling day stays on HQ.</div>
     </div>
     <nav class="sidebar-nav" aria-label="Sections">
-      <button class="nav-item" data-section="hq" aria-current="false">
-        <i data-lucide="radio-tower" aria-hidden="true"></i>
-        HQ
+      <button class="nav-item nav-item-hq" data-section="hq" aria-current="false">
+        <i data-lucide="arrow-left" aria-hidden="true"></i>
+        Back to HQ
         <span class="nav-badge nav-badge-teal" id="badge-hq" aria-live="polite" style="display:none;">0</span>
       </button>
       <button class="nav-item" data-section="today" aria-current="false">
@@ -1115,37 +1133,40 @@ h1, h2, h3 { letter-spacing: -0.02em; }
       <div id="sidebar-export-area"></div>
       <button class="sidebar-link" id="sidebar-signatures-btn">Email Signatures</button>
       <div id="sidebar-reset-area"></div>
-      LodgeHelm CRM v1.0
+      LodgeHelm HQ v2.0
     </div>
   </aside>
 
   <!-- Main wrapper -->
   <div class="main-wrapper">
-    <!-- Top bar -->
+    <!-- Top bar — HQ identity on the left, back office tucked on the right -->
     <header class="top-bar">
-      <button class="hamburger" id="hamburger-btn" aria-label="Open navigation menu">
-        <i data-lucide="menu" aria-hidden="true"></i>
-      </button>
-      <div class="top-bar-logo">
+      <div class="top-bar-logo" id="topbar-home" role="button" tabindex="0" aria-label="Back to HQ" style="cursor:pointer;">
         <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2"/>
           <path d="M14 3v5M14 20v5M3 14h5M20 14h5M14 14l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           <circle cx="14" cy="14" r="2.5" fill="currentColor"/>
         </svg>
-        <span>LodgeHelm</span>
+        <span class="wordmark">LodgeHelm</span>
+        <span class="hq-tag">HQ</span>
       </div>
+      <button class="hq-home-btn" id="back-to-hq" style="display:none;">
+        <i data-lucide="arrow-left" aria-hidden="true"></i> HQ
+      </button>
       <div class="top-bar-search">
         <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
-        <input type="search" id="global-search" placeholder="Search leads..." aria-label="Search leads">
+        <input type="search" id="global-search" placeholder="Find any lodge…" aria-label="Search leads">
       </div>
-      <div class="top-bar-user" id="top-bar-user">
+      <div class="top-bar-user" id="top-bar-user" style="display:none;">
         Signed in as: <strong id="current-user-display"></strong>
-        <!-- Single-user mode: Switch button hidden -->
         <a id="switch-user-btn" role="button" tabindex="-1" style="display:none;" aria-hidden="true">Switch</a>
       </div>
       <div class="top-bar-actions">
         <button class="theme-toggle" id="refresh-cloud-btn" aria-label="Refresh leads from cloud" title="Refresh from cloud (leads load once per session)">
           <i data-lucide="refresh-cw" aria-hidden="true"></i>
+        </button>
+        <button class="backoffice-btn" id="hamburger-btn" aria-label="Open the back office">
+          <i data-lucide="folder-open" aria-hidden="true"></i><span>Back office</span>
         </button>
       </div>
     </header>
@@ -2968,6 +2989,9 @@ function showToast(message, type = 'success') {
 function showSection(sectionId) {
   state.activeSection = sectionId;
   document.getElementById('main-content').classList.toggle('hq-active', sectionId === 'hq');
+  // The top-bar "← HQ" button only exists while you're in the back office.
+  const backBtn = document.getElementById('back-to-hq');
+  if (backBtn) backBtn.style.display = sectionId === 'hq' ? 'none' : 'inline-flex';
   document.querySelectorAll('.main-content section').forEach(s => s.classList.remove('active'));
   const sec = document.getElementById('section-' + sectionId);
   if (sec) sec.classList.add('active');
@@ -6318,7 +6342,7 @@ document.querySelector('.sidebar-nav').addEventListener('click', e => {
   if (nav) showSection(nav.dataset.section);
 });
 
-// Hamburger
+// Back-office drawer opener (all screen sizes)
 document.getElementById('hamburger-btn').addEventListener('click', () => {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('mobile-overlay').classList.toggle('active');
@@ -6327,6 +6351,10 @@ document.getElementById('mobile-overlay').addEventListener('click', () => {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('mobile-overlay').classList.remove('active');
 });
+// Wordmark + "← HQ" both come home.
+document.getElementById('topbar-home').addEventListener('click', () => showSection('hq'));
+document.getElementById('topbar-home').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') showSection('hq'); });
+document.getElementById('back-to-hq').addEventListener('click', () => showSection('hq'));
 
 // Panel overlay
 document.getElementById('panel-overlay').addEventListener('click', closePanel);
@@ -6338,6 +6366,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (state.modalOpen) closeModal();
     else if (state.panelOpen) closePanel();
+    else if (document.getElementById('sidebar').classList.contains('open')) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('mobile-overlay').classList.remove('active');
+    }
   }
 });
 

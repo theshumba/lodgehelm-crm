@@ -2873,6 +2873,9 @@ function resetAllData() {
   localStorage.removeItem('lodgehelm-view-prefs');
   localStorage.removeItem('lodgehelm-chat-history');
   localStorage.removeItem('lodgehelm-learnings');
+  // Guided-day state must not outlive the leads its ids point at.
+  localStorage.removeItem('lodgehelm-hq-session');
+  localStorage.removeItem('lodgehelm-hq-coach');
   location.reload();
 }
 
@@ -5752,10 +5755,15 @@ function hqSearchLeads(q) {
 // ---- guided day session (Start calling → one lead at a time → end-of-day) ----
 // Persisted to its own localStorage key so a refresh mid-morning never loses the day.
 const HQ_SESSION_KEY = 'lodgehelm-hq-session';
+// Fresh date on every call — the module-level todayISO goes stale in a tab left open
+// past midnight, which would silently discard a small-hours session on the next load.
+function hqTodayISO() { return new Date().toISOString().split('T')[0]; }
 function hqLoadSession() {
   try {
     const s = JSON.parse(localStorage.getItem(HQ_SESSION_KEY) || 'null');
-    if (s && s.date === todayISO && Array.isArray(s.ids) && s.ids.length) return s;
+    if (s && s.date === hqTodayISO() && Array.isArray(s.ids) && s.ids.length
+        && Number.isInteger(s.idx) && s.idx >= 0 && (s.finished || s.idx < s.ids.length)) return s;
+    if (s) localStorage.removeItem(HQ_SESSION_KEY);
   } catch (_) {}
   return null;
 }
@@ -5763,7 +5771,17 @@ function hqSaveSession() {
   try {
     if (state.hqSession) localStorage.setItem(HQ_SESSION_KEY, JSON.stringify(state.hqSession));
     else localStorage.removeItem(HQ_SESSION_KEY);
-  } catch (_) {}
+  } catch (e) { console.warn('HQ session not persisted:', e); }
+}
+// A session lead can vanish mid-day (clone-collapse merge, tombstone, delete). Walk the
+// pointer past any dead ids so Resume/Next can never strand the day on a ghost.
+function hqSessionPruneDead() {
+  const ss = state.hqSession;
+  if (!ss || ss.finished) return;
+  const alive = id => { const l = getLeadById(id); return l && !l._deleted; };
+  while (ss.idx < ss.ids.length && !alive(ss.ids[ss.idx])) ss.idx += 1;
+  if (ss.idx >= ss.ids.length) { ss.finished = true; if (state.hq) state.hq.leadId = null; }
+  hqSaveSession();
 }
 // Fresh cold leads worth dialling: never contacted, callable, best data first.
 function hqFreshLeads(limit) {
@@ -5778,7 +5796,7 @@ function hqFreshLeads(limit) {
 function hqStartSession(source) {
   const list = source === 'fresh' ? hqFreshLeads(10) : hqDueLeads();
   if (!list.length) { showToast('Nothing to call right now', 'info'); return; }
-  state.hqSession = { date: todayISO, source: source || 'due', ids: list.map(l => l.id), idx: 0, outcomes: {} };
+  state.hqSession = { date: hqTodayISO(), source: source || 'due', ids: list.map(l => l.id), idx: 0, outcomes: {} };
   hqSaveSession();
   state.hq.leadId = state.hqSession.ids[0];
   state.hq.tab = 'crib';
@@ -5787,6 +5805,7 @@ function hqStartSession(source) {
   renderHQ();
 }
 function hqSessionCurrentId() {
+  hqSessionPruneDead();
   const ss = state.hqSession;
   return (ss && !ss.finished) ? ss.ids[ss.idx] : null;
 }
@@ -5794,8 +5813,8 @@ function hqAdvanceSession() {
   const ss = state.hqSession;
   if (!ss || ss.finished) return;
   ss.idx += 1;
-  if (ss.idx >= ss.ids.length) {
-    ss.finished = true;
+  hqSessionPruneDead();
+  if (ss.finished) {
     state.hq.leadId = null;
   } else {
     state.hq.leadId = ss.ids[ss.idx];
@@ -6440,7 +6459,10 @@ document.getElementById('section-hq').addEventListener('click', e => {
   if (action === 'hq-session-next') { hqAdvanceSession(); return; }
   if (action === 'hq-session-resume') {
     const cur = hqSessionCurrentId();
-    if (cur) { s.leadId = cur; s.tab = 'crib'; s.pane = 'work'; s.__adv = true; renderHQ(); }
+    if (cur) { s.leadId = cur; s.tab = 'crib'; s.pane = 'work'; s.__adv = true; }
+    // Even with no live current lead (pruning may have just finished the day),
+    // re-render so the end-of-day screen appears instead of a dead button.
+    renderHQ();
     return;
   }
   if (action === 'hq-session-end') { hqEndSession(); return; }
@@ -8712,9 +8734,12 @@ function init() {
   // Resume a mid-day guided session (same-day only) exactly where he left it.
   state.hqSession = hqLoadSession();
   if (state.hqSession && !state.hqSession.finished) {
-    state.hq.leadId = state.hqSession.ids[state.hqSession.idx];
-    state.hq.tab = 'crib';
-    state.hq.pane = 'work';
+    const cur = hqSessionCurrentId(); // prunes ids whose leads no longer exist
+    if (cur) {
+      state.hq.leadId = cur;
+      state.hq.tab = 'crib';
+      state.hq.pane = 'work';
+    }
   }
   // Reflect persisted activeSection into UI
   showSection(state.activeSection);

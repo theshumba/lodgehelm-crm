@@ -845,7 +845,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .hq-stagepills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
 .hq-stagepill { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 5px 12px; cursor: pointer; transition: all .15s ease; }
 .hq-stagepill.active { background: var(--hq-ink); border-color: var(--hq-amber); color: var(--hq-amber); }
-.hq-tabs { position: sticky; top: 0; z-index: 5; background: var(--hq-green); display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin: 6px 0 20px; }
+.hq-tabs { position: sticky; top: 0; z-index: 5; background: var(--hq-green); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin: 6px 0 20px; }
 .hq-tab { background: none; border: 1px solid var(--hq-hairline); border-radius: 11px; padding: 8px 6px; text-align: center; cursor: pointer; color: var(--hq-ivory); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: -0.01em; transition: all .15s ease; }
 .hq-tab:hover { border-color: rgba(224,134,58,0.5); }
 .hq-tab.active { background: var(--hq-ink); border-color: var(--hq-amber); color: var(--hq-amber); }
@@ -961,6 +961,45 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 #section-hq .ns-actions .btn-secondary, #section-hq .ns-actions .btn-ghost { background: none; color: var(--hq-ivory); border: 1px solid var(--hq-hairline); }
 #section-hq .ns-actions .btn i, #section-hq .ns-actions .btn svg { width: 13px; height: 13px; }
 
+/* ---- guided day: morning screen, session band, coach strip ---- */
+#section-hq .hq-morning-kicker { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hq-amber); margin-bottom: 10px; }
+#section-hq .hq-greet { font-family: 'Space Grotesk', sans-serif; font-size: clamp(26px, 4vw, 34px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px; }
+#section-hq .hq-day-number { font-size: 17px; line-height: 1.5; color: var(--hq-muted); max-width: 46ch; margin-bottom: 6px; }
+#section-hq .hq-day-number b { color: var(--hq-ivory); font-weight: 600; }
+#section-hq .hq-day-number .amber { color: var(--hq-amber); font-weight: 600; }
+#section-hq .hq-daychips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 20px; }
+#section-hq .hq-start-btn { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16.5px; background: var(--hq-amber); color: var(--hq-ink-deep); border: none; border-radius: 999px; padding: 15px 30px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: background .15s ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); box-shadow: 0 12px 32px rgba(224,134,58,0.28); }
+#section-hq .hq-start-btn:hover { background: var(--hq-amber-deep); }
+#section-hq .hq-start-btn:active { transform: scale(0.97); }
+#section-hq .hq-start-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 0 8px; }
+#section-hq .hq-start-sub { color: var(--hq-faint); font-size: 12.5px; }
+#section-hq .hq-coach { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 14px; padding: 16px 18px 14px; margin: 22px 0 8px; }
+#section-hq .hq-coach-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+#section-hq .hq-coach ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: coach; }
+#section-hq .hq-coach li { counter-increment: coach; display: flex; gap: 11px; align-items: baseline; font-size: 14px; line-height: 1.5; color: rgba(245,239,230,0.88); }
+#section-hq .hq-coach li::before { content: counter(coach); font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--hq-ink-deep); background: var(--hq-amber); width: 19px; height: 19px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; transform: translateY(2px); }
+#section-hq .hq-coach li b { color: var(--hq-ivory); }
+#section-hq .hq-coach-dismiss { background: none; border: none; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--hq-muted); padding: 4px 2px; }
+#section-hq .hq-coach-dismiss:hover { color: var(--hq-ivory); }
+#section-hq .hq-session-band { display: flex; align-items: center; gap: 12px; background: var(--hq-ink-deep); border: 1px solid rgba(224,134,58,0.45); border-radius: 999px; padding: 7px 8px 7px 18px; margin-bottom: 16px; flex-wrap: wrap; }
+#section-hq .hq-session-band .hq-mono { color: var(--hq-amber); white-space: nowrap; }
+#section-hq .hq-progress { flex: 1; min-width: 60px; height: 4px; border-radius: 999px; background: rgba(245,239,230,0.12); overflow: hidden; }
+#section-hq .hq-progress-fill { height: 100%; background: var(--hq-amber); border-radius: 999px; transition: width 300ms cubic-bezier(0.23, 1, 0.32, 1); }
+#section-hq .hq-resume-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--hq-ink-deep); border: 1px solid var(--hq-hairline); border-radius: 999px; padding: 6px 8px 6px 16px; margin-bottom: 14px; flex-wrap: wrap; }
+#section-hq .hq-resume-bar .t { font-size: 13px; color: var(--hq-muted); }
+#section-hq .hq-eod-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 18px 0; }
+@media (prefers-reduced-motion: no-preference) {
+  #section-hq .hq-work-inner.hq-adv { animation: fadeSlideIn 220ms cubic-bezier(0.23, 1, 0.32, 1); }
+}
+#section-hq .hq-tab .cap { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hq-faint); margin-top: 3px; }
+#section-hq .hq-tab.active .cap { color: rgba(224,134,58,0.75); }
+#section-hq .hq-details { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; margin-top: 12px; overflow: hidden; }
+#section-hq .hq-details summary { cursor: pointer; padding: 13px 18px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: var(--hq-ivory); list-style: none; display: flex; align-items: center; gap: 8px; }
+#section-hq .hq-details summary::-webkit-details-marker { display: none; }
+#section-hq .hq-details summary::before { content: '›'; color: var(--hq-amber); font-size: 16px; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+#section-hq .hq-details[open] summary::before { transform: rotate(90deg); }
+#section-hq .hq-details .hq-details-body { padding: 0 18px 16px; }
+
 /* ---- auth overlay ---- */
 .hq-auth-overlay { position: fixed; inset: 0; z-index: 10000; background: #143b2e; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .hq-auth-card { width: 100%; max-width: 360px; background: #1a1a17; border: 1px solid rgba(245,239,230,0.1); border-radius: 18px; padding: 28px 26px; color: #f5efe6; font-family: 'Inter', sans-serif; }
@@ -985,8 +1024,9 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   .hq-rail { border-right: none; }
   .hq-back { display: inline-flex; margin-bottom: 12px; }
   .hq-work-inner { padding: 16px 14px 80px; }
-  .hq-tabs { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .hq-tabs { grid-template-columns: repeat(4, 1fr); gap: 4px; }
   .hq-tab { font-size: 11.5px; padding: 7px 2px; border-radius: 9px; }
+  .hq-tab .cap { display: none; }
   .hq-tiers { grid-template-columns: 1fr; }
   .hq-dash-stats { grid-template-columns: 1fr; }
 }
@@ -1303,7 +1343,8 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 const state = {
   leads: [],
   activeSection: 'hq',
-  hq: { leadId: null, tab: 'call', stageFilter: 'all', search: '', track: 'owner', pane: 'rail' },
+  hq: { leadId: null, tab: 'crib', stageFilter: 'all', search: '', track: 'owner', pane: 'work' },
+  hqSession: null,
   brainInbox: [],
   brainPatterns: null,
   crmView: 'list',
@@ -5708,14 +5749,81 @@ function hqSearchLeads(q) {
   }).slice(0, 30);
 }
 
+// ---- guided day session (Start calling → one lead at a time → end-of-day) ----
+// Persisted to its own localStorage key so a refresh mid-morning never loses the day.
+const HQ_SESSION_KEY = 'lodgehelm-hq-session';
+function hqLoadSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(HQ_SESSION_KEY) || 'null');
+    if (s && s.date === todayISO && Array.isArray(s.ids) && s.ids.length) return s;
+  } catch (_) {}
+  return null;
+}
+function hqSaveSession() {
+  try {
+    if (state.hqSession) localStorage.setItem(HQ_SESSION_KEY, JSON.stringify(state.hqSession));
+    else localStorage.removeItem(HQ_SESSION_KEY);
+  } catch (_) {}
+}
+// Fresh cold leads worth dialling: never contacted, callable, best data first.
+function hqFreshLeads(limit) {
+  const dueIds = new Set(hqDueLeads().map(l => l.id));
+  return hqActiveLeads()
+    .filter(l => !dueIds.has(l.id) && hqStageOf(l) === 'cold'
+      && !(l.crm && l.crm.dateLastContact)
+      && ((l.phones && l.phones[0] && l.phones[0].number) || hqWaNumber(l)))
+    .sort((a, b) => (((b.crm || {}).dataScore) || 0) - (((a.crm || {}).dataScore) || 0))
+    .slice(0, limit || 10);
+}
+function hqStartSession(source) {
+  const list = source === 'fresh' ? hqFreshLeads(10) : hqDueLeads();
+  if (!list.length) { showToast('Nothing to call right now', 'info'); return; }
+  state.hqSession = { date: todayISO, source: source || 'due', ids: list.map(l => l.id), idx: 0, outcomes: {} };
+  hqSaveSession();
+  state.hq.leadId = state.hqSession.ids[0];
+  state.hq.tab = 'crib';
+  state.hq.pane = 'work';
+  state.hq.__adv = true;
+  renderHQ();
+}
+function hqSessionCurrentId() {
+  const ss = state.hqSession;
+  return (ss && !ss.finished) ? ss.ids[ss.idx] : null;
+}
+function hqAdvanceSession() {
+  const ss = state.hqSession;
+  if (!ss || ss.finished) return;
+  ss.idx += 1;
+  if (ss.idx >= ss.ids.length) {
+    ss.finished = true;
+    state.hq.leadId = null;
+  } else {
+    state.hq.leadId = ss.ids[ss.idx];
+    state.hq.tab = 'crib';
+  }
+  hqSaveSession();
+  state.hq.pane = 'work';
+  state.hq.__adv = true;
+  renderHQ();
+}
+function hqEndSession() {
+  state.hqSession = null;
+  hqSaveSession();
+  state.hq.leadId = null;
+  state.hq.pane = 'work';
+  renderHQ();
+}
+
 // ---- render: shell ----
 function renderHQ() {
   const c = document.getElementById('hq-content');
   if (!c) return;
-  const s = state.hq || (state.hq = { leadId: null, tab: 'call', stageFilter: 'all', search: '', track: 'owner', pane: 'rail' });
+  const s = state.hq || (state.hq = { leadId: null, tab: 'crib', stageFilter: 'all', search: '', track: 'owner', pane: 'work' });
   const lead = s.leadId ? getLeadById(s.leadId) : null;
   if (s.leadId && !lead) { s.leadId = null; }
-  const paneCls = (lead && s.pane === 'work') ? 'pane-work' : 'pane-rail';
+  // The workspace (morning screen / current call) is the default view — the rail is the
+  // secondary pane on mobile, not the front door.
+  const paneCls = s.pane === 'rail' ? 'pane-rail' : 'pane-work';
   c.innerHTML = `
     <div class="hq-shell ${paneCls}">
       <aside class="hq-rail">
@@ -5733,6 +5841,12 @@ function renderHQ() {
     </div>`;
   hqRenderRailList();
   hqRenderWorkspace();
+  // One-shot entrance animation when the guided day hands over the next call.
+  if (s.__adv) {
+    const inner = document.getElementById('hq-work-inner');
+    if (inner) inner.classList.add('hq-adv');
+    s.__adv = false;
+  }
   lucide.createIcons({ nodes: [c] });
 }
 
@@ -5743,11 +5857,19 @@ function hqLeadRow(l, opts) {
   const duePill = (due !== null && due <= 0)
     ? `<span class="hq-pill overdue">${due < 0 ? Math.abs(due) + 'd overdue' : 'due today'}</span>` : '';
   const nsLabel = (l.crm && l.crm.nextStep && l.crm.nextStep.label) ? `<span class="hq-pill">${escapeHtml(l.crm.nextStep.label.slice(0, 26))}</span>` : '';
+  // Guided-day markers: where this lodge sits in today's run.
+  let dayPill = '';
+  const ss = state.hqSession;
+  if (ss && !ss.finished) {
+    const pos = ss.ids.indexOf(l.id);
+    if (pos > -1 && pos < ss.idx) dayPill = '<span class="hq-pill" style="color:#9fca8a;border-color:rgba(140,190,110,0.45);">✓ done</span>';
+    else if (pos === ss.idx) dayPill = '<span class="hq-pill amber">up now</span>';
+  }
   return `
     <button class="hq-lead${s.leadId === l.id ? ' active' : ''}" data-action="hq-select-lead" data-id="${escapeHtml(l.id)}">
       <div class="nm">${escapeHtml(l.businessName || 'Unnamed')}</div>
       <div class="meta">
-        <span class="hq-pill amber">${stage.name}</span>
+        ${dayPill}<span class="hq-pill amber">${stage.name}</span>
         ${duePill}${nsLabel}
         ${l.country ? `<span class="hq-pill">${escapeHtml(l.country)}</span>` : ''}
       </div>
@@ -5779,14 +5901,42 @@ function hqRenderWorkspace() {
   const el = document.getElementById('hq-work-inner');
   if (!el) return;
   const s = state.hq;
+  const ss = state.hqSession;
   const lead = s.leadId ? getLeadById(s.leadId) : null;
-  if (!lead) { el.innerHTML = hqDashboardHtml(); return; }
+  if (!lead) {
+    el.innerHTML = (ss && ss.finished) ? hqEndOfDayHtml() : hqMorningHtml();
+    return;
+  }
   const stageKey = hqStageOf(lead);
   const phone = (lead.phones && lead.phones[0] && lead.phones[0].number) || ((lead.contacts || []).find(c => c && c.phone) || {}).phone || '';
   const wa = hqWaNumber(lead);
   const who = [lead.ownerName, ((lead.contacts || [])[0] || {}).title].filter(Boolean).join(' · ');
+  // Guided-day chrome: the full band on the current call, a quiet resume bar if he
+  // wandered off to another lead mid-day.
+  const isCurrent = ss && !ss.finished && lead.id === ss.ids[ss.idx];
+  const logged = isCurrent && !!ss.outcomes[lead.id];
+  let sessionHtml = '';
+  if (isCurrent) {
+    const pct = Math.round(((ss.idx + (logged ? 1 : 0)) / ss.ids.length) * 100);
+    sessionHtml = `
+      <div class="hq-session-band">
+        <span class="hq-mono">Call ${ss.idx + 1} of ${ss.ids.length}</span>
+        <div class="hq-progress"><div class="hq-progress-fill" style="width:${pct}%"></div></div>
+        ${logged
+          ? `<button class="hq-btn" data-action="hq-session-next">${ss.idx + 1 >= ss.ids.length ? 'Finish the day' : 'Next call'} <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></button>`
+          : `<button class="hq-btn ghost" data-action="hq-session-next" title="Move on without logging">Skip</button>`}
+        <button class="hq-btn ghost" data-action="hq-session-end">End day</button>
+      </div>`;
+  } else if (ss && !ss.finished) {
+    sessionHtml = `
+      <div class="hq-resume-bar">
+        <span class="t">Your day is paused at call ${ss.idx + 1} of ${ss.ids.length}.</span>
+        <button class="hq-btn" data-action="hq-session-resume">Resume <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></button>
+      </div>`;
+  }
   el.innerHTML = `
-    <button class="hq-btn ghost hq-back" data-action="hq-back"><i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Queue</button>
+    <button class="hq-btn ghost hq-back" data-action="hq-back"><i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Today's list</button>
+    ${sessionHtml}
     <div class="hq-lead-head">
       <div class="lodge">${escapeHtml(lead.businessName || 'Unnamed')}</div>
       <div class="hq-lead-sub">
@@ -5808,16 +5958,16 @@ function hqRenderWorkspace() {
       <div style="margin-top:12px;">${renderNextStepBand(lead)}</div>
     </div>
     <div class="hq-tabs">
-      ${[['crib', 'Crib'], ['call', 'Call'], ['answers', 'Answers'], ['brain', 'Brain'], ['send', 'Send']].map(([k, label]) =>
-        `<button class="hq-tab${s.tab === k ? ' active' : ''}" data-action="hq-tab" data-tab="${k}">${label}</button>`).join('')}
+      ${[['crib', 'Prep', 'before the call'], ['call', 'Call', 'the script'], ['send', 'Send', 'whatsapp after'], ['brain', 'Brain', 'call brain notes']].map(([k, label, cap]) =>
+        `<button class="hq-tab${s.tab === k ? ' active' : ''}" data-action="hq-tab" data-tab="${k}">${label}<span class="cap">${cap}</span></button>`).join('')}
     </div>
     <div id="hq-tab-body">${hqTabHtml(lead, s.tab, stageKey)}</div>`;
   hqUpdateTokens();
 }
 
 function hqTabHtml(lead, tab, stageKey) {
-  if (tab === 'crib') return hqCribTab(lead);
-  if (tab === 'answers') return hqAnswersTab(lead);
+  // 'answers' folded into Prep (kept as a route for any stale state).
+  if (tab === 'crib' || tab === 'answers') return hqCribTab(lead);
   if (tab === 'brain') return hqBrainTab(lead);
   if (tab === 'send') return hqSendTab(lead);
   return hqCallTab(lead, stageKey);
@@ -5862,7 +6012,13 @@ function hqCribTab(l) {
     <div class="hq-card">
       ${activity.length ? activity.map(a => `<div class="hq-note"><div class="when">${escapeHtml(formatTimeAgo(a.date))}</div>${escapeHtml(a.action || '')}</div>`).join('')
         : '<div class="hq-empty-note">No activity yet.</div>'}
-    </div>`;
+    </div>
+
+    <div class="hq-seclabel"><span class="n">✓</span><span class="t">Everything they've told you</span></div>
+    <details class="hq-details">
+      <summary>All their answers — discovery and kickoff, tap to edit</summary>
+      <div class="hq-details-body">${hqAnswersFields(l)}</div>
+    </details>`;
 }
 
 // ---- tab: answers ----
@@ -5877,15 +6033,15 @@ function hqAnswerField(l, def) {
       </div>
     </div>`;
 }
-function hqAnswersTab(l) {
+// The editable everything-they-told-you fields — now lives inside Prep (was its own tab).
+function hqAnswersFields(l) {
   return `
-    <div class="hq-goalbar"><span class="hq-mono">Answers</span><p>Everything they've ever told you — editable, saved to the lead as you type, auto-filled into every script.</p></div>
-    <div class="hq-seclabel"><span class="n">C</span><span class="t">Discovery — confirm, don't ask</span></div>
-    <div class="hq-card">${HQ_AUDIT_CONFIRM.map(d => hqAnswerField(l, d)).join('')}</div>
+    <div class="hq-seclabel" style="margin-top:6px;"><span class="n">C</span><span class="t">Discovery — confirm, don't ask</span></div>
+    ${HQ_AUDIT_CONFIRM.map(d => hqAnswerField(l, d)).join('')}
     <div class="hq-seclabel"><span class="n">A</span><span class="t">Discovery — only they know this</span></div>
-    <div class="hq-card">${HQ_AUDIT_ASK.map(d => hqAnswerField(l, d)).join('')}</div>
+    ${HQ_AUDIT_ASK.map(d => hqAnswerField(l, d)).join('')}
     <div class="hq-seclabel"><span class="n">K</span><span class="t">Kickoff — the setup spec</span></div>
-    <div class="hq-card">${HQ_KICKOFF_QS.map(d => hqAnswerField(l, d)).join('')}</div>`;
+    ${HQ_KICKOFF_QS.map(d => hqAnswerField(l, d)).join('')}`;
 }
 
 // ---- tab: brain ----
@@ -6115,20 +6271,73 @@ function hqClientView(l) {
     </ul></div>`;
 }
 
-// ---- dashboard (no lead selected) ----
-function hqDashboardHtml() {
+// ---- morning screen (the front door: your day, one number, one button) ----
+function hqMorningHtml() {
   const active = hqActiveLeads();
   const due = hqDueLeads(active);
+  const overdue = due.filter(l => daysUntil(l.crm.followUpDate) < 0).length;
+  const dueToday = due.length - overdue;
+  const fresh = hqFreshLeads(10);
   const inDisc = active.filter(l => l.crm && l.crm.stage === 5).length;
   const won = (state.leads || []).filter(l => l && l.crm && l.crm.stage === 6).length;
   const pat = state.brainPatterns;
   const inbox = state.brainInbox || [];
+  const ss = state.hqSession;
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const dateLine = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  const coachDone = (function () { try { return localStorage.getItem('lodgehelm-hq-coach') === 'done'; } catch (_) { return false; } })();
+
+  let dayHtml;
+  if (ss && !ss.finished) {
+    dayHtml = `
+      <p class="hq-day-number">You're mid-day — <b>call ${ss.idx + 1} of ${ss.ids.length}</b> is up next.</p>
+      <div class="hq-start-row">
+        <button class="hq-start-btn" data-action="hq-session-resume">Resume your day <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
+        <button class="hq-btn ghost" data-action="hq-session-end">End the day early</button>
+      </div>`;
+  } else if (due.length) {
+    dayHtml = `
+      <p class="hq-day-number">You have <b>${due.length} call${due.length === 1 ? '' : 's'}</b> to make today.</p>
+      <div class="hq-daychips">
+        ${overdue ? `<span class="hq-pill overdue">${overdue} overdue</span>` : ''}
+        ${dueToday ? `<span class="hq-pill amber">${dueToday} due today</span>` : ''}
+      </div>
+      <div class="hq-start-row">
+        <button class="hq-start-btn" data-action="hq-start-day" data-source="due">Start calling <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
+        <span class="hq-start-sub">One lodge at a time — prep, call, log, next.</span>
+      </div>`;
+  } else if (fresh.length) {
+    dayHtml = `
+      <p class="hq-day-number">Nothing due today — clear runway. <b>${fresh.length} fresh lodge${fresh.length === 1 ? '' : 's'}</b> are ready for a first call.</p>
+      <div class="hq-start-row">
+        <button class="hq-start-btn" data-action="hq-start-day" data-source="fresh">Call fresh leads <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
+        <span class="hq-start-sub">Best-researched lodges first.</span>
+      </div>`;
+  } else {
+    dayHtml = `<p class="hq-day-number">Nothing due and nothing fresh to dial. Browse the pipeline on the left, or open the back office for the full lists.</p>`;
+  }
+
   return `
-    <div class="hq-lead-head">
-      <div class="lodge">LodgeHelm HQ</div>
-      <div class="hq-lead-sub"><span>${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</span><span>Pick a lead on the left — everything for the call lives here.</span></div>
-    </div>
-    <div class="hq-dash-stats">
+    <button class="hq-btn ghost hq-back" data-action="hq-back" style="margin-bottom:14px;"><i data-lucide="list" style="width:14px;height:14px;"></i> See today's list</button>
+    <div class="hq-morning-kicker">${dateLine} · LodgeHelm HQ</div>
+    <div class="hq-greet">${greet}, Melusi.</div>
+    ${dayHtml}
+    ${coachDone ? '' : `
+      <div class="hq-coach">
+        <div class="hq-coach-head">
+          <span class="hq-mono" style="color:var(--hq-amber);">How your day works</span>
+          <button class="hq-coach-dismiss" data-action="hq-coach-dismiss">Got it — hide this</button>
+        </div>
+        <ol>
+          <li><b>Start calling</b> — HQ hands you the first lodge on today's list.</li>
+          <li><b>Prep</b> — a minute on who they are before you dial.</li>
+          <li><b>Call</b> — the right script is on screen; tick and type as you talk.</li>
+          <li><b>Log it</b> — pick how it went. HQ sets the next step and hands you the next lodge.</li>
+          <li><b>Tonight</b> — drop your recordings on Call Brain. Its notes land on each lodge's Brain tab by morning.</li>
+        </ol>
+      </div>`}
+    <div class="hq-dash-stats" style="margin-top:20px;">
       <div class="hq-stat"><div class="v">${due.length}</div><div class="l">Calls due today</div></div>
       <div class="hq-stat"><div class="v">${inDisc}</div><div class="l">In discussion</div></div>
       <div class="hq-stat"><div class="v">${won}</div><div class="l">Won</div></div>
@@ -6155,6 +6364,38 @@ function hqDashboardHtml() {
     ${pat && pat.text
       ? `<div class="hq-card"><div class="hq-pre">${escapeHtml(pat.text)}</div><div class="hq-mono" style="margin-top:10px;color:var(--hq-muted);">Updated ${escapeHtml((pat.updatedAt || '').slice(0, 10))}${pat.calls ? ' · ' + pat.calls + ' calls' : ''}</div></div>`
       : `<div class="hq-card"><div class="hq-empty-note" style="padding:4px 0;">Patterns build as Call Brain digests your calls — objections that repeat, lines that land, mistakes to never make twice. Drop recordings on Call Brain and refresh.</div></div>`}`;
+}
+
+// ---- end-of-day screen (the list is done) ----
+function hqEndOfDayHtml() {
+  const ss = state.hqSession || { ids: [], outcomes: {} };
+  const total = ss.ids.length;
+  const outcomes = ss.outcomes || {};
+  const logged = Object.keys(outcomes).length;
+  const skipped = Math.max(0, total - logged);
+  const counts = {};
+  Object.values(outcomes).forEach(v => { if (v) counts[v] = (counts[v] || 0) + 1; });
+  const dateLine = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  return `
+    <div class="hq-morning-kicker">${dateLine} · Day complete</div>
+    <div class="hq-greet">That's the list. Well done.</div>
+    <div class="hq-eod-stats">
+      <div class="hq-stat"><div class="v">${total}</div><div class="l">Calls in the day</div></div>
+      <div class="hq-stat"><div class="v">${logged}</div><div class="l">Logged</div></div>
+      ${skipped ? `<div class="hq-stat"><div class="v">${skipped}</div><div class="l">Skipped</div></div>` : ''}
+    </div>
+    ${Object.keys(counts).length ? `
+      <div class="hq-card"><ul>
+        ${Object.entries(counts).map(([v, n]) => `<li><b>${n}×</b> ${escapeHtml(callOutcomeLabel(v))}</li>`).join('')}
+      </ul></div>` : ''}
+    <div class="hq-card" style="margin-top:12px;">
+      <b style="color:var(--hq-amber);">Tonight:</b> drop today's recordings on Call Brain on your Mac.
+      Its briefs and coaching land on each lodge's Brain tab, and tomorrow's list is already
+      building from the next steps you just set.
+    </div>
+    <div class="hq-start-row" style="margin-top:20px;">
+      <button class="hq-start-btn" data-action="hq-eod-close">Back to HQ <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
+    </div>`;
 }
 
 // ---- token substitution (live, no re-render) ----
@@ -6193,8 +6434,22 @@ document.getElementById('section-hq').addEventListener('click', e => {
   const action = target.dataset.action;
   const id = target.dataset.id;
   const s = state.hq;
-  if (action === 'hq-select-lead') { s.leadId = id; s.pane = 'work'; renderHQ(); return; }
+  if (action === 'hq-select-lead') { s.leadId = id; s.pane = 'work'; s.tab = 'crib'; renderHQ(); return; }
   if (action === 'hq-back') { s.pane = 'rail'; renderHQ(); return; }
+  if (action === 'hq-start-day') { hqStartSession(target.dataset.source); return; }
+  if (action === 'hq-session-next') { hqAdvanceSession(); return; }
+  if (action === 'hq-session-resume') {
+    const cur = hqSessionCurrentId();
+    if (cur) { s.leadId = cur; s.tab = 'crib'; s.pane = 'work'; s.__adv = true; renderHQ(); }
+    return;
+  }
+  if (action === 'hq-session-end') { hqEndSession(); return; }
+  if (action === 'hq-eod-close') { hqEndSession(); return; }
+  if (action === 'hq-coach-dismiss') {
+    try { localStorage.setItem('lodgehelm-hq-coach', 'done'); } catch (_) {}
+    renderHQ();
+    return;
+  }
   if (action === 'hq-tab') { s.tab = target.dataset.tab; renderHQ(); return; }
   if (action === 'hq-goto-send') { s.tab = 'send'; renderHQ(); return; }
   if (action === 'hq-stage-filter') { s.stageFilter = target.dataset.stage; renderHQ(); return; }
@@ -6291,7 +6546,16 @@ document.getElementById('section-hq').addEventListener('change', e => {
   const sel = e.target.closest('[data-action="hq-log-call"]');
   if (sel && sel.value) {
     logCall(sel.dataset.id, sel.value);
-    showToast('Call logged — next step set', 'success');
+    // Guided day: logging the current call arms the "Next call →" button (never yanks
+    // the workspace away — he may still want to send the follow-up from here first).
+    const ss = state.hqSession;
+    if (ss && !ss.finished && sel.dataset.id === ss.ids[ss.idx]) {
+      ss.outcomes[sel.dataset.id] = sel.value;
+      hqSaveSession();
+      showToast('Logged — hit "Next call" when you\'re done here', 'success');
+    } else {
+      showToast('Call logged — next step set', 'success');
+    }
     renderHQ();
   }
 });
@@ -8443,8 +8707,15 @@ function init() {
   renderExportButton();
   applyConsultantDefaults();
   loadChatState();
-  // HQ is the front door — every session opens on the call workspace.
+  // HQ is the front door — every session opens on the calling day.
   state.activeSection = 'hq';
+  // Resume a mid-day guided session (same-day only) exactly where he left it.
+  state.hqSession = hqLoadSession();
+  if (state.hqSession && !state.hqSession.finished) {
+    state.hq.leadId = state.hqSession.ids[state.hqSession.idx];
+    state.hq.tab = 'crib';
+    state.hq.pane = 'work';
+  }
   // Reflect persisted activeSection into UI
   showSection(state.activeSection);
   lucide.createIcons();

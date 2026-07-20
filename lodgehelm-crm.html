@@ -5632,7 +5632,7 @@ const HQ_OBJECTIONS = {
     { q: 'Send me something.', a: 'Happy to — so I send the right thing: is the bigger pain catching enquiries fast, or the follow-ups that go quiet after a quote? <em>(note the answer)</em> What\'s the best email for it?' }
   ],
   ownerPrice: [
-    { q: 'What does this cost? / Is it per lodge?', a: 'It\'s a monthly subscription per property. A single lodge starts around $149–249 a month. But honestly — one recovered booking pays for the whole year. The real question isn\'t the monthly figure, it\'s how many enquiries are quietly slipping through right now. I\'d rather show you that in a 15-minute pilot than talk pricing in the abstract.' },
+    { q: 'What does this cost? / Is it per lodge?', a: 'It\'s a monthly subscription per property. A single lodge is $349 a month, plus a one-off setup where I do all the work. But honestly — one recovered booking pays for the whole year. The real question isn\'t the monthly figure, it\'s how many enquiries are quietly slipping through right now. I\'d rather show you that in a 15-minute pilot than talk pricing in the abstract.' },
     { q: 'Isn\'t that expensive? / No budget.', a: 'Fair — and I\'d rather you never pay for something that doesn\'t earn its keep. A single safari party is worth three to fifteen thousand dollars. Stop losing just ONE of those a year and it\'s paid for itself several times over. Try it free for 14 days and judge it on your own numbers.' },
     { q: 'Just give me a number.', a: 'I\'ll give you the exact figure once I\'ve seen your setup — I don\'t want to quote you a tier you don\'t need. <em>(Saying this is stronger, not weaker.)</em>' }
   ],
@@ -5643,7 +5643,7 @@ const HQ_OBJECTIONS = {
     { q: 'Will this replace my job / change my role?', a: 'Opposite, actually — it\'s the visibility you and the owner have never had, and it makes your part of the operation look sharp, not replaceable. It\'s built to make the GM\'s life easier, not to cut the GM out.' }
   ],
   gmPrice: [
-    { q: 'How much is this going to cost — I\'ll need to tell the owner.', a: 'It\'s a monthly subscription per property — from around $149 a month for a single lodge; larger multi-property groups are custom-priced. But the number that actually matters to the owner is this: one recovered booking pays for the whole year. That\'s the line to lead with, not the monthly figure.' },
+    { q: 'How much is this going to cost — I\'ll need to tell the owner.', a: 'It\'s a monthly subscription per property: $349 a month for a single lodge; multi-property groups pay $299 per property. But the number that actually matters to the owner is this: one recovered booking pays for the whole year. That\'s the line to lead with, not the monthly figure.' },
     { q: 'I don\'t know our budget for something like this.', a: 'You don\'t need to know it upfront — that\'s what the 14-day pilot is for. You try it free, see what it recovers on your own numbers, and then it\'s an easy budget conversation because you\'re showing a return, not asking for a leap of faith.' },
     { q: 'The owner\'s going to ask me if it\'s worth it — what do I say?', a: 'Tell them: a single safari party is worth three to fifteen thousand dollars, and you only have to stop losing ONE of those a year for it to pay for itself. That\'s the whole case — you\'re not asking them to buy software, you\'re showing them a leak.' }
   ],
@@ -5662,11 +5662,11 @@ const HQ_ONELINERS = [
 function hqTiersHtml() {
   return `
     <div class="hq-tiers">
-      <div class="hq-tier"><div class="tname">Starter</div><div class="tprice">$149–249/mo</div><div class="twho">Single owner-run lodge</div></div>
-      <div class="hq-tier"><div class="tname">Pro</div><div class="tprice">$349–599/mo</div><div class="twho">Reservation-heavy lodge</div></div>
+      <div class="hq-tier"><div class="tname">Starter</div><div class="tprice">$349/mo</div><div class="twho">Single owner-run lodge</div></div>
+      <div class="hq-tier"><div class="tname">Pro</div><div class="tprice">$649/mo</div><div class="twho">Reservation-heavy lodge</div></div>
       <div class="hq-tier"><div class="tname">Enterprise</div><div class="tprice">Let's talk</div><div class="twho">Multi-property / DMC</div></div>
     </div>
-    <div class="hq-tiers-extra">Plus one-off setup $500–3,000 · 14-day pilot · annual prepay ≈ 2 months free</div>`;
+    <div class="hq-tiers-extra">Setup $2,000 one-off ($3,500 multi-camp) · 14-day pilot · annual prepay ≈ 2 months free · Founding three: $249/mo locked for life, setup $1,000</div>`;
 }
 function hqOnelinersHtml(label) {
   return `

@@ -814,14 +814,20 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .hq-search:focus { border-color: var(--hq-amber); }
 .hq-search::placeholder { color: var(--hq-faint); }
 .hq-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-.hq-chip { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 4px 10px; cursor: pointer; transition: all .15s ease; }
-.hq-chip:hover { border-color: rgba(224,134,58,0.55); color: var(--hq-ivory); }
+.hq-chip { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 4px 10px; cursor: pointer; transition: border-color .15s ease, color .15s ease, background .15s ease, transform 140ms cubic-bezier(0.23, 1, 0.32, 1); }
+.hq-chip:active { transform: scale(0.95); }
+@media (hover: hover) and (pointer: fine) {
+  .hq-chip:hover { border-color: rgba(224,134,58,0.55); color: var(--hq-ivory); }
+}
 .hq-chip.active { background: var(--hq-amber); border-color: var(--hq-amber); color: var(--hq-ink-deep); }
 .hq-rail-list { flex: 1; overflow-y: auto; padding: 10px 10px 24px; min-height: 0; }
 .hq-rail-group { margin: 8px 4px 6px; color: var(--hq-amber); display: flex; align-items: center; gap: 8px; }
 .hq-rail-group .n { color: var(--hq-muted); }
-.hq-lead { width: 100%; text-align: left; background: none; border: 1px solid transparent; border-radius: 12px; padding: 10px 12px; cursor: pointer; color: var(--hq-ivory); transition: all .13s ease; display: block; }
-.hq-lead:hover { background: rgba(18,18,18,0.35); }
+.hq-lead { width: 100%; text-align: left; background: none; border: 1px solid transparent; border-radius: 12px; padding: 10px 12px; cursor: pointer; color: var(--hq-ivory); transition: background .13s ease, border-color .13s ease, transform 140ms cubic-bezier(0.23, 1, 0.32, 1); display: block; }
+.hq-lead:active { transform: scale(0.985); }
+@media (hover: hover) and (pointer: fine) {
+  .hq-lead:hover { background: rgba(18,18,18,0.35); }
+}
 .hq-lead.active { background: var(--hq-ink); border-color: rgba(224,134,58,0.6); }
 .hq-lead .nm { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14.5px; letter-spacing: -0.02em; line-height: 1.25; }
 .hq-lead .meta { display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
@@ -845,7 +851,8 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .hq-btn.copied { background: var(--hq-ivory); color: var(--hq-ink-deep); }
 .hq-outcome { background: var(--hq-ink-deep); border: 1px solid rgba(245,239,230,0.18); border-radius: 999px; color: var(--hq-ivory); font: 500 13px 'Inter', sans-serif; padding: 8px 12px; outline: none; }
 .hq-stagepills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
-.hq-stagepill { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 5px 12px; cursor: pointer; transition: all .15s ease; }
+.hq-stagepill { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--hq-hairline); border-radius: 999px; color: var(--hq-muted); padding: 5px 12px; cursor: pointer; transition: border-color .15s ease, color .15s ease, background .15s ease, transform 140ms cubic-bezier(0.23, 1, 0.32, 1); }
+.hq-stagepill:active { transform: scale(0.95); }
 .hq-stagepill.active { background: var(--hq-ink); border-color: var(--hq-amber); color: var(--hq-amber); }
 .hq-tabs { position: sticky; top: 0; z-index: 5; background: var(--hq-green); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--hq-hairline); margin: 6px 0 20px; }
 .hq-tab { background: none; border: 1px solid var(--hq-hairline); border-radius: 11px; padding: 8px 6px; text-align: center; cursor: pointer; color: var(--hq-ivory); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: -0.01em; transition: all .15s ease; }
@@ -937,7 +944,25 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .hq-assign-results { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 .hq-assign-results button { text-align: left; background: var(--hq-ink-deep); border: 1px solid var(--hq-hairline); border-radius: 8px; color: var(--hq-ivory); font: 500 13px 'Inter', sans-serif; padding: 7px 10px; cursor: pointer; }
 .hq-assign-results button:hover { border-color: var(--hq-amber); }
-.hq-dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.hq-dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.hq-money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; background: var(--hq-ink); border: 1px solid rgba(230,164,58,0.25); border-radius: 13px; padding: 13px 16px; margin: 14px 0 4px; font-size: 14px; }
+.hq-money b { color: var(--hq-amber); font-family: 'Space Grotesk', sans-serif; }
+.hq-owed-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(245,239,230,0.06); }
+.hq-owed-row:last-child { border-bottom: none; }
+.hq-owed-row .who { background: none; border: none; color: var(--hq-amber); font: inherit; font-weight: 600; cursor: pointer; padding: 0; text-align: left; }
+.hq-owed-row .what { flex: 1; font-size: 13.5px; color: rgba(245,239,230,0.85); }
+.hq-today-row { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(245,239,230,0.06); font-size: 13.5px; }
+.hq-today-row:last-child { border-bottom: none; }
+.hq-today-row .tm { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--hq-muted); min-width: 42px; }
+.hq-today-row .oc { color: var(--hq-amber); font-size: 12px; }
+.hq-dropzone { border: 1.5px dashed rgba(230,164,58,0.4); border-radius: 13px; padding: 13px; margin-bottom: 12px; transition: border-color .15s ease, background .15s ease; }
+.hq-dropzone.drag { border-color: var(--hq-amber); background: rgba(230,164,58,0.08); }
+.hq-dropzone .dz-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.hq-dropzone .hint { font-size: 12px; color: var(--hq-muted); margin-top: 8px; line-height: 1.5; }
+#hq-rec-pill { position: fixed; right: 18px; bottom: 18px; z-index: 3000; display: none; align-items: center; gap: 8px; background: var(--hq-ink); color: #f5efe6; border: 1px solid rgba(230,164,58,0.5); border-radius: 999px; padding: 10px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.45); max-width: 74vw; }
+#hq-rec-pill.rec { border-color: #e05252; }
+#hq-rec-pill.rec::before { content: ''; flex: none; width: 9px; height: 9px; border-radius: 50%; background: #e05252; animation: hqpulse 1.2s ease infinite; }
+@keyframes hqpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .hq-stat { background: var(--hq-ink); border: 1px solid rgba(245,239,230,0.07); border-radius: 13px; padding: 14px 16px; }
 .hq-stat .v { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; color: var(--hq-amber); line-height: 1; }
 .hq-stat .l { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--hq-muted); margin-top: 6px; }
@@ -992,6 +1017,15 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 #section-hq .hq-eod-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 18px 0; }
 @media (prefers-reduced-motion: no-preference) {
   #section-hq .hq-work-inner.hq-adv { animation: fadeSlideIn 220ms cubic-bezier(0.23, 1, 0.32, 1); }
+  /* Clicking between lodges happens dozens of times a day — a whisper of a fade,
+     opacity only, no movement. The guided-day hand-off keeps the bigger entrance. */
+  #section-hq .hq-work-inner.hq-swap { animation: hqSwapFade 120ms ease-out; }
+  @keyframes hqSwapFade { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    #section-hq .hq-work-inner.hq-adv, #section-hq .hq-work-inner.hq-swap { animation: none; }
+    #hq-rec-pill.rec::before { animation: none; }
+    .hq-btn, .hq-chip, .hq-lead, .hq-stagepill { transition-property: background, border-color, color; }
+  }
 }
 #section-hq .hq-tab .cap { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hq-faint); margin-top: 3px; }
 #section-hq .hq-tab.active .cap { color: rgba(224,134,58,0.75); }
@@ -1962,12 +1996,16 @@ function openDialer(id, num) {
 // ===== CALL OUTCOME LOGGING (synced activity + last-contact stamp) =====
 const CALL_OUTCOMES = [
   { value: 'connected', label: 'Connected – spoke to contact' },
+  { value: 'booked_discovery', label: 'Booked the discovery call ✓' },
+  { value: 'booked_close', label: 'Booked the close meeting ✓' },
+  { value: 'won_paid', label: 'They said yes / paid ✓✓' },
   { value: 'gatekeeper', label: 'Reached gatekeeper' },
+  { value: 'callback', label: 'Asked to call back' },
   { value: 'voicemail', label: 'Left voicemail' },
   { value: 'no_answer', label: 'No answer' },
-  { value: 'callback', label: 'Asked to call back' },
   { value: 'wrong_number', label: 'Wrong / dead number' },
-  { value: 'not_interested', label: 'Not interested' }
+  { value: 'not_interested', label: 'Not interested' },
+  { value: 'they_called', label: 'They called me back' }
 ];
 function callOutcomeLabel(v) { return (CALL_OUTCOMES.find(o => o.value === v) || {}).label || v; }
 
@@ -2166,6 +2204,22 @@ function logCall(id, outcome) {
   if (outcome === 'connected') {
     bumpStage(lead, 3);
     setNextStep(lead, 'Send the info / follow-up email', daysFromNow(2), 'Spoke to contact');
+  } else if (outcome === 'booked_discovery') {
+    lead.stage = 'discovery';
+    bumpStage(lead, 5);
+    setNextStep(lead, 'Run the discovery call (Lodge Audit)', daysFromNow(1), 'Discovery call booked');
+  } else if (outcome === 'booked_close') {
+    lead.stage = 'close';
+    bumpStage(lead, 5);
+    setNextStep(lead, 'Run the close meeting', daysFromNow(1), 'Close meeting booked');
+  } else if (outcome === 'won_paid') {
+    lead.stage = 'kickoff';
+    bumpStage(lead, 6);
+    if (!lead.crm.wonAt) lead.crm.wonAt = todayISO;
+    setNextStep(lead, 'Invoice within the hour + book the kickoff', daysFromNow(0), 'They said YES');
+  } else if (outcome === 'they_called') {
+    bumpStage(lead, 3);
+    setNextStep(lead, 'Send the info / follow-up email', daysFromNow(2), 'They called me back');
   } else if (outcome === 'gatekeeper') {
     bumpStage(lead, 3);
     setNextStep(lead, 'Call back, ask for the owner', daysFromNow(2), 'Reached gatekeeper');
@@ -5591,6 +5645,182 @@ function hqScheduleSave() {
   hqSaveTimer = setTimeout(() => saveState(), 600);
 }
 
+// ---- lodge-local time (safari Africa runs on 2 or 3 fixed offsets, no DST) ----
+const HQ_TZ_OFFSETS = {
+  'Kenya': 3, 'Tanzania': 3, 'Uganda': 3, 'Ethiopia': 3, 'Madagascar': 3, 'Somalia': 3,
+  'Botswana': 2, 'South Africa': 2, 'Zimbabwe': 2, 'Zambia': 2, 'Mozambique': 2,
+  'Malawi': 2, 'Namibia': 2, 'Rwanda': 2, 'Burundi': 2, 'Eswatini': 2, 'Lesotho': 2,
+  'DR Congo': 2, 'Democratic Republic of the Congo': 2,
+  'Angola': 1, 'Nigeria': 1, 'Cameroon': 1, 'Chad': 1,
+  'Ghana': 0, 'Senegal': 0, 'Gambia': 0, 'Ivory Coast': 0,
+  'Seychelles': 4, 'Mauritius': 4, 'United Arab Emirates': 4
+};
+function hqLodgeClock(l) {
+  const off = HQ_TZ_OFFSETS[l && l.country];
+  if (off === undefined) return null;
+  const now = new Date();
+  const t = new Date(now.getTime() + (off * 60 + now.getTimezoneOffset()) * 60000);
+  const hh = t.getHours();
+  const label = ((hh % 12) || 12) + ':' + String(t.getMinutes()).padStart(2, '0') + (hh < 12 ? 'am' : 'pm');
+  return { label, hour: hh, good: hh >= 8 && hh < 18, early: hh < 8 };
+}
+function hqLocalHour(l) {
+  const c = hqLodgeClock(l);
+  return c ? c.hour : 12;
+}
+
+// Compose the research crib from what's already on the record — one click, no typing.
+function hqComposeCrib(l) {
+  const bits = [];
+  if (l.country) bits.push(l.country);
+  if (l.segment) bits.push(String(l.segment).replace(/_/g, ' '));
+  const desc = String(l.description || '');
+  const camps = desc.match(/(\d+)\s*(camps?|lodges?|tents?|rooms?|properties)/i);
+  if (camps) bits.push(camps[1] + ' ' + camps[2].toLowerCase());
+  const channels = [];
+  const site = String(l.website || '');
+  if (/safaribookings/i.test(site) || /safaribookings/i.test(desc)) channels.push('SafariBookings');
+  if (/booking\.com/i.test(desc)) channels.push('Booking.com');
+  if (site && !/safaribookings/i.test(site)) channels.push('own website');
+  if (channels.length) bits.push(channels.join(' + '));
+  if (l.funnelLeak) bits.push('leak guess: ' + l.funnelLeak);
+  if (!bits.length) return '';
+  let crib = bits.join(' · ');
+  const firstSentence = desc.split('. ')[0];
+  if (firstSentence && firstSentence.length > 20 && firstSentence.length < 170) crib += '\n' + firstSentence.trim() + (firstSentence.endsWith('.') ? '' : '.');
+  return crib;
+}
+
+// ---- Call Brain from the desk: record in HQ, drop files on the lead, live progress ----
+// The recorder and the upload live OUTSIDE the render cycle (module state + a fixed
+// pill on <body>), so logging outcomes and moving between lodges never interrupts them.
+const HQ_BRAIN_URL = 'http://localhost:4317';
+let hqRec = null; // { rec, chunks, leadId, leadName, startedAt, timerId, mime }
+
+async function hqCallBrainAlive() {
+  try {
+    const r = await fetch(HQ_BRAIN_URL + '/api/health', { signal: AbortSignal.timeout(1800) });
+    return r.ok;
+  } catch (_) { return false; }
+}
+function hqRecPill(text, opts = {}) {
+  let el = document.getElementById('hq-rec-pill');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'hq-rec-pill';
+    el.addEventListener('click', () => { if (hqRec) hqStopRecording(); });
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  el.classList.toggle('rec', !!hqRec);
+  el.style.display = 'flex';
+  if (opts.fadeMs) setTimeout(() => { if (!hqRec) el.style.display = 'none'; }, opts.fadeMs);
+}
+function hqRecPillHide() { const el = document.getElementById('hq-rec-pill'); if (el) el.style.display = 'none'; }
+
+async function hqStartRecording(lead) {
+  if (hqRec) { hqStopRecording(); return; }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (_) {
+    showToast('The mic is blocked — allow the microphone for this site, then try again', 'error');
+    return;
+  }
+  const mime = (window.MediaRecorder && MediaRecorder.isTypeSupported('audio/mp4')) ? 'audio/mp4'
+    : (window.MediaRecorder && MediaRecorder.isTypeSupported('audio/webm')) ? 'audio/webm' : '';
+  let rec;
+  try { rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); }
+  catch (_) { stream.getTracks().forEach(t => t.stop()); showToast('This browser can\'t record — use Chrome', 'error'); return; }
+  hqRec = { rec, chunks: [], leadId: lead.id, leadName: lead.businessName || 'lead', startedAt: Date.now(), timerId: null, mime: rec.mimeType || mime };
+  rec.ondataavailable = ev => { if (ev.data && ev.data.size && hqRec) hqRec.chunks.push(ev.data); };
+  rec.onstop = hqRecFinished;
+  rec.start(10000); // a chunk every 10s, so a hiccup can only cost seconds
+  hqRec.timerId = setInterval(() => {
+    if (!hqRec) return;
+    const secs = Math.floor((Date.now() - hqRec.startedAt) / 1000);
+    hqRecPill('● Recording ' + hqRec.leadName + ' · ' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0') + ' — tap to stop');
+  }, 1000);
+  hqRecPill('● Recording ' + hqRec.leadName + ' — tap to stop');
+  renderHQ();
+}
+function hqStopRecording() {
+  if (hqRec && hqRec.rec && hqRec.rec.state !== 'inactive') hqRec.rec.stop();
+}
+function hqRecFinished() {
+  const R = hqRec;
+  hqRec = null;
+  if (!R) return;
+  clearInterval(R.timerId);
+  try { R.rec.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
+  const blob = new Blob(R.chunks, { type: R.mime || 'audio/webm' });
+  if (blob.size < 12000) {
+    hqRecPillHide();
+    showToast('That recording was a blink — nothing worth keeping', 'info');
+    renderHQ();
+    return;
+  }
+  const ext = /mp4/.test(R.mime || '') ? '.m4a' : '.webm';
+  const slug = (R.leadName || 'call').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'call';
+  const name = slug + ' ' + new Date().toISOString().slice(0, 10) + ext;
+  hqUploadToBrain(blob, name, R.leadId, R.leadName, { fallbackDownload: true });
+  renderHQ();
+}
+// Upload → Call Brain with its live SSE progress mirrored into the pill.
+async function hqUploadToBrain(fileOrBlob, name, leadId, leadName, opts = {}) {
+  hqRecPill('Sending to Call Brain…');
+  try {
+    const res = await fetch(HQ_BRAIN_URL + '/api/upload', {
+      method: 'POST',
+      headers: {
+        'x-filename': encodeURIComponent(name),
+        'x-lead-id': encodeURIComponent(leadId || ''),
+        'x-lead-name': encodeURIComponent(leadName || '')
+      },
+      body: fileOrBlob
+    });
+    if (!res.ok || !res.body) throw new Error('Call Brain answered ' + res.status);
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '', finalEv = null;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf('\n\n')) > -1) {
+        const piece = buf.slice(0, i); buf = buf.slice(i + 2);
+        const line = piece.split('\n').find(x => x.startsWith('data: '));
+        if (!line) continue;
+        let ev = null;
+        try { ev = JSON.parse(line.slice(6)); } catch (_) { continue; }
+        if (ev.type === 'progress' && ev.message) hqRecPill(ev.message);
+        if (ev.type === 'done' || ev.type === 'error') finalEv = ev;
+      }
+    }
+    if (!finalEv || finalEv.type !== 'done') throw new Error((finalEv && finalEv.message) || 'processing fell over');
+    hqRecPill('Brief filed on ' + (leadName || finalEv.company || 'the lodge') + ' ✓', { fadeMs: 5000 });
+    showToast('Call Brain is done — the brief and coaching are on the lodge', 'success');
+    if (typeof refreshFromCloud === 'function') setTimeout(() => { try { refreshFromCloud(); } catch (_) {} }, 1200);
+  } catch (e) {
+    hqRecPillHide();
+    if (opts.fallbackDownload && fileOrBlob instanceof Blob) {
+      try {
+        const url = URL.createObjectURL(fileOrBlob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        showToast('Call Brain unreachable — saved the recording to Downloads instead. Drop it on the lead later.', 'error');
+        return;
+      } catch (_) {}
+    }
+    showToast('Couldn\'t hand it to Call Brain: ' + (e.message || 'unreachable'), 'error');
+  }
+}
+// Never let a tab close eat a live recording.
+window.addEventListener('beforeunload', e => { if (hqRec) { e.preventDefault(); e.returnValue = ''; } });
+
 // ---- answer definitions (keys are the shared contract with the old call-system page) ----
 const HQ_AUDIT_CONFIRM = [
   { num: 'C1', q: 'Who they are — say it, let them correct you', hint: '"So you\'re <b>[lodge]</b>, up near [park], running [N] camps — have I got that right?" A small yes + proof you did the work. Pull it from the crib.', ansKey: 'c1', ph: 'Corrections — e.g. actually 4 camps, new one opened in May' },
@@ -5622,6 +5852,16 @@ const HQ_CLOSE_PREP = [
   { q: 'Their leak answer, memorised verbatim', hint: 'You open with it: "<span class="hq-tok" data-ans="leak" data-ph="fill it in on Discovery"></span>"' },
   { q: 'Demo ready — their lodge name in the sample data', hint: 'e.g. quote header reads their lodge, not "Mara Plains Camp".' },
   { q: 'Know which tier fits + your setup fee number', hint: 'Decide BEFORE the call — never work out pricing live.' }
+];
+// The after-the-yes engine: the moment a lodge pays, HQ walks the path to live the
+// same way it walks a cold call — in order, nothing forgotten, momentum never lost.
+const HQ_AFTER_YES = [
+  { q: 'Send the invoice — within the hour', tag: 'Now', hint: 'Momentum dies overnight. Setup $2,000 (or the founding-three $249 line if you promised it) plus the first month. Send it on WhatsApp AND email so it can\'t get buried.' },
+  { q: 'Confirm the money landed', hint: 'Paid = the project is real. If nothing lands in 24h, one gentle nudge: "just making sure the invoice didn\'t get buried".' },
+  { q: 'Book the kickoff call', hint: 'Inside 3 days while the yes is warm. The kickoff WhatsApp is written for you in Send, below.' },
+  { q: 'Run the kickoff — the intake on this desk, you talk, I type', hint: 'Tick through the intake questions below. Never homework for them.' },
+  { q: 'Build it, then prove it on their real enquiries', hint: 'When it\'s running, message: "it\'s live on your enquiries — here\'s what it caught this week".' },
+  { q: 'Walkthrough with whoever handles the inbox, then mark them Live', hint: 'Move the stage pill above to Live · Client — HQ switches to keep-them-winning mode.' }
 ];
 
 // ---- objections (verbatim from the call-system page) ----
@@ -5740,16 +5980,20 @@ function hqLogSend(lead, label) {
 function hqActiveLeads() {
   return (state.leads || []).filter(l => {
     if (!l || l._deleted || l.source === 'sample') return false;
-    if (l.status === 'archive') return false;
     const disp = (l.crm && l.crm.disposition) || '';
     if (disp === 'not_interested' || disp === 'archived') return false;
-    return l.status === 'crm' || l.status === 'qualified';
+    if (l.status === 'crm' || l.status === 'qualified') return true;
+    // No-answer lodges stay in the call list — they come back as "Try again" on the
+    // right day instead of vanishing into the back-office archive.
+    return l.status === 'archive' && disp === 'no_answer';
   });
 }
 function hqDueLeads(list) {
   return (list || hqActiveLeads())
     .filter(l => l.crm && l.crm.followUpDate && daysUntil(l.crm.followUpDate) !== null && daysUntil(l.crm.followUpDate) <= 0)
-    .sort((a, b) => daysUntil(a.crm.followUpDate) - daysUntil(b.crm.followUpDate));
+    // Most-overdue first; within a day, lodges whose local calling window closes
+    // soonest (latest local time) come first.
+    .sort((a, b) => (daysUntil(a.crm.followUpDate) - daysUntil(b.crm.followUpDate)) || (hqLocalHour(b) - hqLocalHour(a)));
 }
 function hqQueueLeads() {
   const s = state.hq || {};
@@ -5758,18 +6002,42 @@ function hqQueueLeads() {
   if (s.country && s.country !== 'all') base = base.filter(l => (l.country || 'Unknown') === s.country);
   const due = hqDueLeads(base);
   const dueIds = new Set(due.map(l => l.id));
-  const rest = base.filter(l => !dueIds.has(l.id))
-    .sort((a, b) => (((b.crm && b.crm.stage) || 0) - ((a.crm && a.crm.stage) || 0)) || String(a.businessName || '').localeCompare(String(b.businessName || '')));
-  return { due, rest };
+  const rest = base.filter(l => !dueIds.has(l.id));
+  const byName = (a, b) => String(a.businessName || '').localeCompare(String(b.businessName || ''));
+  // The pipeline, not a pile: deals in motion first, then people he's already spoken
+  // to (soonest follow-up first), then untouched cold ranked by research quality.
+  const stageRank = { client: 4, kickoff: 3, close: 2, discovery: 1, cold: 0 };
+  const inPlay = rest.filter(l => hqStageOf(l) !== 'cold')
+    .sort((a, b) => (stageRank[hqStageOf(b)] - stageRank[hqStageOf(a)]) || byName(a, b));
+  const nextDue = l => {
+    const d = (l.crm && l.crm.followUpDate) ? daysUntil(l.crm.followUpDate) : null;
+    return d === null ? 9999 : d;
+  };
+  const spoken = rest.filter(l => hqStageOf(l) === 'cold' && l.crm && l.crm.dateLastContact)
+    .sort((a, b) => (nextDue(a) - nextDue(b)) || String((b.crm || {}).dateLastContact || '').localeCompare(String((a.crm || {}).dateLastContact || '')));
+  const fresh = rest.filter(l => hqStageOf(l) === 'cold' && !(l.crm && l.crm.dateLastContact))
+    .sort((a, b) => ((((b.crm || {}).dataScore) || 0) - (((a.crm || {}).dataScore) || 0)) || byName(a, b));
+  return { due, inPlay, spoken, fresh };
 }
 function hqSearchLeads(q) {
   const needle = q.trim().toLowerCase();
   if (!needle) return [];
+  // 5+ digits in the query = a number search — so a ring-back can be identified
+  // by pasting the caller's number straight into the box.
+  const digits = needle.replace(/[^0-9]/g, '');
+  const byNumber = digits.length >= 5;
   return (state.leads || []).filter(l => {
     if (!l || l._deleted || l.source === 'sample') return false;
-    return String(l.businessName || '').toLowerCase().includes(needle)
+    if (String(l.businessName || '').toLowerCase().includes(needle)
       || String(l.ownerName || '').toLowerCase().includes(needle)
-      || String(l.country || '').toLowerCase().includes(needle);
+      || String(l.country || '').toLowerCase().includes(needle)) return true;
+    if (byNumber) {
+      const nums = [l.whatsapp || '']
+        .concat((l.phones || []).map(p => (p && p.number) || ''))
+        .concat((l.contacts || []).map(c => (c && c.phone) || ''));
+      return nums.some(n => String(n).replace(/[^0-9]/g, '').includes(digits));
+    }
+    return false;
   }).slice(0, 30);
 }
 
@@ -5871,6 +6139,10 @@ function renderHQ() {
   })();
   const lead = s.leadId ? getLeadById(s.leadId) : null;
   if (s.leadId && !lead) { s.leadId = null; }
+  // A full re-render must never eat the rail's scroll position — logging an outcome
+  // mid-list used to bounce him back to the top of 700 lodges.
+  const railBefore = document.getElementById('hq-rail-list');
+  const railScroll = railBefore ? railBefore.scrollTop : 0;
   // The workspace (morning screen / current call) is the default view — the rail is the
   // secondary pane on mobile, not the front door.
   const paneCls = s.pane === 'rail' ? 'pane-rail' : 'pane-work';
@@ -5879,7 +6151,7 @@ function renderHQ() {
       <aside class="hq-rail">
         <div class="hq-rail-head">
           <div class="hq-rail-title"><span class="t">Call list</span><span class="hq-mono">HQ</span></div>
-          <input type="search" class="hq-search" id="hq-search-input" placeholder="Search any lead…" value="${escapeHtml(s.search || '')}" autocomplete="off">
+          <input type="search" class="hq-search" id="hq-search-input" placeholder="Search a name, or paste a number…" value="${escapeHtml(s.search || '')}" autocomplete="off">
           <div class="hq-chips">
             <button class="hq-chip${s.stageFilter === 'all' ? ' active' : ''}" data-action="hq-stage-filter" data-stage="all">All</button>
             ${HQ_STAGES.map(st => `<button class="hq-chip${s.stageFilter === st.key ? ' active' : ''}" data-action="hq-stage-filter" data-stage="${st.key}">${st.name.split(' ')[0]}</button>`).join('')}
@@ -5894,6 +6166,8 @@ function renderHQ() {
       <div class="hq-work"><div class="hq-work-inner" id="hq-work-inner"></div></div>
     </div>`;
   hqRenderRailList();
+  const railAfter = document.getElementById('hq-rail-list');
+  if (railAfter && railScroll) railAfter.scrollTop = railScroll;
   hqRenderWorkspace();
   // One-shot entrance animation when the guided day hands over the next call.
   if (s.__adv) {
@@ -5942,14 +6216,23 @@ function hqRenderRailList() {
       ${hits.length ? hits.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">No lead matches that.</div>'}`;
     return;
   }
-  const { due, rest } = hqQueueLeads();
-  const restCapped = rest.slice(0, s.railCap || 40);
+  const { due, inPlay, spoken, fresh } = hqQueueLeads();
+  const cap = s.railCap || 40;
+  const spokenCapped = spoken.slice(0, cap);
+  const freshCapped = fresh.slice(0, cap);
+  const hidden = (spoken.length - spokenCapped.length) + (fresh.length - freshCapped.length);
   el.innerHTML = `
     <div class="hq-rail-group"><span class="hq-mono">Due today</span><span class="hq-mono n">${due.length}</span></div>
     ${due.length ? due.map(l => hqLeadRow(l)).join('') : '<div class="hq-empty-note">Nothing due. Click anyone below to call them.</div>'}
-    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Everyone else</span><span class="hq-mono n">${rest.length}</span></div>
-    ${restCapped.map(l => hqLeadRow(l)).join('')}
-    ${rest.length > restCapped.length ? `<button class="hq-chip" style="display:block;margin:10px auto 4px;" data-action="hq-rail-more">Show 100 more · ${rest.length - restCapped.length} to go</button>` : ''}`;
+    ${inPlay.length ? `
+    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">In play</span><span class="hq-mono n">${inPlay.length}</span></div>
+    ${inPlay.map(l => hqLeadRow(l)).join('')}` : ''}
+    ${spoken.length ? `
+    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Spoken to</span><span class="hq-mono n">${spoken.length}</span></div>
+    ${spokenCapped.map(l => hqLeadRow(l)).join('')}` : ''}
+    <div class="hq-rail-group" style="margin-top:16px;"><span class="hq-mono">Fresh cold</span><span class="hq-mono n">${fresh.length}</span></div>
+    ${freshCapped.map(l => hqLeadRow(l)).join('')}
+    ${hidden > 0 ? `<button class="hq-chip" style="display:block;margin:10px auto 4px;" data-action="hq-rail-more">Show 100 more · ${hidden} to go</button>` : ''}`;
 }
 
 // ---- render: workspace ----
@@ -6000,19 +6283,27 @@ function hqRenderWorkspace() {
         ${who ? `<span>${escapeHtml(who)}</span>` : ''}
         ${lead.country ? `<span>${escapeHtml(lead.country)}</span>` : ''}
         ${lead.segment ? `<span class="hq-pill">${escapeHtml(lead.segment.replace(/_/g, ' '))}</span>` : ''}
+        ${(() => { const c = hqLodgeClock(lead); if (!c) return ''; return `<span class="hq-pill${c.good ? '' : ' overdue'}" title="Local time at the lodge">${c.label} there${c.good ? '' : c.early ? ' · early' : ' · late'}</span>`; })()}
       </div>
       <div class="hq-head-actions">
         ${phone ? `<button class="hq-btn" data-action="hq-call" data-id="${escapeHtml(lead.id)}"><i data-lucide="phone" style="width:14px;height:14px;"></i> ${escapeHtml(phone)}</button>` : ''}
         ${wa ? `<button class="hq-btn ghost" data-action="hq-goto-send"><i data-lucide="message-circle" style="width:14px;height:14px;"></i> WhatsApp</button>` : ''}
-        <select class="hq-outcome" data-action="hq-log-call" data-id="${escapeHtml(lead.id)}" aria-label="Log call outcome">
+        <button class="hq-btn ghost" data-action="generate-email" data-id="${escapeHtml(lead.id)}"><i data-lucide="mail" style="width:14px;height:14px;"></i> Email</button>
+        <select class="hq-outcome" data-action="hq-log-call" data-id="${escapeHtml(lead.id)}" aria-label="Log call outcome" title="Or press 1-9 / 0 on your keyboard">
           <option value="" selected>Log call outcome…</option>
-          ${CALL_OUTCOMES.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
+          ${CALL_OUTCOMES.map((o, i) => `<option value="${o.value}">${i < 9 ? (i + 1) + '. ' : i === 9 ? '0. ' : ''}${o.label}</option>`).join('')}
         </select>
       </div>
       <div class="hq-stagepills">
         ${HQ_STAGES.map(st => `<button class="hq-stagepill${stageKey === st.key ? ' active' : ''}" data-action="hq-set-stage" data-id="${escapeHtml(lead.id)}" data-stage="${st.key}">${st.step} · ${st.name}</button>`).join('')}
       </div>
       <div style="margin-top:12px;">${renderNextStepBand(lead)}</div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+        <span class="hq-mono" style="color:var(--hq-muted);font-size:10px;">CALL BACK</span>
+        <button class="hq-chip" data-action="hq-snooze" data-days="0">Later today</button>
+        <button class="hq-chip" data-action="hq-snooze" data-days="1">Tomorrow</button>
+        <button class="hq-chip" data-action="hq-snooze" data-days="7">Next week</button>
+      </div>
     </div>
     <div class="hq-jumpbar">
       ${[['hq-sec-script', 'Script'], ['hq-sec-lodge', 'The lodge'], ['hq-sec-send', 'Send'], ['hq-sec-brain', 'Brain']].map(([t, label]) =>
@@ -6041,7 +6332,7 @@ function hqCribTab(l) {
   const emails = allLeadEmails(l);
   const phones = (l.phones || []).map(p => p && p.number).filter(Boolean);
   return `
-    <div class="hq-seclabel"><span class="n">✎</span><span class="t">Research crib — park · camps · channels · leak guess</span></div>
+    <div class="hq-seclabel"><span class="n">✎</span><span class="t">Research crib — park · camps · channels · leak guess</span><button class="hq-chip" data-action="hq-crib-auto" style="margin-left:auto;">Write it for me</button></div>
     <textarea class="hq-crib" id="hq-crib-input" placeholder="e.g. Maasai Mara · 3 camps · SafariBookings + direct · after-hours enquiries slip">${escapeHtml(l.crib || '')}</textarea>
 
     <div class="hq-seclabel"><span class="n">i</span><span class="t">The record</span></div>
@@ -6108,7 +6399,15 @@ function hqAnswersFields(l) {
 function hqBrainTab(l) {
   const entries = (l.brain || []).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
   return `
-    <div style="margin-bottom:10px;"><button class="hq-btn ghost" data-action="hq-open-callbrain" title="Start Call Brain first if it doesn't open: double-click 'Start Call Brain.command' on your Mac">Drop a recording → open Call Brain</button></div>
+    <div class="hq-dropzone" id="hq-brain-drop">
+      <div class="dz-row">
+        <button class="hq-btn" data-action="hq-record" data-id="${escapeHtml(l.id)}">${(typeof hqRec !== 'undefined' && hqRec) ? '■ Stop recording' : '● Record this call'}</button>
+        <button class="hq-btn ghost" data-action="hq-pick-file">Drop a file…</button>
+        <button class="hq-btn ghost" data-action="hq-open-callbrain">Open Call Brain</button>
+        <input type="file" id="hq-brain-file" style="display:none" accept="audio/*,video/*,.txt,.md,.vtt,.srt">
+      </div>
+      <div class="hint">Phone on speaker, the Mac listens. Or drag any recording onto this panel. Either way it files itself on ${escapeHtml(l.businessName || 'this lodge')} — the brief and coaching land below on their own.</div>
+    </div>
     ${entries.length ? entries.map(e => `
       <div class="hq-brain-entry">
         <div class="head">
@@ -6145,7 +6444,11 @@ function hqSendTab(l) {
     ${hqSendTpl(l, 'audit')}
     ${hqSendTpl(l, 'kickoff')}
     ${hqSendTpl(l, 'segment')}
-    <p class="hq-meta" style="margin-top:14px;">Emails: Back office → CRM / Outreach → Draft on the lead, same as always. ≤15–20 new lodges a day on WhatsApp first-touches.</p>`;
+    <div class="hq-card" style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:13.5px;color:rgba(245,239,230,0.85);flex:1;min-width:180px;">Email instead: draft it here (AI or standard) and send straight from your Gmail.</span>
+      <button class="hq-btn" data-action="generate-email" data-id="${escapeHtml(l.id)}"><i data-lucide="mail" style="width:14px;height:14px;"></i> Draft an email</button>
+    </div>
+    <p class="hq-meta" style="margin-top:10px;">≤15–20 new lodges a day on WhatsApp first-touches.</p>`;
 }
 
 // ---- tab: call (per stage) ----
@@ -6298,6 +6601,9 @@ function hqCloseCall(l) {
 
 function hqKickoffCall(l) {
   return `
+    ${hqSec('★', 'Do this now — from yes to live, in order')}
+    ${hqQcardHtml(l, 'afteryes', HQ_AFTER_YES)}
+    ${hqResetRow('afteryes', 'Reset · new deal')}
     <p class="hq-meta">They've paid. This is <b>step 1 of the paid setup</b> — frame it that way. If you already ran the audit in discovery, confirm those answers rather than re-asking (open \u201cEverything they\u2019ve told you\u201d in the lodge panel).</p>
     <div style="margin-bottom:14px;"><button class="hq-btn ghost" data-action="hq-goto-send">To book it: the kickoff WhatsApp is written for you below</button></div>
     ${hqSec('1', 'Open the call')}
@@ -6332,6 +6638,46 @@ function hqClientView(l) {
 }
 
 // ---- morning screen (the front door: your day, one number, one button) ----
+// Calls actually made today — read from the activity trail, so every call counts
+// whether it happened inside a guided session or not.
+function hqCallsMadeToday() {
+  const today = hqTodayISO();
+  const out = [];
+  (state.leads || []).forEach(l => {
+    if (!l || l._deleted || l.source === 'sample') return;
+    (l.activity || []).forEach(a => {
+      if (!a || String(a.date || '').slice(0, 10) !== today) return;
+      const m = /^logged call \((.+)\)$/.exec(a.action || '');
+      if (m) out.push({ lead: l, outcome: m[1], date: a.date });
+    });
+  });
+  return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+// Everything he promised on calls that hasn't been sent yet — Call Brain extracts
+// these from recordings ("you owe them: …") and files them on each brain entry.
+function hqOwedFollowups() {
+  const out = [];
+  (state.leads || []).forEach(l => {
+    if (!l || l._deleted || l.source === 'sample') return;
+    (l.brain || []).forEach(e => {
+      ((e && e.owed) || []).forEach((o, idx) => out.push({ lead: l, what: o, date: e.date || '', callId: e.callId || '', idx }));
+    });
+  });
+  return out.sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 12);
+}
+// The scoreboard: what the pipeline is worth in real money (Starter $349/mo, setup $2,000).
+function hqMoneyLineHtml(active) {
+  const stages = active.map(l => hqStageOf(l));
+  const pipeline = stages.filter(k => k === 'discovery' || k === 'close').length;
+  const live = stages.filter(k => k === 'kickoff' || k === 'client').length;
+  if (!pipeline && !live) return '';
+  const fmt = n => '$' + n.toLocaleString('en-US');
+  const parts = [];
+  if (pipeline) parts.push(`<b>${fmt(pipeline * 2000)}</b> setup + <b>${fmt(pipeline * 349)}/mo</b> across ${pipeline} lodge${pipeline === 1 ? '' : 's'} in play`);
+  if (live) parts.push(`<b>${fmt(live * 349)}/mo</b> won`);
+  return `<div class="hq-money"><span class="hq-mono" style="color:var(--hq-amber);">On the table</span><span>${parts.join(' · ')}</span></div>`;
+}
+
 function hqMorningHtml() {
   const active = hqActiveLeads();
   const due = hqDueLeads(active);
@@ -6343,6 +6689,8 @@ function hqMorningHtml() {
   const pat = state.brainPatterns;
   const inbox = state.brainInbox || [];
   const ss = state.hqSession;
+  const doneToday = hqCallsMadeToday();
+  const owed = hqOwedFollowups();
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const dateLine = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -6383,6 +6731,7 @@ function hqMorningHtml() {
     <div class="hq-morning-kicker">${dateLine} · LodgeHelm HQ</div>
     <div class="hq-greet">${greet}, Melusi.</div>
     ${dayHtml}
+    ${hqMoneyLineHtml(active)}
     ${coachDone ? '' : `
       <div class="hq-coach">
         <div class="hq-coach-head">
@@ -6393,15 +6742,36 @@ function hqMorningHtml() {
           <li><b>Start calling</b> — HQ hands you the first lodge on today's list.</li>
           <li><b>Prep</b> — a minute on who they are before you dial.</li>
           <li><b>Call</b> — the right script is on screen; tick and type as you talk.</li>
-          <li><b>Log it</b> — pick how it went. HQ sets the next step and hands you the next lodge.</li>
-          <li><b>Tonight</b> — drop your recordings on Call Brain. Its notes land on each lodge's Brain panel by morning.</li>
+          <li><b>Log it</b> — pick how it went (or press 1-9). HQ sets the next step and hands you the next lodge.</li>
+          <li><b>Record</b> — tap Record on the lodge's Brain panel as you dial (speaker on, the Mac listens). The brief files itself on that lodge.</li>
         </ol>
       </div>`}
     <div class="hq-dash-stats" style="margin-top:20px;">
-      <div class="hq-stat"><div class="v">${due.length}</div><div class="l">Calls due today</div></div>
+      <div class="hq-stat"><div class="v">${doneToday.length}</div><div class="l">Calls made today</div></div>
+      <div class="hq-stat"><div class="v">${due.length}</div><div class="l">Still due today</div></div>
       <div class="hq-stat"><div class="v">${inDisc}</div><div class="l">In discussion</div></div>
       <div class="hq-stat"><div class="v">${won}</div><div class="l">Won</div></div>
     </div>
+    ${doneToday.length ? `
+      ${hqSec('✓', "Today so far — every call you've made, worked or not")}
+      <div class="hq-card" style="margin-bottom:18px;">
+        ${doneToday.map(d => `
+          <div class="hq-today-row">
+            <span class="tm">${escapeHtml(new Date(d.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))}</span>
+            <button class="who" style="background:none;border:none;color:var(--hq-cream,#f5efe6);font:inherit;font-weight:600;cursor:pointer;padding:0;" data-action="hq-select-lead" data-id="${escapeHtml(d.lead.id)}">${escapeHtml(d.lead.businessName || 'Unnamed')}</button>
+            <span class="oc">${escapeHtml(d.outcome)}</span>
+          </div>`).join('')}
+      </div>` : ''}
+    ${owed.length ? `
+      ${hqSec('!', 'You owe these — promised on a call, not sent yet')}
+      <div class="hq-card" style="margin-bottom:18px;">
+        ${owed.map(o => `
+          <div class="hq-owed-row">
+            <button class="who" data-action="hq-select-lead" data-id="${escapeHtml(o.lead.id)}">${escapeHtml(o.lead.businessName || 'Unnamed')}</button>
+            <span class="what">${escapeHtml(o.what)}</span>
+            <button class="hq-btn ghost" data-action="hq-owed-done" data-id="${escapeHtml(o.lead.id)}" data-call="${escapeHtml(o.callId)}" data-idx="${o.idx}">Sent ✓</button>
+          </div>`).join('')}
+      </div>` : ''}
     ${inbox.length ? `
       ${hqSec('!', 'Call Brain inbox — briefs waiting for a lead')}
       ${inbox.map(item => `
@@ -6449,10 +6819,10 @@ function hqEndOfDayHtml() {
         ${Object.entries(counts).map(([v, n]) => `<li><b>${n}×</b> ${escapeHtml(callOutcomeLabel(v))}</li>`).join('')}
       </ul></div>` : ''}
     <div class="hq-card" style="margin-top:12px;">
-      <b style="color:var(--hq-amber);">Tonight:</b> drop today's recordings on Call Brain on your Mac.
-      Its briefs and coaching land on each lodge's Brain panel, and tomorrow's list is already
-      building from the next steps you just set.
-      <div style="margin-top:10px;"><button class="hq-btn ghost" data-action="hq-open-callbrain">Open Call Brain now</button></div>
+      <b style="color:var(--hq-amber);">Recordings:</b> anything you recorded on the desk is already filed.
+      Got Zadarma downloads or stray voice memos? Drop them on the lodge's Brain panel, or on Call Brain
+      directly. Tomorrow's list is already building from the next steps you just set.
+      <div style="margin-top:10px;"><button class="hq-btn ghost" data-action="hq-open-callbrain">Open Call Brain</button></div>
     </div>
     <div class="hq-start-row" style="margin-top:20px;">
       <button class="hq-start-btn" data-action="hq-eod-close">Back to HQ <i data-lucide="arrow-right" style="width:17px;height:17px;"></i></button>
@@ -6488,6 +6858,26 @@ async function hqAssignBrief(docId, leadId) {
   renderHQ();
 }
 
+// Selecting a lead swaps ONLY the workspace — the rail (and your place in it) stays put.
+function hqAfterSelect() {
+  const shell = document.querySelector('.hq-shell');
+  if (!shell) { renderHQ(); return; }
+  shell.classList.remove('pane-rail');
+  shell.classList.add('pane-work');
+  document.querySelectorAll('#hq-rail-list .hq-lead').forEach(b =>
+    b.classList.toggle('active', b.dataset.id === state.hq.leadId));
+  hqRenderWorkspace();
+  const work = document.querySelector('.hq-work');
+  if (work) work.scrollTop = 0;
+  const inner = document.getElementById('hq-work-inner');
+  if (inner) {
+    lucide.createIcons({ nodes: [inner] });
+    inner.classList.remove('hq-swap');
+    void inner.offsetWidth; // restart the micro-fade even on rapid clicks
+    inner.classList.add('hq-swap');
+  }
+}
+
 // ---- HQ events ----
 document.getElementById('section-hq').addEventListener('click', e => {
   const target = e.target.closest('[data-action]');
@@ -6495,7 +6885,7 @@ document.getElementById('section-hq').addEventListener('click', e => {
   const action = target.dataset.action;
   const id = target.dataset.id;
   const s = state.hq;
-  if (action === 'hq-select-lead') { s.leadId = id; s.pane = 'work'; s.tab = 'crib'; renderHQ(); return; }
+  if (action === 'hq-select-lead') { s.leadId = id; s.pane = 'work'; s.tab = 'crib'; hqAfterSelect(); return; }
   if (action === 'hq-back') { s.pane = 'rail'; renderHQ(); return; }
   if (action === 'hq-start-day') { hqStartSession(target.dataset.source); return; }
   if (action === 'hq-session-next') { hqAdvanceSession(); return; }
@@ -6515,9 +6905,22 @@ document.getElementById('section-hq').addEventListener('click', e => {
     return;
   }
   if (action === 'hq-open-callbrain') {
-    // Call Brain's local dashboard (drag-drop a recording; it never leaves the Mac).
-    window.open('http://localhost:4317', '_blank');
-    showToast('If nothing opened: start Call Brain first (Start Call Brain.command)', 'info');
+    // Check it's awake BEFORE opening — a dead localhost tab is the old bug.
+    hqCallBrainAlive().then(ok => {
+      if (ok) window.open(HQ_BRAIN_URL, '_blank');
+      else showToast('Call Brain is asleep. It starts with your Mac now — if this keeps happening, double-click "Start Call Brain.command" in the call-brain folder.', 'error');
+    });
+    return;
+  }
+  if (action === 'hq-record') {
+    if (hqRec) { hqStopRecording(); return; }
+    const lead = getLeadById(id) || (s.leadId ? getLeadById(s.leadId) : null);
+    if (lead) hqStartRecording(lead);
+    return;
+  }
+  if (action === 'hq-pick-file') {
+    const f = document.getElementById('hq-brain-file');
+    if (f) f.click();
     return;
   }
   if (action === 'hq-tab') { return; } // tabs retired — one desk, everything visible
@@ -6591,6 +6994,48 @@ document.getElementById('section-hq').addEventListener('click', e => {
     }
     return;
   }
+  if (action === 'generate-email') { const lead = getLeadById(id); if (lead) openModal('email', lead); return; }
+  if (action === 'hq-snooze') {
+    const lead = s.leadId ? getLeadById(s.leadId) : null;
+    if (lead) {
+      if (!lead.crm) lead.crm = {};
+      const days = Number(target.dataset.days) || 0;
+      const label = (lead.crm.nextStep && lead.crm.nextStep.label) || 'Call back';
+      setNextStep(lead, label, daysFromNow(days));
+      addActivity(lead, 'call back ' + (days === 0 ? 'later today' : days === 1 ? 'tomorrow' : 'next week'));
+      saveState();
+      showToast(days === 0 ? 'Kept in today\'s list' : 'Coming back ' + (days === 1 ? 'tomorrow' : formatDate(daysFromNow(days))), 'info');
+      renderHQ();
+    }
+    return;
+  }
+  if (action === 'hq-crib-auto') {
+    const lead = s.leadId ? getLeadById(s.leadId) : null;
+    if (lead) {
+      if (lead.crib && lead.crib.trim()) { showToast('Crib already written — clear it first if you want a fresh one', 'info'); return; }
+      const built = hqComposeCrib(lead);
+      if (!built) { showToast('Not enough on the record to write one', 'info'); return; }
+      lead.crib = built;
+      saveState();
+      renderHQ();
+      showToast('Crib written from the record — tweak it if you like', 'success');
+    }
+    return;
+  }
+  if (action === 'hq-owed-done') {
+    const lead = getLeadById(id);
+    if (lead) {
+      const entry = (lead.brain || []).find(en => en && String(en.callId || '') === String(target.dataset.call || ''));
+      if (entry && Array.isArray(entry.owed)) {
+        const removed = entry.owed.splice(Number(target.dataset.idx), 1);
+        if (removed.length) addActivity(lead, 'sent what was owed (' + removed[0] + ')');
+        saveState();
+        showToast('Marked sent', 'success');
+        renderHQ();
+      }
+    }
+    return;
+  }
   if (action === 'hq-assign-brief') { hqAssignBrief(target.dataset.doc, target.dataset.lead); return; }
   if (action === 'hq-dismiss-brief') {
     const docId = target.dataset.doc;
@@ -6608,6 +7053,13 @@ document.getElementById('section-hq').addEventListener('click', e => {
 
 document.getElementById('section-hq').addEventListener('change', e => {
   const s = state.hq;
+  if (e.target.id === 'hq-brain-file') {
+    const f = e.target.files && e.target.files[0];
+    const lead = s.leadId ? getLeadById(s.leadId) : null;
+    if (f && lead) hqUploadToBrain(f, f.name, lead.id, lead.businessName || '');
+    e.target.value = '';
+    return;
+  }
   if (e.target.matches('input[type="checkbox"][data-tick]')) {
     const lead = s.leadId ? getLeadById(s.leadId) : null;
     if (!lead) return;
@@ -6676,6 +7128,28 @@ document.getElementById('section-hq').addEventListener('input', e => {
   }
 });
 
+// Drag a recording anywhere onto the Brain panel's drop zone — files itself on the open lead.
+(function () {
+  const sec = document.getElementById('section-hq');
+  sec.addEventListener('dragover', e => {
+    const z = e.target.closest && e.target.closest('#hq-brain-drop');
+    if (z) { e.preventDefault(); z.classList.add('drag'); }
+  });
+  sec.addEventListener('dragleave', e => {
+    const z = e.target.closest && e.target.closest('#hq-brain-drop');
+    if (z) z.classList.remove('drag');
+  });
+  sec.addEventListener('drop', e => {
+    const z = e.target.closest && e.target.closest('#hq-brain-drop');
+    if (!z) return;
+    e.preventDefault();
+    z.classList.remove('drag');
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    const lead = state.hq.leadId ? getLeadById(state.hq.leadId) : null;
+    if (f && lead) hqUploadToBrain(f, f.name, lead.id, lead.businessName || '');
+  });
+})();
+
 // Top-bar cloud refresh (function declaration hoists; wired once here).
 (function () {
   const btn = document.getElementById('refresh-cloud-btn');
@@ -6711,6 +7185,33 @@ document.getElementById('back-to-hq').addEventListener('click', () => showSectio
 document.getElementById('panel-overlay').addEventListener('click', closePanel);
 
 // Theme toggle retired — there is one green world now, nothing to switch.
+
+// Keyboard-speed logging on the desk: 1-9 and 0 log the outcome, N arms the next call.
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
+  if (state.modalOpen || state.panelOpen) return;
+  if (state.activeSection !== 'hq') return;
+  const s = state.hq || {};
+  if (!s.leadId) return;
+  if (e.key === 'n' || e.key === 'N') {
+    const ss = state.hqSession;
+    if (ss && !ss.finished) { e.preventDefault(); hqAdvanceSession(); }
+    return;
+  }
+  let idx = null;
+  if (/^[1-9]$/.test(e.key)) idx = Number(e.key) - 1;
+  else if (e.key === '0') idx = 9;
+  if (idx === null || idx >= CALL_OUTCOMES.length) return;
+  e.preventDefault();
+  const o = CALL_OUTCOMES[idx];
+  logCall(s.leadId, o.value);
+  const ss = state.hqSession;
+  if (ss && !ss.finished && s.leadId === ss.ids[ss.idx]) { ss.outcomes[s.leadId] = o.value; hqSaveSession(); }
+  showToast('Logged: ' + o.label, 'success');
+  renderHQ();
+});
 
 // ESC key
 document.addEventListener('keydown', e => {

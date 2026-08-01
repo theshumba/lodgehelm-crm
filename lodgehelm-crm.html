@@ -2065,6 +2065,13 @@ function allLeadEmails(l) {
   ((l && l.contacts) || []).forEach(c => { if (c && c.email) out.push(c.email); });
   return [...new Set(out.map(x => String(x).trim()).filter(Boolean))];
 }
+// Company LinkedIn page. Enrichment writes it top-level; the Prospeo import put it under
+// firmographics.socials, so read both.
+function leadLinkedin(l) {
+  if (!l) return '';
+  const url = l.linkedin || (l.firmographics && l.firmographics.socials && l.firmographics.socials.linkedin) || '';
+  return String(url).trim();
+}
 function gmailComposeUrl(to, subject, body) {
   return 'https://mail.google.com/mail/?view=cm&fs=1'
     + '&authuser=' + encodeURIComponent(OUTREACH_FROM)
@@ -3962,6 +3969,8 @@ function renderViewLeadPanel(lead) {
     </div>
     ${lead.description ? `<p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5);line-height:1.6;">${escapeHtml(lead.description)}</p>` : ''}
     ${lead.website ? `<div class="form-group"><span class="form-label">Website</span><a href="${escapeHtml(lead.website)}" target="_blank" rel="noopener" style="font-size:var(--text-sm);color:var(--color-primary);word-break:break-all;">${escapeHtml(lead.website)}</a></div>` : ''}
+    ${leadLinkedin(lead) ? `<div class="form-group"><span class="form-label">Company LinkedIn</span><a href="${escapeHtml(leadLinkedin(lead))}" target="_blank" rel="noopener" style="font-size:var(--text-sm);color:var(--color-primary);word-break:break-all;">${escapeHtml(leadLinkedin(lead))}</a></div>` : ''}
+    ${lead.ownerName ? `<div class="form-group"><span class="form-label">Owner / Decision Maker</span><span style="font-size:var(--text-sm);">${escapeHtml(lead.ownerName)}</span></div>` : ''}
     ${lead.address ? `<div class="form-group"><span class="form-label">Address</span><span style="font-size:var(--text-sm);">${escapeHtml(lead.address)}</span></div>` : ''}
     ${renderClaimBadge(lead)}
     ${lead.phones.length ? `<div class="form-group"><span class="form-label">Phone Numbers</span>${lead.phones.map(p => `<div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-1);"><a href="tel:${escapeHtml(p.number.replace(/[^+0-9]/g,''))}" style="font-size:var(--text-sm);color:var(--color-primary);text-decoration:underline;text-underline-offset:2px;"><i data-lucide="phone" style="width:13px;height:13px;vertical-align:-2px;margin-right:3px;" aria-hidden="true"></i>${escapeHtml(p.number)}</a><button class="btn btn-ghost btn-sm" style="min-height:26px;padding:2px var(--space-2);font-size:var(--text-xs);" data-action="log-call" data-id="${lead.id}" data-num="${escapeHtml(p.number)}"><i data-lucide="phone-call" style="width:12px;height:12px;" aria-hidden="true"></i> Log call</button></div>`).join('')}</div>` : ''}
@@ -3976,6 +3985,7 @@ function renderViewLeadPanel(lead) {
             ${c.title ? `<div style="font-size:var(--text-xs);color:var(--color-text-muted);">${escapeHtml(c.title)}</div>` : ''}
             ${c.phone ? `<div style="font-size:var(--text-xs);">${escapeHtml(c.phone)}</div>` : ''}
             ${c.email ? `<div style="font-size:var(--text-xs);">${escapeHtml(c.email)}</div>` : ''}
+            ${c.linkedin ? `<div style="font-size:var(--text-xs);"><a href="${escapeHtml(c.linkedin)}" target="_blank" rel="noopener" style="color:var(--color-primary);text-decoration:underline;text-underline-offset:2px;"><i data-lucide="linkedin" style="width:12px;height:12px;vertical-align:-2px;margin-right:3px;" aria-hidden="true"></i>LinkedIn profile</a></div>` : ''}
           </div>
         `).join('')}
       </div>
@@ -6340,6 +6350,10 @@ function hqCribTab(l) {
       ${l.description ? `<p style="font-size:14px;line-height:1.55;color:rgba(245,239,230,0.85);margin:0 0 10px;">${escapeHtml(l.description)}</p>` : ''}
       <div class="hq-kv">
         ${l.website ? `<a class="hq-pill" href="${escapeHtml(l.website)}" target="_blank" rel="noopener">Website ↗</a>` : ''}
+        ${leadLinkedin(l) ? `<a class="hq-pill" href="${escapeHtml(leadLinkedin(l))}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}
+        ${(l.contacts || []).filter(c => c && c.name).map(c => c.linkedin
+          ? `<a class="hq-pill" href="${escapeHtml(c.linkedin)}" target="_blank" rel="noopener">${escapeHtml(c.name)}${c.title ? ' · ' + escapeHtml(c.title) : ''} ↗</a>`
+          : `<span class="hq-pill">${escapeHtml(c.name)}${c.title ? ' · ' + escapeHtml(c.title) : ''}</span>`).join('')}
         ${phones.map(p => `<span class="hq-pill">${escapeHtml(p)}</span>`).join('')}
         ${emails.map(e => `<span class="hq-pill">${escapeHtml(e)}</span>`).join('')}
         ${l.funnelLeak ? `<span class="hq-pill amber">leak guess: ${escapeHtml(l.funnelLeak)}</span>` : ''}

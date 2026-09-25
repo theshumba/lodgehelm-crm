@@ -5625,7 +5625,7 @@ function renderPlaybooks() {
 const HQ_STAGES = [
   { key: 'cold',      step: 'Call 01', name: 'Cold Call',     goal: 'Book the 15-min discovery call. Nothing else. Never pitch price on a cold call, "I\'ll give you the exact figure once I\'ve seen your setup."' },
   { key: 'discovery', step: 'Call 02', name: 'Discovery',     goal: 'Run the Lodge Audit, you ask, you type. Leave with their leak in their own words, and the close meeting booked.' },
-  { key: 'close',     step: 'Call 03', name: 'Close Meeting', goal: 'Leave with a yes, the setup fee paid (or invoice sent within the hour), and the kickoff call booked.' },
+  { key: 'close',     step: 'Call 03', name: 'Close Meeting', goal: 'Leave with a yes, the free month started, and the setup call booked.' },
   { key: 'kickoff',   step: 'Call 04', name: 'Kickoff',       goal: 'Everything needed to build their system, concierge style. You talk, I type. Never homework.' },
   { key: 'client',    step: 'Live',    name: 'Client',        goal: 'They\'re live. Keep response instant, keep the wins visible, never the same mistake twice.' }
 ];
@@ -5861,12 +5861,12 @@ const HQ_CLOSE_PREP = [
   { q: 'Their answers open', hint: 'Everything from discovery is in \u201cEverything they\u2019ve told you\u201d, beside this script.' },
   { q: 'Their leak answer, memorised verbatim', hint: 'You open with it: "<span class="hq-tok" data-ans="leak" data-ph="fill it in on Discovery"></span>"' },
   { q: 'Demo ready — their lodge name in the sample data', hint: 'e.g. quote header reads their lodge, not "Mara Plains Camp".' },
-  { q: 'Know which tier fits + your setup fee number', hint: 'Decide BEFORE the call — never work out pricing live.' }
+  { q: 'Know which plan fits: single camp, group, or founding place', hint: 'Decide BEFORE the call — never work out pricing live.' }
 ];
 // The after-the-yes engine: the moment a lodge pays, HQ walks the path to live the
 // same way it walks a cold call — in order, nothing forgotten, momentum never lost.
 const HQ_AFTER_YES = [
-  { q: 'Send the invoice — within the hour', tag: 'Now', hint: 'Momentum dies overnight. Setup $2,000 (or the founding-three $249 line if you promised it) plus the first month. Send it on WhatsApp AND email so it can\'t get buried.' },
+  { q: 'Confirm the free month in writing, within the hour', tag: 'Now', hint: 'Momentum dies overnight. Send the start date, the price after the free month ($299 per camp, or $199 if you offered a founding place) and the setup call time. Send it on WhatsApp AND email so it cannot get buried.' },
   { q: 'Confirm the money landed', hint: 'Paid = the project is real. If nothing lands in 24h, one gentle nudge: "just making sure the invoice didn\'t get buried".' },
   { q: 'Book the kickoff call', hint: 'Inside 3 days while the yes is warm. The kickoff WhatsApp is written for you in Send, below.' },
   { q: 'Run the kickoff — the intake on this desk, you talk, I type', hint: 'Tick through the intake questions below. Never homework for them.' },
@@ -5882,9 +5882,9 @@ const HQ_OBJECTIONS = {
     { q: 'Send me something.', a: 'Happy to — so I send the right thing: is the bigger pain catching enquiries fast, or the follow-ups that go quiet after a quote? <em>(note the answer)</em> What\'s the best email for it?' }
   ],
   ownerPrice: [
-    { q: 'What does this cost? / Is it per lodge?', a: 'It\'s a monthly subscription per property. A single lodge is $349 a month, plus a one-off setup where I do all the work. But honestly — one recovered booking pays for the whole year. The real question isn\'t the monthly figure, it\'s how many enquiries are quietly slipping through right now. I\'d rather show you that in a 15-minute pilot than talk pricing in the abstract.' },
-    { q: 'Isn\'t that expensive? / No budget.', a: 'Fair — and I\'d rather you never pay for something that doesn\'t earn its keep. A single safari party is worth three to fifteen thousand dollars. Stop losing just ONE of those a year and it\'s paid for itself several times over. Try it free for 14 days and judge it on your own numbers.' },
-    { q: 'Just give me a number.', a: 'I\'ll give you the exact figure once I\'ve seen your setup — I don\'t want to quote you a tier you don\'t need. <em>(Saying this is stronger, not weaker.)</em>' }
+    { q: 'What does this cost? / Is it per lodge?', a: 'It is per camp, with your whole team included. A single camp is $299 a month, or $2,990 if you pay for the year. There is no setup fee: I set it up with you and you use it free for the first month. One recovered booking pays for the whole year, so the real question is how many enquiries are slipping through right now.' },
+    { q: 'Isn\'t that expensive? / No budget.', a: 'Fair — and I\'d rather you never pay for something that doesn\'t earn its keep. A single safari party is worth three to fifteen thousand dollars. Stop losing just ONE of those a year and it\'s paid for itself several times over. Use it free for the first month and judge it on your own numbers.' },
+    { q: 'Just give me a number.', a: 'It is $299 a month per camp with the whole team included, and the first month is free. <em>(One plan now, so say it plainly.)</em>' }
   ],
   gm: [
     { q: 'I don\'t have time to roll out new software.', a: 'Totally get it — this isn\'t a project for your team. Setup takes a day, not a quarter, and we do the onboarding call with you, not the other way round.' },
@@ -5893,15 +5893,15 @@ const HQ_OBJECTIONS = {
     { q: 'Will this replace my job / change my role?', a: 'Opposite, actually — it\'s the visibility you and the owner have never had, and it makes your part of the operation look sharp, not replaceable. It\'s built to make the GM\'s life easier, not to cut the GM out.' }
   ],
   gmPrice: [
-    { q: 'How much is this going to cost — I\'ll need to tell the owner.', a: 'It\'s a monthly subscription per property: $349 a month for a single lodge; multi-property groups pay $299 per property. But the number that actually matters to the owner is this: one recovered booking pays for the whole year. That\'s the line to lead with, not the monthly figure.' },
-    { q: 'I don\'t know our budget for something like this.', a: 'You don\'t need to know it upfront — that\'s what the 14-day pilot is for. You try it free, see what it recovers on your own numbers, and then it\'s an easy budget conversation because you\'re showing a return, not asking for a leap of faith.' },
+    { q: 'How much is this going to cost — I\'ll need to tell the owner.', a: 'It is per camp, whole team included: $299 a month for a single camp, and groups of three or more camps pay $249 for every camp. The first month is free. But the number that actually matters to the owner is this: one recovered booking pays for the whole year. That\'s the line to lead with, not the monthly figure.' },
+    { q: 'I don\'t know our budget for something like this.', a: 'You don\'t need to know it upfront — that is what the free first month is for. You use it free, see what it recovers on your own numbers, and then it\'s an easy budget conversation because you\'re showing a return, not asking for a leap of faith.' },
     { q: 'The owner\'s going to ask me if it\'s worth it — what do I say?', a: 'Tell them: a single safari party is worth three to fifteen thousand dollars, and you only have to stop losing ONE of those a year for it to pay for itself. That\'s the whole case — you\'re not asking them to buy software, you\'re showing them a leak.' }
   ],
   close: [
-    { q: 'I need to think about it.', a: 'Completely fair. In my experience that usually means one of two things — the money, or whether it\'ll actually work at your lodge. Which one is it for you? <em>(If money → the maths again. If doubt → "that\'s exactly what the 14-day pilot is for — judge it on your own enquiries, not my word.")</em>' },
+    { q: 'I need to think about it.', a: 'Completely fair. In my experience that usually means one of two things — the money, or whether it\'ll actually work at your lodge. Which one is it for you? <em>(If money → the maths again. If doubt → "that is exactly what the free first month is for — judge it on your own enquiries, not my word.")</em>' },
     { q: 'I need to talk to my partner / the owner.', a: 'Of course. Two options: I\'ll jump on a ten-minute call with both of you — easier than you re-explaining it — or I\'ll send you a one-page summary with your own numbers in it so the conversation takes five minutes. Which works? <em>(Then book the follow-up date before hanging up.)</em>' },
     { q: 'Can we start next season instead?', a: 'You can — but the quiet season is exactly the right time to set up. It means the system is tested and boring by the time enquiries flood in. Setting up mid-high-season is how it never happens. And every month waited is another month of the leak we just priced.' },
-    { q: 'Can you drop the setup fee?', a: 'The setup fee is the part where I do everything — configure it to your lodge, test it on your real enquiries, train your people. Your side is a five-minute call; everything that looks like work is mine. It\'s also why this actually goes live instead of becoming another tool nobody rolled out. What I can do is [annual prepay ≈ 2 months free / fold it into the first invoice] — but the setup itself is the value.' }
+    { q: 'What happens after the free month?', a: 'If it is earning its keep, you carry on at $299 a month per camp, or $2,990 for the year. If it is not, you tell me and that is the end of it. Nothing to cancel, no card on file.' }
   ]
 };
 const HQ_ONELINERS = [
@@ -5912,11 +5912,11 @@ const HQ_ONELINERS = [
 function hqTiersHtml() {
   return `
     <div class="hq-tiers">
-      <div class="hq-tier"><div class="tname">Starter</div><div class="tprice">$349/mo</div><div class="twho">Single owner-run lodge</div></div>
-      <div class="hq-tier"><div class="tname">Pro</div><div class="tprice">$649/mo</div><div class="twho">Reservation-heavy lodge</div></div>
-      <div class="hq-tier"><div class="tname">Enterprise</div><div class="tprice">Let's talk</div><div class="twho">Multi-property / DMC</div></div>
+      <div class="hq-tier"><div class="tname">LodgeHelm</div><div class="tprice">$299/mo</div><div class="twho">Per camp, whole team included</div></div>
+      <div class="hq-tier"><div class="tname">Groups</div><div class="tprice">$249/mo</div><div class="twho">Per camp, groups of 3+ camps</div></div>
+      <div class="hq-tier"><div class="tname">Operators &amp; DMCs</div><div class="tprice">Let's talk</div><div class="twho">Selling many lodges</div></div>
     </div>
-    <div class="hq-tiers-extra">Setup $2,000 one-off ($3,500 multi-camp) · 14-day pilot · annual prepay ≈ 2 months free · Founding three: $249/mo locked for life, setup $1,000</div>`;
+    <div class="hq-tiers-extra">Free first month, set up by me · No setup fee · Yearly: 12 months for the price of 10 ($2,990) · Founding five: $199/mo per camp for life · Add-ons: live availability $49/camp, replies in 4 more languages $49 · 15% only on bookings LodgeHelm sends</div>`;
 }
 function hqOnelinersHtml(label) {
   return `
@@ -6526,7 +6526,7 @@ function hqColdCall(l) {
     </ol><div class="qs-note">Owners almost never can answer Q1/Q2 precisely — that's the gap you're pointing at.</div></div>
     ${hqSec('4', 'Objections')}
     ${hqObjectionsHtml(HQ_OBJECTIONS.owner)}
-    ${hqSec('£', 'Price objections — anchor ROI → range → pilot')}
+    ${hqSec('£', 'Price objections: ROI first, then the price, then the free month')}
     ${hqTiersHtml()}
     ${hqObjectionsHtml(HQ_OBJECTIONS.ownerPrice)}
     ${hqOnelinersHtml('Pocket one-liners')}
@@ -6589,7 +6589,7 @@ function hqDiscoveryCall(l) {
 
 function hqCloseCall(l) {
   return `
-    <p class="hq-meta">They're properly interested — this is the demo-and-decide meeting, ~20 minutes. <b>This is where the money happens, not the kickoff</b> — the kickoff is after they've paid.</p>
+    <p class="hq-meta">They're properly interested — this is the demo-and-decide meeting, ~20 minutes. <b>This is where the yes happens.</b> The kickoff starts their free month.</p>
     ${hqSec('✓', 'Before the meeting — prep checklist')}
     ${hqQcardHtml(l, 'prep', HQ_CLOSE_PREP)}
     ${hqResetRow('prep', 'Reset · new meeting')}
@@ -6599,16 +6599,16 @@ function hqCloseCall(l) {
     ${hqSay(`Walk one enquiry through the workflow, start to finish, using their scenario: enquiry lands → one inbox with a clock on it → branded quote out in minutes → follow-up chases itself.`, `Show, don't tour. One journey through, not a feature list. Stop the moment they lean in.`)}
     ${hqSec('3', 'The maths — their numbers')}
     ${hqSay(`You said you get roughly <span class="hq-tok" data-ans="enq" data-ph="[X] enquiries a month"></span>, and <span class="hq-tok" data-ans="who" data-ph="[who they told you]"></span> is catching them. A single party is worth three to fifteen thousand dollars. If even one a quarter is slipping through — and from what you've told me it's more — that's [4 × their party value] a year going quiet at ${HQ_TOK_LODGE}. That's the number we're actually talking about today.`)}
-    ${hqSec('4', 'Price — ROI first, then two numbers')}
-    ${hqSay(`So the cost. Two numbers, both smaller than that one. The monthly is [tier] — that's the system running, every enquiry, every follow-up. And there's a one-off setup of [fee] — that's me configuring it to ${HQ_TOK_LODGE}, testing it on your real enquiries, and getting your people live. You do a five-minute call; I do everything that looks like work. One recovered booking covers the whole year.`)}
+    ${hqSec('4', 'Price: ROI first, then one number')}
+    ${hqSay(`So the cost, and it is smaller than that number. It is [$299] a month per camp, whole team included, or [$2,990] for the year, which is less than one family booking. There is no setup fee. I set it up with you this week, you use it free for a month, and you only pay if you keep it. One recovered booking covers the whole year.`)}
     <div style="margin-top:12px;">${hqTiersHtml()}</div>
     ${hqSec('5', 'The ask — then stop talking')}
-    ${hqSay(`Shall we get ${HQ_TOK_LODGE} live? Two things happen today: I'll send the setup invoice, and we book your kickoff call — fifteen minutes where you talk and I type, then I disappear and build. What day suits you this week?`, `Ask it, then silence. The first person to speak after the ask loses.`)}
+    ${hqSay(`Shall we get ${HQ_TOK_LODGE} live? Today we book your setup call: fifteen minutes where you talk and I type, then I build it. Your free month starts the day it is live. No card, no invoice. What day suits you this week?`, `Ask it, then silence. The first person to speak after the ask loses.`)}
     ${hqSec('6', 'Close-meeting objections')}
     ${hqObjectionsHtml(HQ_OBJECTIONS.close)}
     <div class="hq-dontleave"><span class="hq-mono">Don't leave without</span><ul>
       <li>A yes — or a real no (a "maybe" gets a booked follow-up date)</li>
-      <li>Setup fee paid, or invoice sent within the hour</li>
+      <li>Setup call booked and the free month start date agreed</li>
       <li>Kickoff call booked, day and time</li>
     </ul></div>`;
 }
@@ -6628,12 +6628,12 @@ function hqKickoffCall(l) {
     ${hqResetRow('kickoff', 'Reset · new kickoff')}
     ${hqSec('3', 'End the call')}
     ${hqSay(`That's everything I need. Next thing you'll hear from me is when it's running on ${HQ_TOK_LODGE}'s real enquiries — I'll message you on WhatsApp by [day]. After that we do one short walkthrough with whoever handles the inbox, and you're live.`)}
-    ${hqSec('£', 'If the setup fee ever comes up')}
+    ${hqSec('£', 'If they ask what setup costs')}
     <div class="hq-fee-card">
-      <span class="hq-mono">Fee framing</span>
-      <h3>The intake is step 1 of the paid setup — never a substitute for it.</h3>
-      <p>The fee pays for the outcome: the system configured to their lodge, tested on their real enquiries, staff shown how it works, and live. The questions just make sure it's built right first time.</p>
-      <div class="sayline">"The questions are so we build it right first time — the setup work is everything that happens after."</div>
+      <span class="hq-mono">Setup framing</span>
+      <h3>Setup is free. The intake is how the free month starts.</h3>
+      <p>There is no setup fee. The questions make sure it is built right first time, so the free month shows results on their own enquiries.</p>
+      <div class="sayline">"The questions are so we build it right first time. The setup is on me."</div>
     </div>`;
 }
 
@@ -6679,7 +6679,7 @@ function hqOwedFollowups() {
   });
   return out.sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 12);
 }
-// The scoreboard: what the pipeline is worth in real money (Starter $349/mo, setup $2,000).
+// The scoreboard: what the pipeline is worth in real money ($299 per camp a month, no setup fee).
 function hqMoneyLineHtml(active) {
   const stages = active.map(l => hqStageOf(l));
   const pipeline = stages.filter(k => k === 'discovery' || k === 'close').length;
@@ -6687,8 +6687,8 @@ function hqMoneyLineHtml(active) {
   if (!pipeline && !live) return '';
   const fmt = n => '$' + n.toLocaleString('en-US');
   const parts = [];
-  if (pipeline) parts.push(`<b>${fmt(pipeline * 2000)}</b> setup + <b>${fmt(pipeline * 349)}/mo</b> across ${pipeline} lodge${pipeline === 1 ? '' : 's'} in play`);
-  if (live) parts.push(`<b>${fmt(live * 349)}/mo</b> won`);
+  if (pipeline) parts.push(`<b>${fmt(pipeline * 299)}/mo</b> across ${pipeline} lodge${pipeline === 1 ? '' : 's'} in play`);
+  if (live) parts.push(`<b>${fmt(live * 299)}/mo</b> won`);
   return `<div class="hq-money"><span class="hq-mono" style="color:var(--hq-amber);">On the table</span><span>${parts.join(' · ')}</span></div>`;
 }
 

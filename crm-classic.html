@@ -1457,6 +1457,9 @@ const LodgeHelmSync = (function () {
         let modAt = raw._modAt;
         if (modAt && typeof modAt.toDate === 'function') { try { modAt = modAt.toDate().toISOString(); } catch (_) { modAt = ''; } }
         const lead = { ...raw };
+        // A doc imported without an `id` field (the 1 Aug batch did this) must not vanish:
+        // the document's own id is the lead id.
+        if (!lead.id) lead.id = d.id;
         lead._modAt = (typeof modAt === 'string') ? modAt : '';
         // _srvAt is written as serverTimestamp() and comes back as a Firestore Timestamp —
         // convert to ISO so the merge can order by it.

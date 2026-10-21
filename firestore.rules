@@ -1,15 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // LodgeHelm HQ — single-owner lockdown (2026-07-19). Every read and write requires
-    // the owner's UID; anonymous auth is retired. The page stays publicly hosted —
-    // these rules are the lock. Call Brain and the CRM CLI use the service-account
-    // (admin SDK), which bypasses rules by design.
-    function isOwner() {
-      return request.auth != null && request.auth.uid == 'W86SC8wFMZdH59PYPVPhIIMSEoj1';
+    // LodgeHelm HQ: no login screen (owner's decision, 21 Oct 2026). The page signs in
+    // anonymously, so any signed-in session may read and save. Leads can never be
+    // deleted from the browser (the app soft-deletes with a tombstone, which is an
+    // update). Call Brain, the CLI and the outreach engine use the service account,
+    // which bypasses these rules.
+    function signedIn() { return request.auth != null; }
+    match /leads/{leadId} {
+      allow read, create, update: if signedIn();
     }
-    match /{document=**} {
-      allow read, write: if isOwner();
+    match /inbox/{docId} {
+      allow read, delete: if signedIn();
+    }
+    match /hq/{docId} {
+      allow read: if signedIn();
+    }
+    match /engineStatus/{docId} {
+      allow read: if signedIn();
     }
   }
 }

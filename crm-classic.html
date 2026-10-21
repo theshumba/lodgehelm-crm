@@ -19,9 +19,9 @@
 <!-- Firebase (shared backend for multi-device sync). See FIREBASE-SETUP.md. -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
   import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, writeBatch, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-  window.__fb = { initializeApp, getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, writeBatch, runTransaction };
+  window.__fb = { initializeApp, getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged, getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, writeBatch, runTransaction };
   window.dispatchEvent(new Event('fb-ready'));
 </script>
 <!--
@@ -1367,17 +1367,25 @@ const LodgeHelmSync = (function () {
       // Owner sign-in (email/password) — anonymous auth retired 2026-07-19. HQ holds private
       // call notes, so Firestore rules now require the owner's UID. The auth session persists
       // in this browser profile; the overlay only ever shows on a fresh device/profile.
-      await new Promise((resolve) => {
+      // No login screen (owner's call, 21 Oct 2026): the page signs itself in quietly.
+      // A browser that already holds the old email session keeps it; anything else gets
+      // an anonymous session. Firestore rules accept any signed-in session and refuse
+      // deletes of leads. The email overlay below is kept but never shown.
+      const user = await new Promise((resolve) => {
         let settled = false;
-        window.__fb.onAuthStateChanged(auth, (user) => {
-          if (user) {
+        window.__fb.onAuthStateChanged(auth, (u) => {
+          if (u) {
             hideHQAuthOverlay();
-            if (!settled) { settled = true; resolve(user); }
+            if (!settled) { settled = true; resolve(u); }
           } else {
-            showHQAuthOverlay();
+            window.__fb.signInAnonymously(auth).catch((err) => {
+              console.warn('[LodgeHelmSync] Anonymous sign-in failed:', err);
+              if (!settled) { settled = true; resolve(null); }
+            });
           }
         });
       });
+      if (!user) { showSyncStatus('error', 'could not connect to the cloud'); return false; }
       ready = true;
       LodgeHelmSync.__db = db; // expose for the L1 create-if-absent seed transaction
       LodgeHelmSync.__auth = auth;
